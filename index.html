@@ -2847,6 +2847,7 @@
         const CHICKEN_CONTRACT_ADDRESS = '0xD098f20E494a0fb926d9D8bf7330486bcfDB9913';
         const TOKEN_CONTRACT_ADDRESS = '0xb7C10146bA1b618956a38605AB6496523d450871'; // ESHARE on Base
         const OWNER_ADDRESS = '0x8be2544CB620C5b4B9f1dA7cc80E51B7d093Eee0'; // Owner wallet - update this to your address
+        const BASE_CHAIN_ID = '0x2105'; // Base network chain ID (8453 in hex)
 
         // Contract ABIs
         const CHICKEN_ABI = [
@@ -3004,8 +3005,52 @@
             loadPreviousWinners();
         });
 
+        // Network checking function
+        async function checkAndSwitchNetwork() {
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                
+                if (chainId !== BASE_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: BASE_CHAIN_ID }],
+                        });
+                    } catch (switchError) {
+                        // Chain not added to MetaMask
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: BASE_CHAIN_ID,
+                                        chainName: 'Base',
+                                        nativeCurrency: {
+                                            name: 'Ethereum',
+                                            symbol: 'ETH',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://mainnet.base.org'],
+                                        blockExplorerUrls: ['https://basescan.org']
+                                    }]
+                                });
+                            } catch (addError) {
+                                throw new Error('Please add Base network to MetaMask');
+                            }
+                        }
+                        throw switchError;
+                    }
+                }
+            } catch (error) {
+                console.error('Network switch error:', error);
+                alert('Please switch to Base network in MetaMask to use this app!');
+                throw error;
+            }
+        }
+
         async function connectWallet() {
             console.log('Connect wallet clicked!');
+                await checkAndSwitchNetwork();
             try {
                 web3 = new Web3(window.ethereum);
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -3596,7 +3641,7 @@
                     displayedSeconds = calculateCurrentSeconds();
                     
                     // Check if timer hit zero - trigger game over
-                    if (displayedSeconds === 0 && !document.querySelector('.chicken').classList.contains('exploded')) {
+                    if (displayedSeconds === 0 && serverSecondsAtFetch !== null && !document.querySelector('.chicken').classList.contains('exploded')) {
                         triggerGameOver();
                     }
                     
