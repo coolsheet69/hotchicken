@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Chicken 🐔🔥</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            padding: 30px 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; color: #ff6b35; }
+        h1 span { font-size: 2rem; }
+        .tagline { color: #888; font-style: italic; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,107,53,0.2);
+        }
+        .box.full { grid-column: 1 / -1; }
+        h2 { color: #ff6b35; font-size: 1.1rem; margin-bottom: 12px; }
+        p, li { color: #ccc; font-size: 0.95rem; line-height: 1.5; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 4px 0; padding-left: 20px; position: relative; }
+        li::before { content: "→"; position: absolute; left: 0; color: #ff6b35; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { color: #ff6b35; font-size: 0.85rem; }
+        td { font-size: 0.9rem; }
+        .highlight {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #fff;
+        }
+        .contract {
+            background: rgba(0,0,0,0.3);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #ffa500;
+            word-break: break-all;
+            text-align: center;
+            margin-top: 10px;
+        }
+        footer { text-align: center; color: #666; font-size: 0.8rem; margin-top: 20px; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span>🐔🔥</span> Hot Chicken</h1>
+            <p class="tagline">Don't be holding when the timer runs out!</p>
+        </header>
+
+        <div class="grid">
+            <div class="box full">
+                <div class="highlight">
+                    Last player holding the chicken gets the SEED 🌱 → Everyone else splits the POT 💰 → Everyone gets a shot at the LOTTO 🎰
+                </div>
+            </div>
+
+            <div class="box">
+                <h2>⚙️ How It Works</h2>
+                <ul>
+                    <li>Grab chicken by depositing ESHARE</li>
+                    <li>Each grab = timer resets to 90%</li>
+                    <li>Each grab costs 110% of previous</li>
+                    <li>Timer expires = holder loses</li>
+                    <li>Winners paid instantly</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h2>💰 Tokenomics (11% Tax)</h2>
+                <table>
+                    <tr><th>Destination</th><th>%</th></tr>
+                    <tr><td>🔥 Burn</td><td>5%</td></tr>
+                    <tr><td>👑 Owner</td><td>1%</td></tr>
+                    <tr><td>🎰 Lotto</td><td>5%</td></tr>
+                    <tr><td>✅ Winners</td><td>89%</td></tr>
+                </table>
+            </div>
+
+            <div class="box">
+                <h2>🏆 Payouts</h2>
+                <ul>
+                    <li><strong>Winners:</strong> 89% deposit back + share of pot</li>
+                    <li><strong>Chicken:</strong> Gets seed (tax-free consolation)</li>
+                    <li><strong>Lotto:</strong> 5% of total, ALL players eligible</li>
+                    <li><strong>Hot Zone:</strong> +10% bonus for late entries</li>
+                </ul>
+            </div>
+
+            <div class="box">
+                <h2>⏱️ Timer</h2>
+                <ul>
+                    <li>Starts at ~24 hours</li>
+                    <li>Decays 90% per grab</li>
+                    <li>Floor: 4 min 20 sec</li>
+                    <li>Hot Zone: Last 5 minutes</li>
+                </ul>
+            </div>
+
+            <div class="box full">
+                <h2>📜 Contract (Base Network)</h2>
+                <div class="contract">0xD098f20E494a0fb926d9D8bf7330486bcfDB9913</div>
+            </div>
+        </div>
+
+        <footer>Hot Chicken v3.3 • Built on Base • Powered by ESHARE</footer>
+    </div>
+</body>
+</html>
