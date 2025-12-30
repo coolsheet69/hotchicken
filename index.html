@@ -2762,7 +2762,7 @@
             playChickenAnimation(e);
         });
 
-        // Hover sound effect
+        // Hover sound effect (desktop)
         chicken.addEventListener('mouseenter', () => {
             if (!isHovering) {
                 isHovering = true;
@@ -2773,6 +2773,19 @@
         chicken.addEventListener('mouseleave', () => {
             isHovering = false;
         });
+
+        // Touch support for mobile - play hover sound on touch start
+        // This simulates the "hover" experience on touchscreens
+        let lastTouchTime = 0;
+        chicken.addEventListener('touchstart', (e) => {
+            const now = Date.now();
+            // Play hover sound on touch (shorter cooldown to allow rapid taps for growl)
+            // The createHoverSound function handles its own internal cooldown
+            if (now - lastTouchTime > 150) {
+                createHoverSound();
+                lastTouchTime = now;
+            }
+        }, { passive: true });
 
         function playChickenAnimation(e) {
             // Visual effects
