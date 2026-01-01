@@ -2322,13 +2322,13 @@
             <!-- Hotzone Messages - Left -->
             <div class="hotzone-message hotzone-left" id="hotzoneLeft">
                 <span class="hotzone-text">HOTZONE!</span>
-                <span class="hotzone-bonus">+10% BONUS</span>
+                <span class="hotzone-bonus">+5% BONUS</span>
             </div>
             
             <!-- Hotzone Messages - Right -->
             <div class="hotzone-message hotzone-right" id="hotzoneRight">
                 <span class="hotzone-text">HOTZONE!</span>
-                <span class="hotzone-bonus">+10% BONUS</span>
+                <span class="hotzone-bonus">+5% BONUS</span>
             </div>
             
             <!-- Game Over Message -->
@@ -3817,10 +3817,10 @@
                                 const totalPastDeposits = pastPluckers.reduce((sum, p) => sum + BigInt(p.deposit), BigInt(0));
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
                                 
-                                // NEW TAX STRUCTURE: All participants pay 11% tax (5% burn + 1% owner + 5% lotto)
-                                // Winners get 89% of their deposit back, plus their share of chicken's contribution
-                                const afterTaxMultiplier = 0.89; // 89% after 11% tax
-                                console.log('Tax multiplier:', afterTaxMultiplier, '(11% tax on all participants)');
+                                // TAX STRUCTURE: Winners pay 16% tax (5% burn + 1% owner + 10% lotto)
+                                // Winners get 84% of their deposit back, plus their share of chicken's contribution
+                                const afterTaxMultiplier = 0.84; // 84% after 16% tax
+                                console.log('Tax multiplier:', afterTaxMultiplier, '(16% tax on winners)');
                                 
                                 if (pastPluckers.length > 0) {
                                     previousHoldersEl.innerHTML = pastPluckers.map((plucker, index) => {
@@ -3829,7 +3829,7 @@
                                         const depositEshare = parseFloat(web3.utils.fromWei(plucker.deposit, 'ether'));
                                         
                                         // Calculate this player's share of the pot based on their deposit proportion
-                                        // They get their deposit back (minus 11% tax) + share of chicken's contribution
+                                        // They get their deposit back (minus 16% tax) + share of chicken's contribution
                                         let potentialWinnings = 0;
                                         if (totalPastDeposits > BigInt(0)) {
                                             const depositShare = Number(BigInt(plucker.deposit) * BigInt(10000) / totalPastDeposits) / 10000;
@@ -3920,14 +3920,11 @@
                                 mainPool: roundInfo.mainPool
                             });
                             
-                            // NEW TAX STRUCTURE:
-                            // ALL participants: 5% burn + 1% owner + 5% lotto = 11% tax on their deposit
-                            // Chicken holder ONLY: additional 10% hotzone tax on their deposit at round end
-                            // So winners get 89% of their deposit back
-                            // Chicken's deposit: 11% tax to all, then 10% HZ tax if hotzone (so 79% goes to winners if HZ, 89% if not)
-                            const allParticipantsTaxRate = 0.11; // 5% burn + 1% owner + 5% lotto = 11%
-                            const winnerReturnRate = 0.89; // Winners get 89% of their deposit back (after 11% tax)
-                            const chickenToWinnersRate = wasHotzone ? 0.79 : 0.89; // Chicken's deposit after taxes goes to winners
+                            // TAX STRUCTURE:
+                            // Winners: 16% tax (5% burn + 1% owner + 10% lotto) - get 84% back
+                            // Chicken: 21% tax (5% burn + 1% owner + 10% lotto + 5% HZ) - 79% goes to winners
+                            const winnerReturnRate = 0.84; // Winners get 84% of their deposit back (after 16% tax)
+                            const chickenToWinnersRate = 0.79; // Chicken's 21% tax means 79% goes to winners pool
                             
                             // Get all deposits to calculate shares
                             let loserDeposit = 0;
@@ -3949,7 +3946,7 @@
                             
                             console.log('Loser deposit:', loserDeposit, 'Total winner deposits:', totalWinnerDeposits);
                             
-                            // Amount from chicken going to winners pool (after chicken's taxes)
+                            // Amount from chicken going to winners pool (after chicken's 21% tax)
                             const chickenContribution = loserDeposit * chickenToWinnersRate;
                             console.log('Chicken contribution to winners:', chickenContribution, '(rate:', chickenToWinnersRate, ')');
                             
@@ -3966,7 +3963,7 @@
                                     payout = seedAmount;
                                 } else {
                                     // Winner gets:
-                                    // 1. Their deposit back minus 11% tax (5% burn + 1% owner + 5% lotto)
+                                    // 1. Their deposit back minus 16% tax (5% burn + 1% owner + 10% lotto)
                                     payout = depositEshare * winnerReturnRate;
                                     
                                     // 2. Their share of the chicken contribution (proportional to their deposit)
