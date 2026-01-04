@@ -2908,6 +2908,12 @@
         let lastGrabAmount = 0; // Track last grab amount
 
         // Calculate minimum cost from contract
+        // Helper function to round UP to 4 decimal places (for UI display)
+        // e.g., 0.00121 becomes 0.0013
+        function roundUp4Decimals(value) {
+            return Math.ceil(value * 10000) / 10000;
+        }
+
         async function updateMinimumCost() {
             try {
                 if (chickenContract) {
@@ -2921,7 +2927,10 @@
                         minimumCost = 0.001; // Base minimum for new round
                         console.log('Round ended (blocksLeft=0), using base minimum:', minimumCost);
                     } else if (minGrabWei && minGrabWei !== '0') {
-                        minimumCost = parseFloat(web3.utils.fromWei(minGrabWei, 'ether'));
+                        // Round UP to 4 decimals so UI always shows enough
+                        const rawMin = parseFloat(web3.utils.fromWei(minGrabWei, 'ether'));
+                        minimumCost = roundUp4Decimals(rawMin);
+                        console.log('Raw min:', rawMin, 'Rounded up:', minimumCost);
                     } else {
                         // No active round or first grab - use base minimum
                         minimumCost = 0.001;
@@ -3996,7 +4005,8 @@
                                     payout: payout,
                                     roi: roi,
                                     isLottoWinner: isLottoWinner,
-                                    isLoser: isLoser
+                                    isLoser: isLoser,
+                                    wasSoloRound: participants.length === 1 // Track if this was a solo round (refunded)
                                 });
                             }
                         }
@@ -4022,8 +4032,18 @@
                 // Display all players
                 winnersListEl.innerHTML = allPlayersData.map(p => {
                     const lottoClass = p.isLottoWinner ? ' lotto-winner' : '';
-                    const roiColor = p.roi >= 0 ? '#2ECC71' : '#E74C3C'; // Green for profit, red for loss
-                    const roiSign = p.roi >= 0 ? '+' : '';
+                    
+                    // If solo round, show "Refunded" instead of negative ROI
+                    let roiDisplay;
+                    let roiColor;
+                    if (p.wasSoloRound) {
+                        roiDisplay = 'Refunded';
+                        roiColor = '#F39C12'; // Orange/gold color for refunded
+                    } else {
+                        roiColor = p.roi >= 0 ? '#2ECC71' : '#E74C3C'; // Green for profit, red for loss
+                        const roiSign = p.roi >= 0 ? '+' : '';
+                        roiDisplay = `${roiSign}${p.roi.toFixed(4)} <img src="eshare-logo.png" class="eshare-symbol" alt="E">`;
+                    }
                     
                     let html = `
                         <div class="winner-item${lottoClass}">
@@ -4033,7 +4053,7 @@
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 LOTTO</span>' : ''}
                             </div>
                             <div class="winner-amount" style="color: ${roiColor};">
-                                ${roiSign}${p.roi.toFixed(4)} <img src="eshare-logo.png" class="eshare-symbol" alt="E">
+                                ${roiDisplay}
                             </div>
                         </div>
                     `;
