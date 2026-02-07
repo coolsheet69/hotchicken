@@ -79,10 +79,10 @@
         }
 
         .title-logo {
-            width: 36px;
-            height: 36px;
+            width: 48px;
+            height: 48px;
             vertical-align: middle;
-            margin: 0 4px -4px;
+            margin: 0 6px -6px;
         }
 
         @keyframes title-breathe {
@@ -187,11 +187,10 @@
         }
 
         .eshare-symbol {
-            width: 18px; height: 18px;
+            width: 24px; height: 24px;
             vertical-align: middle;
             margin-left: 3px;
             display: inline-block;
-            
         }
 
         /* ===== CHICKEN ARENA ===== */
@@ -671,6 +670,13 @@
             animation: none;
         }
 
+        .grab-btn-logo {
+            width: 22px;
+            height: 22px;
+            vertical-align: middle;
+            margin: 0 2px -2px;
+        }
+
         .connected-label-text {
             color: var(--neon-blue);
             font-size: 11px;
@@ -737,9 +743,8 @@
         }
 
         .action-card-logo {
-            width: 28px;
-            height: 28px;
-            
+            width: 36px;
+            height: 36px;
         }
 
         .action-card-text {
@@ -916,7 +921,7 @@
                 border-radius: 10px;
             }
             .action-card-icon { width: 28px; height: 28px; font-size: 16px; border-radius: 7px; }
-            .action-card-logo { width: 20px; height: 20px; }
+            .action-card-logo { width: 28px; height: 28px; }
             .action-card-label { font-size: 8px; letter-spacing: 1px; }
             .action-card-sub { font-size: 11px; }
             .action-card-value { font-size: 12px; }
@@ -944,7 +949,7 @@
                 text-align: center;
             }
             .action-card-icon { width: 24px; height: 24px; font-size: 14px; }
-            .action-card-logo { width: 18px; height: 18px; }
+            .action-card-logo { width: 24px; height: 24px; }
             .action-card-label { font-size: 7px; letter-spacing: 0.5px; }
             .action-card-sub { font-size: 10px; }
             .action-card-value { font-size: 11px; }
@@ -993,6 +998,25 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Lotto eligible tag on rows */
+        .lotto-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 200, 100, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            font-family: var(--font-display);
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--neon-green);
+            margin-left: 4px;
+            vertical-align: middle;
+            white-space: nowrap;
         }
 
         .leaderboard-column-headers {
@@ -1048,7 +1072,7 @@
             justify-content: flex-end; grid-column: 3;
             font-family: var(--text-mono);
         }
-        .current-holder-amount .eshare-symbol { width: 17px; height: 17px; }
+        .current-holder-amount .eshare-symbol { width: 20px; height: 20px; }
 
         .current-holder-winnings {
             font-size: 15px; font-weight: 700; color: var(--neon-green);
@@ -1056,7 +1080,7 @@
             justify-content: flex-end; grid-column: 4;
             font-family: var(--text-mono);
         }
-        .current-holder-winnings .eshare-symbol { width: 17px; height: 17px; }
+        .current-holder-winnings .eshare-symbol { width: 20px; height: 20px; }
 
         /* Holder items */
         .holder-item {
@@ -1086,14 +1110,14 @@
             gap: 2px; justify-content: flex-end;
             font-family: var(--text-mono);
         }
-        .holder-amount .eshare-symbol { width: 16px; height: 16px; }
+        .holder-amount .eshare-symbol { width: 18px; height: 18px; }
         .holder-winnings {
             color: var(--neon-green); font-size: 14px; font-weight: 700;
             white-space: nowrap; display: flex; align-items: center;
             gap: 2px; justify-content: flex-end;
             font-family: var(--text-mono);
         }
-        .holder-winnings .eshare-symbol { width: 16px; height: 16px; }
+        .holder-winnings .eshare-symbol { width: 18px; height: 18px; }
         .holder-time { color: var(--text-secondary); font-size: 10px; white-space: nowrap; text-align: right; }
 
         .previous-holders { max-height: 180px; overflow-y: auto; overflow-x: hidden; }
@@ -1176,7 +1200,7 @@
             display: flex; align-items: center; gap: 4px;
             font-family: var(--text-mono);
         }
-        .winner-amount .eshare-symbol { width: 16px; height: 16px; }
+        .winner-amount .eshare-symbol { width: 18px; height: 18px; }
 
         .lotto-badge {
             background: linear-gradient(135deg, var(--neon-green) 0%, #00cc66 100%);
@@ -1392,7 +1416,7 @@
             .game-container { padding: 6px; max-width: 100%; overflow-x: hidden; }
 
             .title { font-size: 24px !important; letter-spacing: 3px; padding: 4px 0; margin-bottom: 2px; }
-            .title-logo { width: 24px; height: 24px; margin: 0 2px -3px; }
+            .title-logo { width: 32px; height: 32px; margin: 0 4px -4px; }
 
             .game-info-container { margin: 0 auto 6px auto; max-width: 100%; padding: 0 4px; }
             .game-info-row { margin-bottom: 5px; gap: 6px; }
@@ -1402,7 +1426,7 @@
             .timer-display .game-info-value { font-size: 17px; }
             .game-info-label { font-size: 10px; }
             .game-info-value { font-size: 14px; }
-            .eshare-symbol { width: 14px; height: 14px; }
+            .eshare-symbol { width: 18px; height: 18px; }
 
             .chicken-area { min-height: 200px; padding-top: 0; }
             .chicken-area::before { width: 200px; height: 200px; }
@@ -1418,6 +1442,7 @@
 
             .leaderboard-container { max-width: 100%; overflow-x: hidden; padding: 10px; }
             .leaderboard-title { font-size: 14px; letter-spacing: 2px; }
+            .lotto-tag { font-size: 6px; padding: 1px 4px; }
             .leaderboard-column-headers { grid-template-columns: 50px 1fr 72px 72px; gap: 4px; padding: 5px 8px; }
             .leaderboard-column-headers span { font-size: 9px; }
 
@@ -1425,15 +1450,15 @@
             .current-holder-label { font-size: 9px; }
             .current-holder-address { font-size: 12px; }
             .current-holder-amount { font-size: 13px; }
-            .current-holder-amount .eshare-symbol { width: 14px; height: 14px; }
+            .current-holder-amount .eshare-symbol { width: 16px; height: 16px; }
             .current-holder-winnings { font-size: 13px; }
-            .current-holder-winnings .eshare-symbol { width: 14px; height: 14px; }
+            .current-holder-winnings .eshare-symbol { width: 16px; height: 16px; }
 
             .holder-item { padding: 6px 8px; gap: 4px; grid-template-columns: 50px 1fr 72px 72px; }
             .holder-rank { font-size: 12px; }
             .holder-address { font-size: 12px; }
             .holder-amount, .holder-winnings { font-size: 12px; }
-            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 13px; height: 13px; }
+            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 15px; height: 15px; }
 
             .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 10px; }
             .previous-winners-title { font-size: 13px; letter-spacing: 2px; }
@@ -1441,7 +1466,7 @@
             .winner-round { font-size: 12px; }
             .winner-address { font-size: 12px; }
             .winner-amount { font-size: 13px; }
-            .winner-amount .eshare-symbol { width: 14px; height: 14px; }
+            .winner-amount .eshare-symbol { width: 16px; height: 16px; }
             .lotto-badge { font-size: 9px; padding: 2px 6px; }
 
             .amount-input-container { margin: 6px auto; }
@@ -1457,7 +1482,7 @@
 
         @media (max-width: 480px) {
             .title { font-size: 20px !important; letter-spacing: 2px; }
-            .title-logo { width: 20px; height: 20px; margin: 0 1px -2px; }
+            .title-logo { width: 24px; height: 24px; margin: 0 2px -3px; }
             .chicken { width: 130px; height: 130px; }
             .chicken-area { min-height: 170px; }
             .chicken-area::before { width: 160px; height: 160px; }
@@ -1472,13 +1497,13 @@
             .current-holder-label { font-size: 8px; }
             .current-holder-address { font-size: 11px; }
             .current-holder-amount, .current-holder-winnings { font-size: 11px; }
-            .current-holder-amount .eshare-symbol, .current-holder-winnings .eshare-symbol { width: 12px; height: 12px; }
+            .current-holder-amount .eshare-symbol, .current-holder-winnings .eshare-symbol { width: 14px; height: 14px; }
 
             .holder-item { padding: 5px 6px; gap: 3px; grid-template-columns: 45px 1fr 65px 65px; }
             .holder-rank { font-size: 11px; }
             .holder-address { font-size: 10px; }
             .holder-amount, .holder-winnings { font-size: 11px; }
-            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 12px; height: 12px; }
+            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 14px; height: 14px; }
 
             .leaderboard-column-headers { grid-template-columns: 45px 1fr 65px 65px; }
             .leaderboard-column-headers span { font-size: 8px; }
@@ -1707,10 +1732,10 @@
                         <circle cx="163" cy="240" r="2" fill="#FFD700"/>
                         <circle cx="175" cy="232" r="2" fill="#FFD700"/>
                         <!-- Medallion -->
-                        <circle cx="150" cy="250" r="11" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
-                        <image href="eshare-fire-logo.webp" x="140" y="240" width="20" height="20" />
+                        <circle cx="150" cy="251" r="14" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
+                        <image href="eshare-fire-logo.webp" x="137" y="238" width="26" height="26" />
                         <!-- Medallion shine -->
-                        <circle cx="145" cy="245" r="3" fill="rgba(255,255,255,0.25)"/>
+                        <circle cx="144" cy="244" r="3.5" fill="rgba(255,255,255,0.25)"/>
                     </g>
                     
                     <!-- ===== NECK ===== -->
@@ -2490,7 +2515,7 @@
 
                 // Transform button into grab chicken button
                 connectWalletBtn.classList.add('is-grab-button');
-                connectWalletBtn.textContent = '🔥 GRAB CHICKEN 🔥';
+                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                 // Also toggle wrapper class for browsers without :has() support
                 const wrapper = connectWalletBtn.closest('.grab-btn-wrapper');
                 if (wrapper) wrapper.classList.add('grab-mode');
@@ -2743,7 +2768,7 @@
                 document.getElementById('hotzoneLeft').classList.remove('active');
                 document.getElementById('hotzoneRight').classList.remove('active');
 
-                connectWalletBtn.textContent = '🔥 GRAB CHICKEN 🔥';
+                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                 connectWalletBtn.disabled = false;
 
                 // Force timer reset - reset all timer state to trigger reload
@@ -2800,7 +2825,7 @@
             } catch (error) {
                 console.error('Error grabbing chicken:', error);
                 alert('Failed to grab chicken: ' + error.message);
-                connectWalletBtn.textContent = '🔥 GRAB CHICKEN 🔥';
+                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                 connectWalletBtn.disabled = false;
             }
         }
@@ -3153,9 +3178,27 @@
                     console.log('Round info:', roundInfo);
                     console.log('Actual pot (playerDeps):', actualPot);
                     
+                    // Get lotto eligible addresses
+                    let lottoHolder = null;
+                    let lottoPrevious = null;
+                    try {
+                        const lottoEligible = await chickenContract.methods.getLottoEligible().call();
+                        lottoHolder = lottoEligible.holder ? lottoEligible.holder.toLowerCase() : null;
+                        lottoPrevious = lottoEligible.previous ? lottoEligible.previous.toLowerCase() : null;
+                        const zeroAddr = '0x0000000000000000000000000000000000000000';
+                        if (lottoHolder === zeroAddr) lottoHolder = null;
+                        if (lottoPrevious === zeroAddr) lottoPrevious = null;
+                        console.log('Lotto eligible - holder:', lottoHolder, 'previous:', lottoPrevious);
+                    } catch (e) {
+                        console.log('getLottoEligible not available:', e.message);
+                    }
+
                     // Update current holder and their deposit
+                    const isHolderLottoEligible = lottoHolder && holder && holder.toLowerCase() === lottoHolder;
+                    const lottoTagHTML = '<span class="lotto-tag">🎰 LOTTO</span>';
+                    
                     if (holder && holder !== '0x0000000000000000000000000000000000000000') {
-                        currentHolderEl.textContent = formatAddress(holder);
+                        currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '');
                         
                         // Get the holder's individual deposit using deposits mapping
                         try {
@@ -3182,7 +3225,7 @@
                             document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         }
                     } else {
-                        currentHolderEl.textContent = 'No holder yet';
+                        currentHolderEl.innerHTML = 'No holder yet';
                         document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     }
@@ -3247,10 +3290,13 @@
                                             potentialWinnings = grossWinnings * afterTaxMultiplier; // Apply taxes
                                         }
                                         
+                                        const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
+                                        const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO</span>' : '';
+                                        
                                         return `
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">#${index + 2}</span>
-                                            <span class="holder-address">${formatAddress(plucker.address)}</span>
+                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                             <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
@@ -3269,7 +3315,7 @@
                     }
                 } else {
                     // No contract - show defaults
-                    currentHolderEl.textContent = 'Connect wallet';
+                    currentHolderEl.innerHTML = 'Connect wallet';
                     previousHoldersEl.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">Connect wallet to see leaderboard</div>';
                 }
 
