@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hot Chicken Game</title>
+    <link rel="icon" type="image/webp" href="eshare-fire-logo.webp">
+    <link rel="apple-touch-icon" href="eshare-fire-logo.webp">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -51,6 +53,8 @@
             opacity: 0.18;
             z-index: 0;
             pointer-events: none;
+            min-height: 100vh;
+            min-width: 100vw;
         }
 
         body::after {
@@ -203,6 +207,12 @@
         @keyframes pulse-red {
             0%, 100% { color: var(--neon-red); opacity: 1; }
             50% { color: #ff6b6b; opacity: 0.8; }
+        }
+
+        .timer-display .game-info-value.timer-updating {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            letter-spacing: 3px;
         }
 
         .game-info-value.highlight {
@@ -1250,6 +1260,7 @@
 
         /* ===== SEED MODAL ===== */
         .seed-modal-overlay {
+            cursor: auto !important;
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8);
@@ -1389,6 +1400,7 @@
         }
 
         .game-over-message {
+            cursor: auto !important;
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, rgba(255, 45, 45, 0.95) 0%, rgba(200, 20, 20, 0.95) 100%);
@@ -1747,19 +1759,19 @@
                     <!-- ===== GOLD CHAIN / BLING ===== -->
                     <g class="bling">
                         <!-- Chain arc across chest -->
-                        <path d="M 115 225 Q 130 240 150 245 Q 170 240 185 225" 
-                              fill="none" stroke="url(#chainGrad)" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M 115 205 Q 130 218 150 222 Q 170 218 185 205" 
+                              fill="none" stroke="url(#chainGrad)" stroke-width="3.5" stroke-linecap="round"/>
                         <!-- Chain links (subtle) -->
-                        <circle cx="125" cy="232" r="2" fill="#FFD700"/>
-                        <circle cx="137" cy="240" r="2" fill="#FFD700"/>
-                        <circle cx="150" cy="243" r="2" fill="#FFD700"/>
-                        <circle cx="163" cy="240" r="2" fill="#FFD700"/>
-                        <circle cx="175" cy="232" r="2" fill="#FFD700"/>
+                        <circle cx="125" cy="211" r="2.5" fill="#FFD700"/>
+                        <circle cx="137" cy="218" r="2.5" fill="#FFD700"/>
+                        <circle cx="150" cy="221" r="2.5" fill="#FFD700"/>
+                        <circle cx="163" cy="218" r="2.5" fill="#FFD700"/>
+                        <circle cx="175" cy="211" r="2.5" fill="#FFD700"/>
                         <!-- Medallion -->
-                        <circle cx="150" cy="251" r="14" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
-                        <image href="eshare-fire-logo.webp" x="137" y="238" width="26" height="26" />
+                        <circle cx="150" cy="230" r="16" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="2"/>
+                        <image href="eshare-fire-logo.webp" x="134" y="214" width="32" height="32" />
                         <!-- Medallion shine -->
-                        <circle cx="144" cy="244" r="3.5" fill="rgba(255,255,255,0.25)"/>
+                        <circle cx="143" cy="223" r="4" fill="rgba(255,255,255,0.25)"/>
                     </g>
                     
                     <!-- ===== NECK ===== -->
@@ -2165,6 +2177,28 @@
         // Follow cursor with hand and make chicken dodge
         let mouseX = 0;
         let mouseY = 0;
+
+        // Helper to restore cursor during browser alerts
+        function showAlert(msg) {
+            document.body.style.cursor = 'auto';
+            handCursor.style.display = 'none';
+            alert(msg);
+            document.body.style.cursor = '';
+            handCursor.style.display = '';
+        }
+        
+        // Hide hand cursor when seed modal is open
+        const seedOverlay = document.getElementById('seedModalOverlay');
+        const observer = new MutationObserver(() => {
+            if (seedOverlay.classList.contains('show')) {
+                handCursor.style.display = 'none';
+                document.body.style.cursor = 'auto';
+            } else {
+                handCursor.style.display = '';
+                document.body.style.cursor = '';
+            }
+        });
+        observer.observe(seedOverlay, { attributes: true, attributeFilter: ['class'] });
         
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
@@ -2491,7 +2525,7 @@
                 }
             } catch (error) {
                 console.error('Network switch error:', error);
-                alert('Please switch to Base network in MetaMask to use this app!');
+                showAlert('Please switch to Base network in MetaMask to use this app!');
                 throw error;
             }
         }
@@ -2553,14 +2587,14 @@
                 updateGameInfo(); // Update timer, seed, pool
             } catch (error) {
                 console.error('Error connecting wallet:', error);
-                alert('Failed to connect wallet');
+                showAlert('Failed to connect wallet');
             }
         }
 
         // Seed Modal handlers
         document.getElementById('openSeedModal').addEventListener('click', () => {
             if (!userAccount) {
-                alert('Please connect your wallet first');
+                showAlert('Please connect your wallet first');
                 return;
             }
             document.getElementById('seedModalOverlay').classList.add('show');
@@ -2580,14 +2614,14 @@
 
         async function handleDepositSeed() {
             if (!userAccount) {
-                alert('Please connect your wallet first');
+                showAlert('Please connect your wallet first');
                 return;
             }
 
             try {
                 const seedAmountEshare = parseFloat(document.getElementById('seedModalAmount').value);
                 if (isNaN(seedAmountEshare) || seedAmountEshare <= 0) {
-                    alert('Please enter a valid seed amount');
+                    showAlert('Please enter a valid seed amount');
                     return;
                 }
 
@@ -2633,7 +2667,7 @@
 
             } catch (error) {
                 console.error('Error depositing seed:', error);
-                alert('Error depositing seed: ' + (error.message || 'Unknown error'));
+                showAlert('Error depositing seed: ' + (error.message || 'Unknown error'));
                 const confirmBtn = document.getElementById('seedModalConfirm');
                 confirmBtn.textContent = 'Deposit';
                 confirmBtn.disabled = false;
@@ -2643,13 +2677,13 @@
         // Owner Dashboard Handlers
         document.getElementById('setTimerBlocksBtn').addEventListener('click', async () => {
             if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
-                alert('Owner only');
+                showAlert('Owner only');
                 return;
             }
             const btn = document.getElementById('setTimerBlocksBtn');
             const value = parseInt(document.getElementById('ownerTimerBlocks').value);
             if (isNaN(value) || value < 1) {
-                alert('Please enter a valid number of blocks');
+                showAlert('Please enter a valid number of blocks');
                 return;
             }
             try {
@@ -2660,7 +2694,7 @@
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; }, 1500);
             } catch (error) {
                 console.error('Error setting timer blocks:', error);
-                alert('Error: ' + (error.message || 'Unknown error'));
+                showAlert('Error: ' + (error.message || 'Unknown error'));
                 btn.textContent = 'Set';
                 btn.disabled = false;
             }
@@ -2668,13 +2702,13 @@
 
         document.getElementById('setMinGrabBtn').addEventListener('click', async () => {
             if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
-                alert('Owner only');
+                showAlert('Owner only');
                 return;
             }
             const btn = document.getElementById('setMinGrabBtn');
             const value = parseFloat(document.getElementById('ownerMinGrab').value);
             if (isNaN(value) || value <= 0) {
-                alert('Please enter a valid amount');
+                showAlert('Please enter a valid amount');
                 return;
             }
             try {
@@ -2686,7 +2720,7 @@
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; updateMinimumCost(); }, 1500);
             } catch (error) {
                 console.error('Error setting min grab:', error);
-                alert('Error: ' + (error.message || 'Unknown error'));
+                showAlert('Error: ' + (error.message || 'Unknown error'));
                 btn.textContent = 'Set';
                 btn.disabled = false;
             }
@@ -2694,13 +2728,13 @@
 
         document.getElementById('setSeedAmountBtn').addEventListener('click', async () => {
             if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
-                alert('Owner only');
+                showAlert('Owner only');
                 return;
             }
             const btn = document.getElementById('setSeedAmountBtn');
             const value = parseFloat(document.getElementById('ownerSeedAmount').value);
             if (isNaN(value) || value <= 0) {
-                alert('Please enter a valid amount');
+                showAlert('Please enter a valid amount');
                 return;
             }
             try {
@@ -2712,7 +2746,7 @@
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; updateGameInfo(); }, 1500);
             } catch (error) {
                 console.error('Error setting seed amount:', error);
-                alert('Error: ' + (error.message || 'Unknown error'));
+                showAlert('Error: ' + (error.message || 'Unknown error'));
                 btn.textContent = 'Set';
                 btn.disabled = false;
             }
@@ -2725,7 +2759,7 @@
                 // Get amount from input
                 const amountEshare = parseFloat(eshareAmountInput.value);
                 if (isNaN(amountEshare) || amountEshare < minimumCost) {
-                    alert(`Please enter at least ${minimumCost.toFixed(4)} ESHARE`);
+                    showAlert(`Please enter at least ${minimumCost.toFixed(4)} ESHARE`);
                     return;
                 }
 
@@ -2795,6 +2829,10 @@
                 connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                 connectWalletBtn.disabled = false;
 
+                // Show updating state on timer while blockchain syncs
+                document.getElementById('timer').textContent = '... updating ...';
+                document.getElementById('timer').classList.add('timer-updating');
+
                 // Force timer reset - reset all timer state to trigger reload
                 displayedSeconds = null;
                 serverSecondsAtFetch = null;
@@ -2848,7 +2886,7 @@
 
             } catch (error) {
                 console.error('Error grabbing chicken:', error);
-                alert('Failed to grab chicken: ' + error.message);
+                showAlert('Failed to grab chicken: ' + error.message);
                 connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                 connectWalletBtn.disabled = false;
             }
@@ -2914,6 +2952,7 @@
                 // Also immediately recalculate display based on existing data
                 displayedSeconds = calculateCurrentSeconds();
                 document.getElementById('timer').textContent = formatTime(displayedSeconds);
+                document.getElementById('timer').classList.remove('timer-updating');
             }
         });
 
@@ -3128,6 +3167,7 @@
                     }
                     
                     document.getElementById('timer').textContent = formatTime(displayedSeconds ?? 0);
+                document.getElementById('timer').classList.remove('timer-updating');
                     
                 } catch (e) {
                     console.warn("Ticker error:", e);
@@ -3214,7 +3254,18 @@
                         if (lottoPrevious === zeroAddr) lottoPrevious = null;
                         console.log('Lotto eligible - holder:', lottoHolder, 'previous:', lottoPrevious);
                     } catch (e) {
-                        console.log('getLottoEligible not available:', e.message);
+                        console.log('getLottoEligible not available, using fallback:', e.message);
+                        // Fallback: current holder is always lotto eligible
+                        if (holder && holder !== '0x0000000000000000000000000000000000000000') {
+                            lottoHolder = holder.toLowerCase();
+                        }
+                        // Try to get previous holder as fallback
+                        try {
+                            const prevHolder = await chickenContract.methods.previousChickenHolder().call();
+                            if (prevHolder && prevHolder !== '0x0000000000000000000000000000000000000000') {
+                                lottoPrevious = prevHolder.toLowerCase();
+                            }
+                        } catch (e2) { /* ignore */ }
                     }
 
                     // Update current holder and their deposit
