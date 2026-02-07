@@ -1759,19 +1759,19 @@
                     <!-- ===== GOLD CHAIN / BLING ===== -->
                     <g class="bling">
                         <!-- Chain arc across chest -->
-                        <path d="M 115 205 Q 130 218 150 222 Q 170 218 185 205" 
+                        <path d="M 115 215 Q 130 228 150 232 Q 170 228 185 215" 
                               fill="none" stroke="url(#chainGrad)" stroke-width="3.5" stroke-linecap="round"/>
                         <!-- Chain links (subtle) -->
-                        <circle cx="125" cy="211" r="2.5" fill="#FFD700"/>
-                        <circle cx="137" cy="218" r="2.5" fill="#FFD700"/>
-                        <circle cx="150" cy="221" r="2.5" fill="#FFD700"/>
-                        <circle cx="163" cy="218" r="2.5" fill="#FFD700"/>
-                        <circle cx="175" cy="211" r="2.5" fill="#FFD700"/>
+                        <circle cx="125" cy="221" r="2.5" fill="#FFD700"/>
+                        <circle cx="137" cy="228" r="2.5" fill="#FFD700"/>
+                        <circle cx="150" cy="231" r="2.5" fill="#FFD700"/>
+                        <circle cx="163" cy="228" r="2.5" fill="#FFD700"/>
+                        <circle cx="175" cy="221" r="2.5" fill="#FFD700"/>
                         <!-- Medallion -->
-                        <circle cx="150" cy="230" r="16" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="2"/>
-                        <image href="eshare-fire-logo.webp" x="134" y="214" width="32" height="32" />
+                        <circle cx="150" cy="240" r="16" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="2"/>
+                        <image href="eshare-fire-logo.webp" x="134" y="224" width="32" height="32" />
                         <!-- Medallion shine -->
-                        <circle cx="143" cy="223" r="4" fill="rgba(255,255,255,0.25)"/>
+                        <circle cx="143" cy="233" r="4" fill="rgba(255,255,255,0.25)"/>
                     </g>
                     
                     <!-- ===== NECK ===== -->
@@ -3270,7 +3270,7 @@
 
                     // Update current holder and their deposit
                     const isHolderLottoEligible = lottoHolder && holder && holder.toLowerCase() === lottoHolder;
-                    const lottoTagHTML = '<span class="lotto-tag">🎰 LOTTO</span>';
+                    const lottoTagHTML = '<span class="lotto-tag">🎰 LOTTO ENTRY</span>';
                     
                     if (holder && holder !== '0x0000000000000000000000000000000000000000') {
                         currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '');
