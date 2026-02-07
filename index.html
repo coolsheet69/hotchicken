@@ -215,21 +215,70 @@
         .chicken {
             width: 260px; height: 390px;
             position: relative;
-            transition: transform 0.2s ease-out, filter 0.1s ease;
-            transform-origin: center center;
+            transition: transform 0.2s ease-out;
+            transform-origin: center 260px;
             user-select: none;
             -webkit-user-select: none;
             z-index: 99999;
-            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+        }
+
+        /* Idle breathing animation on the body */
+        .chicken .body-group {
+            animation: idle-breathe 3s ease-in-out infinite;
+            transform-origin: 150px 260px;
+        }
+        @keyframes idle-breathe {
+            0%, 100% { transform: scaleX(1) scaleY(1); }
+            50% { transform: scaleX(1.02) scaleY(0.985); }
+        }
+
+        /* Subtle wing idle sway */
+        .chicken .wing-left {
+            animation: wing-idle-left 4s ease-in-out infinite;
+            transform-origin: 120px 255px;
+        }
+        .chicken .wing-right {
+            animation: wing-idle-right 4s ease-in-out infinite;
+            transform-origin: 180px 255px;
+        }
+        @keyframes wing-idle-left {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-2deg); }
+        }
+        @keyframes wing-idle-right {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* Subtle tail sway */
+        .chicken .tail-feathers {
+            animation: tail-sway 5s ease-in-out infinite;
+            transform-origin: 70px 260px;
+        }
+        @keyframes tail-sway {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-1.5deg) translateX(-2px); }
+        }
+
+        /* Chain bling subtle jiggle */
+        .chicken .bling {
+            animation: bling-jiggle 3s ease-in-out infinite;
+            transform-origin: 150px 240px;
+        }
+        @keyframes bling-jiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(0.5deg); }
+            75% { transform: rotate(-0.5deg); }
         }
 
         .chicken.dodging { transition: transform 0.15s ease-out; }
 
         .chicken.grabbed {
             transform: scale(0.88, 1.12) rotate(-2deg) !important;
-            filter: brightness(1.2) drop-shadow(0 10px 30px rgba(0,0,0,0.5));
         }
 
+        /* Grabbed: neck squeezes, head shakes, eyes go crazy, wings flap */
         .chicken.grabbed .neck-squeeze { transform: scaleX(0.3) scaleY(1.4); }
         .chicken.grabbed .head-squeeze {
             transform: scale(1.08);
@@ -237,8 +286,33 @@
             animation: head-shake 0.1s ease-in-out infinite;
         }
         .chicken.grabbed .eye-squeeze { transform: scale(1.3); }
-        .chicken.grabbed .pupil-left { animation: grab-eye-left 0.08s ease-in-out infinite; }
-        .chicken.grabbed .pupil-right { animation: grab-eye-right 0.08s ease-in-out infinite; }
+        .chicken.grabbed .pupil-left { animation: grab-eye-left 0.08s ease-in-out infinite !important; }
+        .chicken.grabbed .pupil-right { animation: grab-eye-right 0.08s ease-in-out infinite !important; }
+
+        /* Wings flap wildly when grabbed */
+        .chicken.grabbed .wing-left {
+            animation: wing-flap-left 0.12s ease-in-out infinite !important;
+        }
+        .chicken.grabbed .wing-right {
+            animation: wing-flap-right 0.12s ease-in-out infinite !important;
+        }
+        @keyframes wing-flap-left {
+            0%, 100% { transform: rotate(0deg) scaleX(1); }
+            50% { transform: rotate(-25deg) scaleX(0.8); }
+        }
+        @keyframes wing-flap-right {
+            0%, 100% { transform: rotate(0deg) scaleX(1); }
+            50% { transform: rotate(25deg) scaleX(0.8); }
+        }
+
+        /* Chain swings when grabbed */
+        .chicken.grabbed .bling {
+            animation: bling-swing 0.15s ease-in-out infinite !important;
+        }
+        @keyframes bling-swing {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
 
         @keyframes grab-eye-left { 0%, 100% { transform: translateX(-8px); } 50% { transform: translateX(8px); } }
         @keyframes grab-eye-right { 0%, 100% { transform: translateX(8px); } 50% { transform: translateX(-8px); } }
@@ -250,15 +324,24 @@
             100% { transform: scale(1.08) rotate(-8deg) translateX(-3px); }
         }
 
-        /* Hot Zone Effects */
+        /* ===== HOT ZONE - chicken on fire ===== */
         .chicken.hotzone {
-            filter: hue-rotate(-30deg) saturate(1.8) brightness(1.2) 
-                    drop-shadow(0 0 25px rgba(255, 45, 45, 0.8))
-                    drop-shadow(0 0 60px rgba(255, 45, 45, 0.4));
+            filter: hue-rotate(-20deg) saturate(1.6) brightness(1.15) 
+                    drop-shadow(0 0 20px rgba(255, 45, 45, 0.6))
+                    drop-shadow(0 0 50px rgba(255, 45, 45, 0.3));
         }
 
         .chicken.hotzone .pupil-left,
         .chicken.hotzone .pupil-right { animation-duration: 0.5s !important; }
+
+        /* Tail feathers glow during hotzone */
+        .chicken.hotzone .tail-feathers {
+            animation: tail-hotzone 0.8s ease-in-out infinite !important;
+        }
+        @keyframes tail-hotzone {
+            0%, 100% { transform: rotate(0deg); opacity: 1; }
+            50% { transform: rotate(-3deg) translateX(-3px); opacity: 0.85; }
+        }
 
         .hotzone-smoke {
             position: absolute; top: 50%; left: 50%;
@@ -1492,78 +1575,232 @@
             
             <div class="chicken" id="chicken">
                 <svg class="chicken-body" viewBox="0 0 300 450" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Flowing tail feathers - dramatic curves like reference -->
-                    <path d="M 60 260 Q 20 240 15 200 Q 12 180 25 170 Q 35 165 45 175 Q 50 200 55 230 Z" 
-                          fill="#2C3E50" stroke="#1A252F" stroke-width="2"/>
-                    <path d="M 65 250 Q 30 235 25 200 Q 22 175 35 165 Q 48 160 58 172 Q 62 200 63 235 Z" 
-                          fill="#16A085" stroke="#117A65" stroke-width="2"/>
-                    <path d="M 68 270 Q 35 260 28 225 Q 25 195 38 185 Q 50 180 60 192 Q 65 220 66 255 Z" 
-                          fill="#3498DB" stroke="#2874A6" stroke-width="2"/>
-                    <path d="M 70 285 Q 40 275 35 245 Q 32 215 45 205 Q 58 200 65 210 Q 70 235 69 270 Z" 
-                          fill="#9B59B6" stroke="#7D3C98" stroke-width="2"/>
+                    <defs>
+                        <!-- Body gradient - rich green with depth -->
+                        <radialGradient id="bodyGrad" cx="45%" cy="40%">
+                            <stop offset="0%" stop-color="#4AE88A"/>
+                            <stop offset="50%" stop-color="#2ECC71"/>
+                            <stop offset="100%" stop-color="#1EA85A"/>
+                        </radialGradient>
+                        <!-- Wing gradient -->
+                        <radialGradient id="wingGrad" cx="50%" cy="40%">
+                            <stop offset="0%" stop-color="#1ABC9C"/>
+                            <stop offset="100%" stop-color="#0E8B6E"/>
+                        </radialGradient>
+                        <!-- Head/neck gradient - warm orange -->
+                        <radialGradient id="headGrad" cx="45%" cy="35%">
+                            <stop offset="0%" stop-color="#F5A623"/>
+                            <stop offset="60%" stop-color="#E67E22"/>
+                            <stop offset="100%" stop-color="#CF6B17"/>
+                        </radialGradient>
+                        <!-- Comb gradient - fiery red -->
+                        <linearGradient id="combGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FF4444"/>
+                            <stop offset="100%" stop-color="#CC2222"/>
+                        </linearGradient>
+                        <!-- Wattle gradient -->
+                        <linearGradient id="wattleGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#E74C3C"/>
+                            <stop offset="100%" stop-color="#B83227"/>
+                        </linearGradient>
+                        <!-- Beak gradient -->
+                        <linearGradient id="beakGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFE44D"/>
+                            <stop offset="100%" stop-color="#F5C800"/>
+                        </linearGradient>
+                        <!-- Tail feather gradients -->
+                        <linearGradient id="tailGrad1" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FF6B35"/>
+                            <stop offset="100%" stop-color="#E74C3C"/>
+                        </linearGradient>
+                        <linearGradient id="tailGrad2" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFD700"/>
+                            <stop offset="100%" stop-color="#FF8C00"/>
+                        </linearGradient>
+                        <linearGradient id="tailGrad3" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FF4500"/>
+                            <stop offset="100%" stop-color="#CC0000"/>
+                        </linearGradient>
+                        <linearGradient id="tailGrad4" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#9B59B6"/>
+                            <stop offset="100%" stop-color="#6C3483"/>
+                        </linearGradient>
+                        <!-- Gold chain gradient -->
+                        <linearGradient id="chainGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#FFE066"/>
+                            <stop offset="50%" stop-color="#FFD700"/>
+                            <stop offset="100%" stop-color="#DAA520"/>
+                        </linearGradient>
+                        <!-- Leg gradient -->
+                        <linearGradient id="legGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#E67E22"/>
+                            <stop offset="100%" stop-color="#BF6516"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- ===== TAIL FEATHERS - dramatic flowing flames ===== -->
+                    <g class="tail-feathers">
+                        <!-- Bottom flame feather -->
+                        <path d="M 72 280 Q 15 270 8 220 Q 5 185 22 170 Q 38 160 50 178 Q 58 210 68 255 Z" 
+                              fill="url(#tailGrad4)" opacity="0.9"/>
+                        <!-- Mid feather -->
+                        <path d="M 70 265 Q 18 248 12 200 Q 8 165 30 150 Q 48 142 58 160 Q 64 195 67 240 Z" 
+                              fill="url(#tailGrad3)" opacity="0.95"/>
+                        <!-- Gold feather -->
+                        <path d="M 68 252 Q 22 235 18 190 Q 15 155 35 142 Q 52 135 60 155 Q 65 185 66 230 Z" 
+                              fill="url(#tailGrad2)"/>
+                        <!-- Top fire feather -->
+                        <path d="M 65 240 Q 25 220 22 178 Q 20 148 40 135 Q 55 128 62 148 Q 66 175 64 220 Z" 
+                              fill="url(#tailGrad1)"/>
+                        <!-- Feather detail lines -->
+                        <line x1="55" y1="175" x2="35" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                        <line x1="58" y1="195" x2="25" y2="165" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                        <line x1="60" y1="210" x2="20" y2="185" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    </g>
                     
-                    <!-- Body - smaller round green -->
-                    <ellipse cx="150" cy="260" rx="70" ry="75" fill="#2ECC71" stroke="#27AE60" stroke-width="3"/>
+                    <!-- ===== BODY - round, plump, with shading ===== -->
+                    <g class="body-group">
+                        <!-- Body shadow -->
+                        <ellipse cx="152" cy="264" rx="72" ry="78" fill="rgba(0,0,0,0.15)"/>
+                        <!-- Main body -->
+                        <ellipse cx="150" cy="260" rx="72" ry="78" fill="url(#bodyGrad)" stroke="#1EA85A" stroke-width="2"/>
+                        <!-- Body highlight -->
+                        <ellipse cx="135" cy="235" rx="30" ry="25" fill="rgba(255,255,255,0.08)"/>
+                        <!-- Belly feather texture lines -->
+                        <path d="M 110 275 Q 130 280 150 278 Q 170 280 190 275" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+                        <path d="M 115 290 Q 135 295 150 293 Q 165 295 185 290" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+                    </g>
                     
-                    <!-- Wings - darker teal ovals -->
-                    <ellipse cx="95" cy="255" rx="32" ry="48" fill="#16A085" stroke="#0E6655" stroke-width="3"/>
-                    <ellipse cx="205" cy="255" rx="32" ry="48" fill="#16A085" stroke="#0E6655" stroke-width="3"/>
+                    <!-- ===== WINGS ===== -->
+                    <!-- Left wing -->
+                    <g class="wing-left">
+                        <ellipse cx="92" cy="255" rx="34" ry="52" fill="url(#wingGrad)" stroke="#0B7D5E" stroke-width="2"/>
+                        <!-- Wing feather lines -->
+                        <path d="M 75 230 Q 85 240 78 260" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <path d="M 80 225 Q 92 237 85 265" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+                    </g>
+                    <!-- Right wing -->
+                    <g class="wing-right">
+                        <ellipse cx="208" cy="255" rx="34" ry="52" fill="url(#wingGrad)" stroke="#0B7D5E" stroke-width="2"/>
+                        <path d="M 225 230 Q 215 240 222 260" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <path d="M 220 225 Q 208 237 215 265" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+                    </g>
+
+                    <!-- ===== GOLD CHAIN / BLING ===== -->
+                    <g class="bling">
+                        <!-- Chain arc across chest -->
+                        <path d="M 115 225 Q 130 240 150 245 Q 170 240 185 225" 
+                              fill="none" stroke="url(#chainGrad)" stroke-width="3" stroke-linecap="round"/>
+                        <!-- Chain links (subtle) -->
+                        <circle cx="125" cy="232" r="2" fill="#FFD700"/>
+                        <circle cx="137" cy="240" r="2" fill="#FFD700"/>
+                        <circle cx="150" cy="243" r="2" fill="#FFD700"/>
+                        <circle cx="163" cy="240" r="2" fill="#FFD700"/>
+                        <circle cx="175" cy="232" r="2" fill="#FFD700"/>
+                        <!-- Medallion -->
+                        <circle cx="150" cy="250" r="10" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
+                        <text x="150" y="254" text-anchor="middle" font-size="11" font-weight="900" fill="#8B6914" font-family="sans-serif">$</text>
+                        <!-- Medallion shine -->
+                        <circle cx="146" cy="246" r="3" fill="rgba(255,255,255,0.3)"/>
+                    </g>
                     
-                    <!-- Neck - long tapered orange (wrapped for squeeze) -->
+                    <!-- ===== NECK ===== -->
                     <g class="neck-squeeze">
-                        <path d="M 138 210 Q 142 160 145 120 Q 150 115 155 120 Q 158 160 162 210 Z" 
-                              fill="#E67E22" stroke="#D35400" stroke-width="3"/>
+                        <path d="M 136 215 Q 140 165 144 125 Q 150 118 156 125 Q 160 165 164 215 Z" 
+                              fill="url(#headGrad)" stroke="#CF6B17" stroke-width="2"/>
+                        <!-- Neck feather texture -->
+                        <path d="M 142 180 Q 150 175 158 180" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                        <path d="M 140 195 Q 150 190 160 195" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
                     </g>
                     
-                    <!-- Head group (wrapped for squeeze animation) -->
+                    <!-- ===== HEAD GROUP ===== -->
                     <g class="head-squeeze">
-                        <!-- Head - round orange -->
-                        <circle cx="150" cy="80" r="50" fill="#E67E22" stroke="#D35400" stroke-width="3"/>
+                        <!-- Head shadow -->
+                        <circle cx="152" cy="83" r="52" fill="rgba(0,0,0,0.1)"/>
+                        <!-- Head -->
+                        <circle cx="150" cy="80" r="52" fill="url(#headGrad)" stroke="#CF6B17" stroke-width="2"/>
+                        <!-- Head highlight -->
+                        <ellipse cx="138" cy="62" rx="18" ry="14" fill="rgba(255,255,255,0.08)"/>
                         
-                        <!-- DRAMATIC MOHAWK COMB - spiky and big like reference -->
-                        <path d="M 125 45 L 130 20 L 135 40 L 138 15 L 142 38 L 145 10 L 150 35 L 155 8 L 158 38 L 162 12 L 165 40 L 170 18 L 175 45 Z" 
-                              fill="#E74C3C" stroke="#C0392B" stroke-width="2.5"/>
+                        <!-- ===== DRAMATIC MOHAWK COMB ===== -->
+                        <path d="M 122 48 L 126 16 L 132 42 L 136 8 L 140 38 L 144 4 L 150 34 L 156 2 L 160 38 L 164 6 L 168 42 L 172 14 L 178 48 Z" 
+                              fill="url(#combGrad)" stroke="#AA1111" stroke-width="2" stroke-linejoin="round"/>
+                        <!-- Comb highlights -->
+                        <path d="M 136 20 L 138 35" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M 150 15 L 151 30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M 164 18 L 165 33" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-linecap="round"/>
                         
-                        <!-- Long wattles - hanging down lower -->
-                        <ellipse cx="138" cy="125" rx="6" ry="22" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
-                        <ellipse cx="162" cy="125" rx="6" ry="22" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
+                        <!-- ===== WATTLES ===== -->
+                        <ellipse cx="136" cy="128" rx="7" ry="24" fill="url(#wattleGrad)" stroke="#A52A1A" stroke-width="1.5"/>
+                        <ellipse cx="164" cy="128" rx="7" ry="24" fill="url(#wattleGrad)" stroke="#A52A1A" stroke-width="1.5"/>
+                        <!-- Wattle highlights -->
+                        <ellipse cx="134" cy="120" rx="2.5" ry="6" fill="rgba(255,255,255,0.12)"/>
+                        <ellipse cx="162" cy="120" rx="2.5" ry="6" fill="rgba(255,255,255,0.12)"/>
                         
-                        <!-- Eyes - BIG derpy eyes with spinning pupils -->
+                        <!-- ===== EYES - Big, expressive, slightly unhinged ===== -->
+                        <!-- Left eye -->
                         <g class="eye-left eye-squeeze">
-                            <ellipse cx="135" cy="70" rx="16" ry="18" fill="white" stroke="#2C3E50" stroke-width="2.5"/>
-                            <circle cx="135" cy="70" r="7" fill="#2C3E50" class="pupil-left"/>
+                            <!-- Eye white with subtle gradient -->
+                            <ellipse cx="133" cy="70" rx="18" ry="20" fill="white" stroke="#2C3E50" stroke-width="2.5"/>
+                            <!-- Iris ring -->
+                            <circle cx="133" cy="70" r="10" fill="#8B4513" opacity="0.3"/>
+                            <!-- Pupil -->
+                            <circle cx="133" cy="70" r="7.5" fill="#1a1a2e" class="pupil-left"/>
+                            <!-- Pupil highlight / catchlight -->
+                            <circle cx="129" cy="66" r="3" fill="rgba(255,255,255,0.85)"/>
+                            <circle cx="136" cy="73" r="1.5" fill="rgba(255,255,255,0.5)"/>
                         </g>
+                        <!-- Right eye -->
                         <g class="eye-right eye-squeeze">
-                            <ellipse cx="165" cy="70" rx="16" ry="18" fill="white" stroke="#2C3E50" stroke-width="2.5"/>
-                            <circle cx="165" cy="70" r="7" fill="#2C3E50" class="pupil-right"/>
+                            <ellipse cx="167" cy="70" rx="18" ry="20" fill="white" stroke="#2C3E50" stroke-width="2.5"/>
+                            <circle cx="167" cy="70" r="10" fill="#8B4513" opacity="0.3"/>
+                            <circle cx="167" cy="70" r="7.5" fill="#1a1a2e" class="pupil-right"/>
+                            <circle cx="163" cy="66" r="3" fill="rgba(255,255,255,0.85)"/>
+                            <circle cx="170" cy="73" r="1.5" fill="rgba(255,255,255,0.5)"/>
                         </g>
                         
-                        <!-- Beak - bright yellow -->
-                        <path d="M 150 85 L 135 95 L 150 100 Z" fill="#FFEB3B" stroke="#FBC02D" stroke-width="2"/>
+                        <!-- ===== Eyebrow ridges - gives attitude ===== -->
+                        <path d="M 118 56 Q 128 50 140 54" fill="none" stroke="#BF6516" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M 160 54 Q 172 50 182 56" fill="none" stroke="#BF6516" stroke-width="3" stroke-linecap="round"/>
+                        
+                        <!-- ===== BEAK - open, sassy ===== -->
+                        <!-- Upper beak -->
+                        <path d="M 140 88 L 150 82 L 160 88 L 150 93 Z" fill="url(#beakGrad)" stroke="#D4A800" stroke-width="1.5"/>
+                        <!-- Lower beak (slightly open - looks like talking/squawking) -->
+                        <path d="M 142 93 L 150 99 L 158 93 Z" fill="#E8B500" stroke="#C49800" stroke-width="1" opacity="0.85"/>
                     </g>
                     
-                    <!-- Legs - LONGER skinny orange legs -->
-                    <rect x="132" y="325" width="6" height="95" fill="#E67E22" stroke="#D35400" stroke-width="2"/>
-                    <rect x="162" y="325" width="6" height="95" fill="#E67E22" stroke="#D35400" stroke-width="2"/>
+                    <!-- ===== LEGS ===== -->
+                    <g class="legs">
+                        <!-- Left leg -->
+                        <rect x="130" y="328" width="7" height="90" rx="3" fill="url(#legGrad)" stroke="#A35B12" stroke-width="1.5"/>
+                        <!-- Right leg -->
+                        <rect x="163" y="328" width="7" height="90" rx="3" fill="url(#legGrad)" stroke="#A35B12" stroke-width="1.5"/>
+                        <!-- Knee bumps -->
+                        <circle cx="133.5" cy="355" r="4.5" fill="#E67E22" stroke="#BF6516" stroke-width="1"/>
+                        <circle cx="166.5" cy="355" r="4.5" fill="#E67E22" stroke="#BF6516" stroke-width="1"/>
+                    </g>
                     
-                    <!-- Feet - three-toed chicken feet -->
-                    <!-- Left foot -->
-                    <line x1="130" y1="420" x2="120" y2="433" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="135" y1="420" x2="135" y2="435" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="140" y1="420" x2="148" y2="433" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    
-                    <!-- Right foot -->
-                    <line x1="160" y1="420" x2="152" y2="433" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="165" y1="420" x2="165" y2="435" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    <line x1="170" y1="420" x2="180" y2="433" stroke="#E67E22" stroke-width="5" stroke-linecap="round"/>
-                    
-                    <!-- Toe tips -->
-                    <circle cx="120" cy="433" r="4" fill="#D35400"/>
-                    <circle cx="135" cy="435" r="4" fill="#D35400"/>
-                    <circle cx="148" cy="433" r="4" fill="#D35400"/>
-                    <circle cx="152" cy="433" r="4" fill="#D35400"/>
-                    <circle cx="165" cy="435" r="4" fill="#D35400"/>
-                    <circle cx="180" cy="433" r="4" fill="#D35400"/>
+                    <!-- ===== FEET - chunky three-toed ===== -->
+                    <g class="feet">
+                        <!-- Left foot -->
+                        <line x1="128" y1="418" x2="115" y2="434" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <line x1="133" y1="418" x2="133" y2="438" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <line x1="138" y1="418" x2="150" y2="434" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <!-- Left talons -->
+                        <circle cx="115" cy="434" r="3.5" fill="#BF6516"/>
+                        <circle cx="133" cy="438" r="3.5" fill="#BF6516"/>
+                        <circle cx="150" cy="434" r="3.5" fill="#BF6516"/>
+                        
+                        <!-- Right foot -->
+                        <line x1="162" y1="418" x2="150" y2="434" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <line x1="167" y1="418" x2="167" y2="438" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <line x1="172" y1="418" x2="185" y2="434" stroke="#D4700A" stroke-width="6" stroke-linecap="round"/>
+                        <!-- Right talons -->
+                        <circle cx="150" cy="434" r="3.5" fill="#BF6516"/>
+                        <circle cx="167" cy="438" r="3.5" fill="#BF6516"/>
+                        <circle cx="185" cy="434" r="3.5" fill="#BF6516"/>
+                    </g>
                 </svg>
                 
                 <!-- Hot Zone Smoke -->
