@@ -78,6 +78,13 @@
             margin-bottom: 4px;
         }
 
+        .title-logo {
+            width: 36px;
+            height: 36px;
+            vertical-align: middle;
+            margin: 0 4px -4px;
+        }
+
         @keyframes title-breathe {
             0%, 100% { opacity: 0.85; }
             50% { opacity: 1; }
@@ -1385,6 +1392,7 @@
             .game-container { padding: 6px; max-width: 100%; overflow-x: hidden; }
 
             .title { font-size: 24px !important; letter-spacing: 3px; padding: 4px 0; margin-bottom: 2px; }
+            .title-logo { width: 24px; height: 24px; margin: 0 2px -3px; }
 
             .game-info-container { margin: 0 auto 6px auto; max-width: 100%; padding: 0 4px; }
             .game-info-row { margin-bottom: 5px; gap: 6px; }
@@ -1449,6 +1457,7 @@
 
         @media (max-width: 480px) {
             .title { font-size: 20px !important; letter-spacing: 2px; }
+            .title-logo { width: 20px; height: 20px; margin: 0 1px -2px; }
             .chicken { width: 130px; height: 130px; }
             .chicken-area { min-height: 170px; }
             .chicken-area::before { width: 160px; height: 160px; }
@@ -1520,7 +1529,7 @@
         window.scrollTo(0, 0);
     </script>
     <div class="game-container">
-        <h1 class="title">🔥 HOT CHICKEN 🔥</h1>
+        <h1 class="title"><img src="eshare-fire-logo.webp" class="title-logo" alt="E"> HOT CHICKEN <img src="eshare-fire-logo.webp" class="title-logo" alt="E"></h1>
         
         <!-- Game Info -->
         <div class="game-info-container">
@@ -1533,11 +1542,11 @@
             <div class="game-info-row">
                 <div class="game-info-item">
                     <span class="game-info-label">Seed:</span>
-                    <span class="game-info-value highlight" id="seedEshare">0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E"></span>
+                    <span class="game-info-value highlight" id="seedEshare">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                 </div>
                 <div class="game-info-item">
                     <span class="game-info-label">Pool:</span>
-                    <span class="game-info-value highlight" id="poolEshare">0.000 <img src="eshare-logo.png" class="eshare-symbol" alt="E"></span>
+                    <span class="game-info-value highlight" id="poolEshare">0.000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                 </div>
             </div>
         </div>
@@ -1698,10 +1707,10 @@
                         <circle cx="163" cy="240" r="2" fill="#FFD700"/>
                         <circle cx="175" cy="232" r="2" fill="#FFD700"/>
                         <!-- Medallion -->
-                        <circle cx="150" cy="250" r="10" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
-                        <text x="150" y="254" text-anchor="middle" font-size="11" font-weight="900" fill="#8B6914" font-family="sans-serif">$</text>
+                        <circle cx="150" cy="250" r="11" fill="url(#chainGrad)" stroke="#DAA520" stroke-width="1.5"/>
+                        <image href="eshare-fire-logo.webp" x="140" y="240" width="20" height="20" />
                         <!-- Medallion shine -->
-                        <circle cx="146" cy="246" r="3" fill="rgba(255,255,255,0.3)"/>
+                        <circle cx="145" cy="245" r="3" fill="rgba(255,255,255,0.25)"/>
                     </g>
                     
                     <!-- ===== NECK ===== -->
@@ -1859,8 +1868,8 @@
             <div class="current-holder">
                 <div class="current-holder-label">Lead Plucker:</div>
                 <div class="current-holder-address" id="currentHolder">0x0000...0000</div>
-                <div class="current-holder-amount" id="currentAmount">0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E"></div>
-                <div class="current-holder-winnings" id="currentWinnings">0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E"></div>
+                <div class="current-holder-amount" id="currentAmount">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
+                <div class="current-holder-winnings" id="currentWinnings">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
             </div>
 
             <div class="previous-holders-label">Past Pluckers</div>
@@ -1886,21 +1895,21 @@
         <div class="actions-dashboard">
             <div class="actions-top-row">
                 <a href="https://app.uniswap.org/swap?outputCurrency=0xb7C10146bA1b618956a38605AB6496523d450871&chain=base" target="_blank" class="action-card buy-card" data-tooltip="Buy ESHARE on Uniswap">
-                    <div class="action-card-icon"><img src="eshare-logo.png" class="action-card-logo" alt="E"></div>
+                    <div class="action-card-icon"><img src="eshare-fire-logo.webp" class="action-card-logo" alt="E"></div>
                     <div class="action-card-text">
                         <span class="action-card-label">BUY</span>
                         <span class="action-card-sub">ESHARE</span>
                     </div>
                 </a>
                 <div class="action-card stat-card-burnt">
-                    <div class="action-card-icon">🔥</div>
+                    <div class="action-card-icon"><img src="eshare-fire-logo.webp" class="action-card-logo" alt="E"></div>
                     <div class="action-card-text">
                         <span class="action-card-label">BURNT</span>
                         <span class="action-card-value burnt-value" id="totalBurnt">0.000</span>
                     </div>
                 </div>
                 <div class="action-card stat-card-vault">
-                    <div class="action-card-icon">🏦</div>
+                    <div class="action-card-icon"><img src="eshare-fire-logo.webp" class="action-card-logo" alt="E"></div>
                     <div class="action-card-text">
                         <span class="action-card-label">VAULT</span>
                         <span class="action-card-value vault-value-display" id="vaultBalance">0.00</span>
@@ -3086,14 +3095,14 @@
                     if (roundInfo.round > 0) {
                         const detailedInfo = await chickenContract.methods.getRoundInfo(roundInfo.round).call();
                         const seedEshare = parseFloat(web3.utils.fromWei(detailedInfo.seed, 'ether'));
-                        document.getElementById('seedEshare').innerHTML = seedEshare.toFixed(4) + ' <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                        document.getElementById('seedEshare').innerHTML = seedEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         
                         // Calculate actual pool from player deposits
                         const playerDepositsEshare = parseFloat(web3.utils.fromWei(detailedInfo.playerDeps, 'ether'));
-                        document.getElementById('poolEshare').innerHTML = playerDepositsEshare.toFixed(4) + ' <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                        document.getElementById('poolEshare').innerHTML = playerDepositsEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     } else {
-                        document.getElementById('seedEshare').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
-                        document.getElementById('poolEshare').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                        document.getElementById('seedEshare').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                        document.getElementById('poolEshare').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     }
                     
                     // Update seed vault info in actions box
@@ -3152,7 +3161,7 @@
                         try {
                             const holderDeposit = await chickenContract.methods.deposits(currentRoundNum, holder).call();
                             const depositEshare = parseFloat(web3.utils.fromWei(holderDeposit, 'ether'));
-                            document.getElementById('currentAmount').innerHTML = depositEshare.toFixed(4) + ' <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                            document.getElementById('currentAmount').innerHTML = depositEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             
                             // Calculate lead plucker potential winnings (gets FULL seed TAX FREE as consolation)
                             try {
@@ -3162,20 +3171,20 @@
                                 // Seed is TAX FREE - loser gets full amount as consolation
                                 console.log('Lead plucker seed winnings (TAX FREE):', seedAmount);
                                 
-                                document.getElementById('currentWinnings').innerHTML = seedAmount.toFixed(4) + ' <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                                document.getElementById('currentWinnings').innerHTML = seedAmount.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             } catch (e) {
                                 console.log('Error calculating holder winnings:', e);
-                                document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                                document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             }
                         } catch (e) {
                             console.log('Error getting holder deposit:', e);
-                            document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
-                            document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                            document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                            document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         }
                     } else {
                         currentHolderEl.textContent = 'No holder yet';
-                        document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
-                        document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-logo.png" class="eshare-symbol" alt="E">';
+                        document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                        document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     }
                     
                     // Get participants for past pluckers
@@ -3242,8 +3251,8 @@
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">#${index + 2}</span>
                                             <span class="holder-address">${formatAddress(plucker.address)}</span>
-                                            <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-logo.png" class="eshare-symbol" alt="E"></span>
-                                            <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-logo.png" class="eshare-symbol" alt="E"></span>
+                                            <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                                            <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
                                         `;
                                     }).join('');
@@ -3434,7 +3443,7 @@
                     } else {
                         roiColor = p.roi >= 0 ? '#2ECC71' : '#E74C3C'; // Green for profit, red for loss
                         const roiSign = p.roi >= 0 ? '+' : '';
-                        roiDisplay = `${roiSign}${p.roi.toFixed(4)} <img src="eshare-logo.png" class="eshare-symbol" alt="E">`;
+                        roiDisplay = `${roiSign}${p.roi.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">`;
                     }
                     
                     let html = `
