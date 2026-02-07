@@ -2832,6 +2832,8 @@
                 // Show updating state on timer while blockchain syncs
                 document.getElementById('timer').textContent = '... updating ...';
                 document.getElementById('timer').classList.add('timer-updating');
+                window._timerPausedUntilSync = true;
+                window._timerPausedAt = Date.now();
 
                 // Force timer reset - reset all timer state to trigger reload
                 displayedSeconds = null;
@@ -2950,9 +2952,11 @@
                 lastBlockFetchTime = 0;
                 fetchInProgress = false;
                 // Also immediately recalculate display based on existing data
-                displayedSeconds = calculateCurrentSeconds();
-                document.getElementById('timer').textContent = formatTime(displayedSeconds);
-                document.getElementById('timer').classList.remove('timer-updating');
+                if (!window._timerPausedUntilSync) {
+                    displayedSeconds = calculateCurrentSeconds();
+                    document.getElementById('timer').textContent = formatTime(displayedSeconds);
+                    document.getElementById('timer').classList.remove('timer-updating');
+                }
             }
         });
 
@@ -3093,6 +3097,14 @@
                             fetchTimestamp = Date.now();
                             isHotzoneFromServer = isHZ;
                             
+                            // Clear the updating pause - we have real data now
+                            // But only if at least 4 seconds have passed (early fetches return stale data)
+                            if (window._timerPausedUntilSync && (Date.now() - (window._timerPausedAt || 0)) > 4000) {
+                                window._timerPausedUntilSync = false;
+                                document.getElementById('timer').textContent = formatTime(secs);
+                                document.getElementById('timer').classList.remove('timer-updating');
+                            }
+                            
                             // Check for new round (timer went from 0 to positive)
                             const wasAtZero = displayedSeconds === 0 || displayedSeconds === null;
                             
@@ -3166,8 +3178,10 @@
                         hotzoneRight.classList.remove('active');
                     }
                     
-                    document.getElementById('timer').textContent = formatTime(displayedSeconds ?? 0);
-                document.getElementById('timer').classList.remove('timer-updating');
+                    if (!window._timerPausedUntilSync) {
+                        document.getElementById('timer').textContent = formatTime(displayedSeconds ?? 0);
+                        document.getElementById('timer').classList.remove('timer-updating');
+                    }
                     
                 } catch (e) {
                     console.warn("Ticker error:", e);
@@ -3366,7 +3380,7 @@
                                         }
                                         
                                         const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
-                                        const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO</span>' : '';
+                                        const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO ENTRY</span>' : '';
                                         
                                         return `
                                         <div class="holder-item${userClass}">
