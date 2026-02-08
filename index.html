@@ -12,8 +12,8 @@
     <style>
         :root {
             --bg-deep: #0a0a12;
-            --bg-card: rgba(12, 12, 28, 0.92);
-            --bg-card-hover: rgba(18, 18, 42, 0.96);
+            --bg-card: rgba(20, 20, 40, 0.93);
+            --bg-card-hover: rgba(28, 28, 55, 0.96);
             --neon-orange: #ff6a00;
             --neon-red: #ff2d2d;
             --neon-gold: #ffd700;
@@ -25,8 +25,8 @@
             --text-mono: 'Share Tech Mono', monospace;
             --font-display: 'Orbitron', sans-serif;
             --font-body: 'Rajdhani', sans-serif;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-border-hover: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --glass-border-hover: rgba(255, 255, 255, 0.24);
             --glow-orange: 0 0 20px rgba(255, 106, 0, 0.4), 0 0 60px rgba(255, 106, 0, 0.15);
             --glow-red: 0 0 20px rgba(255, 45, 45, 0.5), 0 0 60px rgba(255, 45, 45, 0.2);
             --glow-gold: 0 0 15px rgba(255, 215, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.15);
@@ -155,6 +155,7 @@
             padding: 8px 16px;
             border-radius: 12px;
             border: 1px solid var(--glass-border);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
@@ -750,6 +751,7 @@
             border-radius: 14px;
             background: var(--bg-card);
             border: 1px solid var(--glass-border);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             text-decoration: none;
             cursor: default;
@@ -1021,7 +1023,7 @@
             border: 1px solid var(--glass-border);
             max-width: 100%;
             margin-left: auto; margin-right: auto;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .leaderboard-title {
@@ -1193,7 +1195,7 @@
             padding: 14px;
             max-width: 100%;
             margin: 10px auto;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .previous-winners-title {
@@ -1404,19 +1406,20 @@
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, rgba(255, 45, 45, 0.95) 0%, rgba(200, 20, 20, 0.95) 100%);
-            color: white; padding: 24px 40px; border-radius: 16px;
+            color: white; padding: 16px 28px; border-radius: 14px;
             font-family: var(--font-display);
-            font-size: 22px; font-weight: 900;
+            font-size: 16px; font-weight: 900;
             text-align: center;
             border: 1px solid rgba(255, 100, 100, 0.5);
             box-shadow: var(--glow-red);
             animation: flash 1s ease-in-out infinite;
             z-index: 100001; display: none;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
+            max-width: 340px;
         }
         .game-over-message.show { display: block; }
 
-        .burnt-bones { margin-top: 15px; font-size: 32px; opacity: 0.8; letter-spacing: 8px; }
+        .burnt-bones { margin-top: 10px; font-size: 24px; opacity: 0.8; letter-spacing: 6px; }
 
         @keyframes flash {
             0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -1543,6 +1546,9 @@
 
             .leaderboard-column-headers { grid-template-columns: 45px 1fr 65px 65px; }
             .leaderboard-column-headers span { font-size: 8px; }
+
+            .game-over-message { font-size: 12px; padding: 12px 18px; max-width: 260px; letter-spacing: 1px; }
+            .burnt-bones { font-size: 18px; margin-top: 6px; letter-spacing: 4px; }
         }
 
         /* ===== OWNER SEED (compat) ===== */
@@ -1627,9 +1633,8 @@
             
             <!-- Game Over Message -->
             <div class="game-over-message" id="gameOverMessage">
-                🔥 GAME OVER! 🔥<br>
-                <span style="font-size: 18px; margin-top: 10px; display: block;">Get paid and start new round with new minimum bid!</span>
-                <div class="burnt-bones">🦴💀🦴</div>
+                GAME OVER!<br>
+                <span style="font-size: 13px; font-weight: 600; margin-top: 8px; display: block; letter-spacing: 0.5px;">Run lottery, get payouts, and start new round with new minimum bid!</span>
             </div>
             
             <!-- 5x Rooster Combo Popup -->
