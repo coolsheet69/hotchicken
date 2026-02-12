@@ -212,11 +212,11 @@ tbody tr:nth-child(odd) {
             <ul>
                 <li>Deposit <strong>ESHARE</strong> to grab the chicken</li>
                 <li>Each grab resets timer to 90% of remaining time</li>
-                <li>During HOT ZONE (5 mins left), timer keeps resetting to 4m:20s</li>
+                <li>During HOT ZONE (last ~5 mins), timer floor is 4m:20s</li>
                 <li>Next grab costs +10% more than previous</li>
-                <li>Timer hits zero → current holder loses bid, but gets Seed</li>
-                <li>Only current + previous holder eligible for lotto</li>
-                <li>Payouts happen instantly on settlement and new round begins</li>
+                <li>Timer hits zero → Lead Plucker (current holder) loses their bid, but receives the Seed as consolation</li>
+                <li>Only Lead Plucker + previous holder are eligible for lotto</li>
+                <li>Everyone else wins — payouts happen instantly on settlement and new round begins</li>
             </ul>
         </div>
 
@@ -236,7 +236,7 @@ tbody tr:nth-child(odd) {
         </thead>
         <tbody>
             <tr>
-                <td>Winner</td>
+                <td>Winners</td>
                 <td>3%</td>
                 <td>0.5%</td>
                 <td>10%</td>
@@ -244,7 +244,7 @@ tbody tr:nth-child(odd) {
                 <td>13.5%</td>
             </tr>
             <tr>
-                <td>Loser (Chicken)</td>
+                <td>Loser (Lead Plucker)</td>
                 <td>3%</td>
                 <td>0.5%</td>
                 <td>10%</td>
@@ -255,31 +255,13 @@ tbody tr:nth-child(odd) {
     </table>
 
     <div class="note">
-        → Seed is <strong>tax-free</strong><br>
-        → Lotto = 10% default (Dev adjustable 5–20%)
+        <p style="margin-bottom: 0.5rem;">→ Seed is <strong>tax-free</strong> and goes to the Lead Plucker (loser)</p>
+        <p style="margin-bottom: 0.5rem;">→ Lotto = 10% of deposits (adjustable 5–20%)</p>
+        <p>→ Hot Zone = 3% bonus redistributed to participants who bid during Hot Zone</p>
+        <p style="margin-top: 0.5rem;">→ Seed Vault = funded by <a href="https://dexfi.com/bonds" target="_blank" style="color: var(--accent-glow); text-decoration: underline;">DexFi Bonds</a> and community contributions</p>
     </div>
 </div>
 
-
-        <div class="box">
-            <h2>🏆 Payout Breakdown</h2>
-            <ul>
-                <li><strong>Winners:</strong> 86.5% returned + pot share + hot zone bonus</li>
-                <li><strong>Loser:</strong> Tax-free seed + possible lotto win</li>
-                <li><strong>Lotto:</strong> 10% of all deposits (50/50 chance)</li>
-                <li><strong>Hot Zone bonus:</strong> 3% redistributed to late entries</li>
-            </ul>
-        </div>
-
-        <div class="box">
-            <h2>⏱ Timer & Hot Zone</h2>
-            <ul>
-                <li>~24 hour timer</li>
-                <li>Each grab → 90% of remaining time</li>
-                <li>Floor: 4 min 20 sec, keeps resetting on grabs</li>
-                <li>Hot Zone: last ~5 minutes</li>
-            </ul>
-        </div>
 
         <div class="box full">
             <h2>📜 Contract (Base Network)</h2>
