@@ -829,6 +829,10 @@
         .buy-card .action-card-sub {
             color: var(--neon-green);
         }
+        .buy-card .buy-card-title {
+            font-size: 16px;
+            letter-spacing: 3px;
+        }
 
         /* Burnt card */
         .stat-card-burnt {
@@ -1009,6 +1013,8 @@
         }
 
         .wallet-balance-only { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .wallet-balance-only .balance-label { color: var(--neon-blue); }
+        .wallet-balance-only .balance-value { color: var(--neon-blue); }
 
         .cost-display { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; margin-top: 5px; }
         .cost-label { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--neon-red); font-family: var(--font-display); font-size: 11px; }
@@ -1963,8 +1969,8 @@
                 <a href="https://app.uniswap.org/swap?outputCurrency=0xb7C10146bA1b618956a38605AB6496523d450871&chain=base" target="_blank" class="action-card buy-card" data-tooltip="Buy ESHARE on Uniswap">
                     <div class="action-card-icon"><img src="eshare-fire-logo.webp" class="action-card-logo" alt="E"></div>
                     <div class="action-card-text">
-                        <span class="action-card-label">BUY</span>
-                        <span class="action-card-sub">ESHARE</span>
+                        <span class="action-card-label">Buy on Uniswap</span>
+                        <span class="action-card-sub buy-card-title">ESHARE</span>
                     </div>
                 </a>
                 <div class="action-card stat-card-burnt">
@@ -2972,6 +2978,11 @@
             const chicken = document.querySelector('.chicken');
             chicken.classList.add('exploded');
             
+            // Change grab button to settle mode
+            if (connectWalletBtn.classList.contains('grab-mode')) {
+                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> SETTLE & GRAB <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+            }
+            
             // Create feather explosion
             createFeathers();
             
@@ -3068,6 +3079,10 @@
                                 chicken.style.transform = '';
                                 chicken.style.animation = '';
                                 document.getElementById('gameOverMessage').classList.remove('show');
+                                // Reset grab button text for new round
+                                if (connectWalletBtn.classList.contains('grab-mode')) {
+                                    connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+                                }
                                 document.getElementById('hotzone Smoke').classList.remove('active');
                                 document.getElementById('hotzoneLeft').classList.remove('active');
                                 document.getElementById('hotzoneRight').classList.remove('active');
@@ -3124,6 +3139,10 @@
                                     chicken.style.transform = '';
                                     chicken.style.animation = '';
                                     document.getElementById('gameOverMessage').classList.remove('show');
+                                    // Reset grab button text for new round
+                                    if (connectWalletBtn.classList.contains('grab-mode')) {
+                                        connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+                                    }
                                     document.getElementById('hotzone Smoke').classList.remove('active');
                                     document.getElementById('hotzoneLeft').classList.remove('active');
                                     document.getElementById('hotzoneRight').classList.remove('active');
