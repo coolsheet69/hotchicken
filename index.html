@@ -561,6 +561,19 @@
             border-color: rgba(0, 255, 136, 0.5);
             box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
         }
+        .quick-bid-btn.bid-mid {
+            border-color: rgba(255, 215, 0, 0.25);
+            color: var(--neon-gold);
+        }
+        .quick-bid-btn.bid-mid:hover {
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        .quick-bid-btn.bid-mid.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+        }
         .quick-bid-btn.bid-max {
             border-color: rgba(255, 106, 0, 0.25);
             color: var(--neon-orange);
@@ -1055,6 +1068,19 @@
         .balance-value { font-family: var(--text-mono); color: var(--neon-orange); font-weight: 700; font-size: 15px; }
 
         .connected-wallet { display: flex; align-items: center; gap: 6px; margin-top: 5px; margin-bottom: 3px; }
+        .connected-wallet-combined {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            margin-bottom: 4px; flex-wrap: wrap;
+        }
+        .wallet-sep {
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 11px;
+            margin: 0 2px;
+        }
+        .connected-wallet-combined .balance-value {
+            color: var(--neon-blue);
+            font-size: 12px;
+        }
         .connected-wallet-top {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             margin-bottom: 8px; padding: 6px 12px;
@@ -1062,10 +1088,6 @@
             border-radius: 8px;
             border: 1px solid rgba(0, 212, 255, 0.15);
         }
-
-        .wallet-balance-only { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-        .wallet-balance-only .balance-label { color: var(--neon-blue); }
-        .wallet-balance-only .balance-value { color: var(--neon-blue); }
 
         .cost-display { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; margin-top: 5px; }
         .cost-label { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: var(--neon-red); font-family: var(--font-display); font-size: 11px; }
@@ -2057,9 +2079,11 @@
                 <button class="connect-wallet" id="connectWallet">Connect Wallet</button>
             </div>
             
-            <div class="connected-wallet" id="connectedWallet" style="display: none;">
+            <div class="connected-wallet-combined" id="connectedWallet" style="display: none;">
                 <span class="connected-label-text">Connected:</span>
                 <span id="connectedAddress" class="connected-addr-text"></span>
+                <span class="wallet-sep">|</span>
+                <span class="balance-value" id="balanceValue">0.00 ESHARE</span>
             </div>
             
             <div class="amount-input-container" id="amountContainer">
@@ -2076,14 +2100,16 @@
                 <label class="amount-min-label">min.</label>
             </div>
             
-            <div class="quick-bid-row" id="quickBidRow" style="display: none;">
-                <button class="quick-bid-btn bid-min" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
-                <button class="quick-bid-btn bid-max" id="quickBid20" onclick="setQuickBid(20)">+20%</button>
+            <!-- Opening bid: just a min bid button -->
+            <div class="quick-bid-row" id="quickBidRowFirst" style="display: none;">
+                <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min Bid</button>
             </div>
             
-            <div class="wallet-balance-only">
-                <span class="balance-label">Wallet:</span>
-                <span class="balance-value" id="balanceValue">0.00 ESHARE</span>
+            <!-- Escalating bids: 10%, 20%, 30% -->
+            <div class="quick-bid-row" id="quickBidRow" style="display: none;">
+                <button class="quick-bid-btn bid-min active" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
+                <button class="quick-bid-btn bid-mid" id="quickBid20" onclick="setQuickBid(20)">+20%</button>
+                <button class="quick-bid-btn bid-max" id="quickBid30" onclick="setQuickBid(30)">+30%</button>
             </div>
         </div>
 
@@ -2583,14 +2609,21 @@
                         // Update label and quick bid buttons
                         const labelEl = document.querySelector('.amount-min-label');
                         const quickRow = document.getElementById('quickBidRow');
+                        const quickRowFirst = document.getElementById('quickBidRowFirst');
                         if (window._isFirstBid) {
-                            // Opening bid: show cap info, hide quick buttons
+                            // Opening bid: show min bid button, hide escalating buttons
                             if (labelEl) labelEl.textContent = window._maxBid > 0 ? `max ${window._maxBid.toFixed(4)}` : 'min.';
                             if (quickRow) quickRow.style.display = 'none';
+                            if (quickRowFirst) quickRowFirst.style.display = 'flex';
                         } else {
-                            // Escalating bid: show range, show quick buttons
+                            // Escalating bid: show 10/20/30 buttons, hide opening button
                             if (labelEl) labelEl.textContent = 'min.';
                             if (quickRow) quickRow.style.display = 'flex';
+                            if (quickRowFirst) quickRowFirst.style.display = 'none';
+                            // Auto-highlight +10% since that's the default
+                            document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
+                            const btn10 = document.getElementById('quickBid10');
+                            if (btn10) btn10.classList.add('active');
                         }
                     } catch(e) {
                         // Fallback to getCurrentRound
@@ -2629,12 +2662,22 @@
 
         // Check if input is below minimum and style accordingly
         function setQuickBid(percent) {
-            if (!window._maxBid || window._isFirstBid) return;
-            
             let amount;
-            if (percent === 10) {
-                amount = minimumCost; // min is already the +10% escalation
+            
+            if (percent === 'min') {
+                // Opening bid: set to minimum
+                amount = minimumCost;
+            } else if (percent === 10) {
+                amount = minimumCost; // min is the +10% escalation
             } else if (percent === 20) {
+                // Calculate 20% escalation from the base (min is 10%, so 20% = min * 1.2/1.1)
+                // Or just use midpoint between min and max
+                if (window._maxBid) {
+                    // 20% is 2/3 between min(10%) and max(30%)
+                    amount = minimumCost + (window._maxBid - minimumCost) * 0.5;
+                    amount = Math.ceil(amount * 10000) / 10000;
+                }
+            } else if (percent === 30) {
                 amount = window._maxBid;
             }
             
@@ -2643,9 +2686,13 @@
                 inputBox.value = amount.toFixed(4);
                 inputBox.classList.remove('below-minimum', 'above-maximum');
                 
-                // Toggle active state
+                // Toggle active state on ALL quick bid buttons
                 document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById(percent === 10 ? 'quickBid10' : 'quickBid20').classList.add('active');
+                const btnId = percent === 'min' ? 'quickBidMin' : 
+                              percent === 10 ? 'quickBid10' : 
+                              percent === 20 ? 'quickBid20' : 'quickBid30';
+                const btn = document.getElementById(btnId);
+                if (btn) btn.classList.add('active');
             }
         }
 
@@ -2975,6 +3022,27 @@
             if (!userAccount) return;
 
             try {
+                // Detect if this is a settlement grab
+                const isSettlement = document.querySelector('.chicken').classList.contains('exploded');
+                
+                // Refresh bid range from contract before validating
+                try {
+                    const bidRange = await chickenContract.methods.getBidRange().call();
+                    const rawMin = parseFloat(web3.utils.fromWei(bidRange.minBid, 'ether'));
+                    const rawMax = parseFloat(web3.utils.fromWei(bidRange.maxBid, 'ether'));
+                    minimumCost = Math.ceil(rawMin * 10000) / 10000;
+                    window._maxBid = Math.floor(rawMax * 10000) / 10000;
+                    window._isFirstBid = bidRange.isFirstBid;
+                    console.log('Fresh bid range - min:', minimumCost, 'max:', window._maxBid, 'isFirst:', window._isFirstBid);
+                    
+                    // If settling, auto-set input to new minimum
+                    if (isSettlement) {
+                        eshareAmountInput.value = minimumCost.toFixed(4);
+                    }
+                } catch(e) {
+                    console.log('Could not refresh bid range:', e.message);
+                }
+                
                 // Get amount from input
                 const amountEshare = parseFloat(eshareAmountInput.value);
                 if (isNaN(amountEshare) || amountEshare < minimumCost) {
