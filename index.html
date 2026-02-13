@@ -1207,21 +1207,21 @@
         .previous-winners-title {
             font-family: var(--font-display);
             color: var(--neon-gold);
-            font-size: 14px; font-weight: 700;
-            text-align: center; margin-bottom: 10px;
+            font-size: 13px; font-weight: 700;
+            text-align: center; margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
         }
 
-        .previous-winners-list { max-height: 200px; overflow-y: auto; overflow-x: hidden; }
+        .previous-winners-list { max-height: 220px; overflow-y: auto; overflow-x: hidden; }
         .previous-winners-list::-webkit-scrollbar { width: 4px; }
         .previous-winners-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
         .previous-winners-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
         .winner-item {
             background: rgba(255,255,255,0.03);
-            padding: 8px 12px; border-radius: 10px; margin-bottom: 5px;
+            padding: 5px 10px; border-radius: 8px; margin-bottom: 3px;
             display: flex; justify-content: space-between; align-items: center;
             border: 1px solid transparent;
             transition: border-color 0.2s, background 0.2s;
@@ -1234,20 +1234,20 @@
             box-shadow: var(--glow-green);
         }
 
-        .winner-info { display: flex; align-items: center; gap: 8px; }
-        .winner-round { color: var(--text-secondary); font-size: 12px; font-weight: 700; font-family: var(--font-display); }
-        .winner-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 13px; }
+        .winner-info { display: flex; align-items: center; gap: 6px; }
+        .winner-round { color: var(--text-secondary); font-size: 10px; font-weight: 700; font-family: var(--font-display); }
+        .winner-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 11px; }
         .winner-amount {
-            color: var(--neon-green); font-size: 14px; font-weight: 700;
-            display: flex; align-items: center; gap: 4px;
+            color: var(--neon-green); font-size: 12px; font-weight: 700;
+            display: flex; align-items: center; gap: 3px;
             font-family: var(--text-mono);
         }
-        .winner-amount .eshare-symbol { width: 18px; height: 18px; }
+        .winner-amount .eshare-symbol { width: 15px; height: 15px; }
 
         .lotto-badge {
             background: linear-gradient(135deg, var(--neon-green) 0%, #00cc66 100%);
-            color: var(--bg-deep); padding: 2px 8px;
-            border-radius: 6px; font-size: 9px; font-weight: 700;
+            color: var(--bg-deep); padding: 1px 6px;
+            border-radius: 5px; font-size: 8px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 1px;
             font-family: var(--font-display);
         }
@@ -1424,6 +1424,93 @@
             max-width: 340px;
         }
         .game-over-message.show { display: block; }
+
+        /* ===== ROUND TRANSITION OVERLAY ===== */
+        .round-transition {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 100002;
+            background: rgba(5, 5, 15, 0.92);
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+        }
+        .round-transition.show { display: flex; }
+
+        .round-transition-card {
+            text-align: center;
+            padding: 24px 30px;
+            max-width: 360px;
+            width: 90%;
+        }
+
+        .round-transition-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            margin-bottom: 16px;
+        }
+
+        .round-transition-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .rt-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .rt-stat-label {
+            font-family: var(--font-display);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .rt-stat-value {
+            font-family: var(--text-mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .rt-stat-value.green { color: var(--neon-green); }
+        .rt-stat-value.red { color: var(--neon-red); }
+        .rt-stat-value.gold { color: var(--neon-gold); }
+        .rt-stat-value.orange { color: var(--neon-orange); }
+
+        .round-transition-countdown {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .round-transition-countdown span {
+            color: var(--neon-orange);
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        @media (max-width: 480px) {
+            .round-transition-title { font-size: 16px; }
+            .rt-stat-label { font-size: 8px; }
+            .rt-stat-value { font-size: 11px; }
+            .round-transition-countdown { font-size: 9px; }
+        }
 
         .burnt-bones { margin-top: 10px; font-size: 24px; opacity: 0.8; letter-spacing: 6px; }
 
@@ -1641,6 +1728,19 @@
             <div class="game-over-message" id="gameOverMessage">
                 GAME OVER!<br>
                 <span style="font-size: 13px; font-weight: 600; margin-top: 8px; display: block; letter-spacing: 0.5px;">Run lottery, get payouts, and start new round with new minimum bid!</span>
+            </div>
+
+            <!-- Round Transition Overlay -->
+            <div class="round-transition" id="roundTransition">
+                <div class="round-transition-card">
+                    <div class="round-transition-title">ROUND COMPLETE</div>
+                    <div class="round-transition-stats" id="roundTransitionStats">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="round-transition-countdown">
+                        New round starting in <span id="roundTransitionTimer">10</span>s
+                    </div>
+                </div>
             </div>
             
             <!-- 5x Rooster Combo Popup -->
@@ -1957,7 +2057,7 @@
 
         <!-- Previous Winners Box -->
         <div class="previous-winners-container">
-            <div class="previous-winners-title">🏆 PREVIOUS PLUCKERS 🏆</div>
+            <div class="previous-winners-title">🏆 PREVIOUS ROUND 🏆</div>
             <div class="previous-winners-list" id="previousWinnersList">
                 <!-- Populated by JavaScript -->
             </div>
@@ -2810,92 +2910,188 @@
 
                 // Call grabChicken with amount
                 console.log('Calling grabChicken with amount:', requiredAmount);
+                
+                // Detect if this is a settlement grab (round was over)
+                const wasSettlement = document.querySelector('.chicken').classList.contains('exploded');
+                
                 const grabTx = await chickenContract.methods.grabChicken(requiredAmount).send({ from: userAccount });
                 console.log('Grab tx:', grabTx);
 
                 // Get chicken element for animations
                 const chicken = document.querySelector('.chicken');
                 
-                // Trigger visual effects
-                const rect = chicken.getBoundingClientRect();
-                playChickenAnimation({
-                    clientX: rect.left + rect.width / 2,
-                    clientY: rect.top + rect.height / 2
-                });
+                if (wasSettlement) {
+                    // === SETTLEMENT GRAB: Show round transition overlay ===
+                    console.log('Settlement grab detected - showing round transition');
+                    
+                    // Hide game over message and chicken
+                    document.getElementById('gameOverMessage').classList.remove('show');
+                    chicken.classList.remove('exploded');
+                    chicken.style.opacity = '0';
+                    document.getElementById('hotzone Smoke').classList.remove('active');
+                    document.getElementById('hotzoneLeft').classList.remove('active');
+                    document.getElementById('hotzoneRight').classList.remove('active');
+                    
+                    // Try to get round stats from the just-settled round
+                    let statsHTML = '';
+                    try {
+                        const prevRound = await chickenContract.methods.currentRound().call();
+                        const settledRound = Math.max(1, parseInt(prevRound) - 1);
+                        const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
+                        const pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
+                        const burned = parseFloat(web3.utils.fromWei(roundData.burned || roundData.burnedAmount || '0', 'ether'));
+                        const lottoPrize = parseFloat(web3.utils.fromWei(roundData.lottoPrize || roundData.actualLottoPot || '0', 'ether'));
+                        const loser = roundData.loser || '0x0000000000000000000000000000000000000000';
+                        const lottoWinner = roundData.lottoWinner || '0x0000000000000000000000000000000000000000';
+                        const zeroAddr = '0x0000000000000000000000000000000000000000';
+                        
+                        statsHTML = `
+                            <div class="rt-stat"><span class="rt-stat-label">Round</span><span class="rt-stat-value gold">#${settledRound}</span></div>
+                            <div class="rt-stat"><span class="rt-stat-label">Total Pot</span><span class="rt-stat-value">${pot.toFixed(4)} ESHARE</span></div>
+                            <div class="rt-stat"><span class="rt-stat-label">Burned</span><span class="rt-stat-value red">${burned.toFixed(4)} ESHARE</span></div>
+                            <div class="rt-stat"><span class="rt-stat-label">Lotto Prize</span><span class="rt-stat-value green">${lottoPrize.toFixed(4)} ESHARE</span></div>
+                            <div class="rt-stat"><span class="rt-stat-label">Lead Plucker</span><span class="rt-stat-value orange">${loser !== zeroAddr ? formatAddress(loser) : '—'}</span></div>
+                            <div class="rt-stat"><span class="rt-stat-label">Lotto Winner</span><span class="rt-stat-value green">${lottoWinner !== zeroAddr ? formatAddress(lottoWinner) : 'Rolled over'}</span></div>
+                        `;
+                    } catch (e) {
+                        console.log('Could not fetch round stats:', e.message);
+                        statsHTML = '<div class="rt-stat"><span class="rt-stat-label">Settling round</span><span class="rt-stat-value">Payouts distributed!</span></div>';
+                    }
+                    
+                    document.getElementById('roundTransitionStats').innerHTML = statsHTML;
+                    document.getElementById('roundTransition').classList.add('show');
+                    
+                    // Countdown timer
+                    let countdown = 10;
+                    const cdEl = document.getElementById('roundTransitionTimer');
+                    cdEl.textContent = countdown;
+                    const cdInterval = setInterval(() => {
+                        countdown--;
+                        cdEl.textContent = countdown;
+                        if (countdown <= 0) clearInterval(cdInterval);
+                    }, 1000);
+                    
+                    // Pause main timer during transition
+                    window._timerPausedUntilSync = true;
+                    window._timerPausedAt = Date.now();
+                    document.getElementById('timer').textContent = '... new round ...';
+                    document.getElementById('timer').classList.add('timer-updating');
+                    
+                    connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+                    connectWalletBtn.disabled = false;
+                    
+                    // After 10 seconds, reveal everything
+                    setTimeout(() => {
+                        document.getElementById('roundTransition').classList.remove('show');
+                        chicken.classList.remove('exploded', 'hotzone');
+                        chicken.style.opacity = '1';
+                        chicken.style.transform = '';
+                        chicken.style.animation = '';
+                        
+                        // Force fresh data
+                        displayedSeconds = null;
+                        serverSecondsAtFetch = null;
+                        fetchTimestamp = null;
+                        lastBlockFetchTime = 0;
+                        fetchInProgress = false;
+                        window._timerPausedUntilSync = false;
+                        document.getElementById('timer').classList.remove('timer-updating');
+                        
+                        loadLeaderboard();
+                        loadBalance();
+                        loadPreviousWinners();
+                        updateMinimumCost();
+                        updateGameInfo();
+                    }, 10000);
+                    
+                    // Background refreshes during transition
+                    setTimeout(() => { loadPreviousWinners(); updateMinimumCost(); }, 3000);
+                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(); }, 6000);
+                    
+                } else {
+                    // === NORMAL GRAB (mid-round) ===
+                
+                    // Trigger visual effects
+                    const rect = chicken.getBoundingClientRect();
+                    playChickenAnimation({
+                        clientX: rect.left + rect.width / 2,
+                        clientY: rect.top + rect.height / 2
+                    });
 
-                // Reset game over state (in case this started a new round)
-                chicken.classList.remove('exploded');
-                chicken.classList.remove('hotzone'); // Remove hotzone on new grab
-                
-                // Explicitly reset chicken visual state
-                chicken.style.opacity = '1';
-                chicken.style.transform = '';
-                chicken.style.animation = '';
-                
-                document.getElementById('gameOverMessage').classList.remove('show');
-                document.getElementById('hotzone Smoke').classList.remove('active');
-                document.getElementById('hotzoneLeft').classList.remove('active');
-                document.getElementById('hotzoneRight').classList.remove('active');
+                    // Reset game over state (in case this started a new round)
+                    chicken.classList.remove('exploded');
+                    chicken.classList.remove('hotzone'); // Remove hotzone on new grab
+                    
+                    // Explicitly reset chicken visual state
+                    chicken.style.opacity = '1';
+                    chicken.style.transform = '';
+                    chicken.style.animation = '';
+                    
+                    document.getElementById('gameOverMessage').classList.remove('show');
+                    document.getElementById('hotzone Smoke').classList.remove('active');
+                    document.getElementById('hotzoneLeft').classList.remove('active');
+                    document.getElementById('hotzoneRight').classList.remove('active');
 
-                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
-                connectWalletBtn.disabled = false;
+                    connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+                    connectWalletBtn.disabled = false;
 
-                // Show updating state on timer while blockchain syncs
-                document.getElementById('timer').textContent = '... updating ...';
-                document.getElementById('timer').classList.add('timer-updating');
-                window._timerPausedUntilSync = true;
-                window._timerPausedAt = Date.now();
+                    // Show updating state on timer while blockchain syncs
+                    document.getElementById('timer').textContent = '... updating ...';
+                    document.getElementById('timer').classList.add('timer-updating');
+                    window._timerPausedUntilSync = true;
+                    window._timerPausedAt = Date.now();
 
-                // Force timer reset - reset all timer state to trigger reload
-                displayedSeconds = null;
-                serverSecondsAtFetch = null;
-                fetchTimestamp = null;
-                lastBlockFetchTime = 0;
-                fetchInProgress = false;
+                    // Force timer reset - reset all timer state to trigger reload
+                    displayedSeconds = null;
+                    serverSecondsAtFetch = null;
+                    fetchTimestamp = null;
+                    lastBlockFetchTime = 0;
+                    fetchInProgress = false;
                 
-                // Small initial delay to let blockchain update
-                setTimeout(() => {
-                    loadLeaderboard();
-                    loadBalance();
-                    loadPreviousWinners();
-                    updateMinimumCost();
-                    updateGameInfo();
-                }, 500);
-                
-                // Continue aggressive refreshing for blockchain sync
-                setTimeout(() => {
-                    loadLeaderboard();
-                    loadPreviousWinners();
-                    updateMinimumCost();
-                    updateGameInfo();
-                }, 2000);
-                
-                setTimeout(() => {
-                    loadLeaderboard();
-                    loadPreviousWinners();
-                    updateMinimumCost();
-                    updateGameInfo();
-                }, 4000);
-                
-                setTimeout(() => {
-                    loadLeaderboard();
-                    loadPreviousWinners();
-                    updateGameInfo();
-                }, 6000);
-                
-                setTimeout(() => {
-                    loadLeaderboard();
-                    loadPreviousWinners();
-                }, 8000);
-                
-                setTimeout(() => {
-                    loadLeaderboard();
-                }, 10000);
-                
-                setTimeout(() => {
-                    loadLeaderboard();
-                    updateGameInfo();
-                }, 5000);
+                    // Small initial delay to let blockchain update
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        loadBalance();
+                        loadPreviousWinners();
+                        updateMinimumCost();
+                        updateGameInfo();
+                    }, 500);
+                    
+                    // Continue aggressive refreshing for blockchain sync
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        loadPreviousWinners();
+                        updateMinimumCost();
+                        updateGameInfo();
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        loadPreviousWinners();
+                        updateMinimumCost();
+                        updateGameInfo();
+                    }, 4000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        loadPreviousWinners();
+                        updateGameInfo();
+                    }, 6000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        loadPreviousWinners();
+                    }, 8000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard();
+                    }, 10000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard();
+                        updateGameInfo();
+                    }, 5000);
+                } // end else (normal grab)
 
             } catch (error) {
                 console.error('Error grabbing chicken:', error);
