@@ -65,15 +65,17 @@
             gap: 1.5rem;
         }
 
-        .box {
-            background: var(--card);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.8rem;
-            transition: all 0.25s ease;
-            overflow: hidden;
-        }
+.box {
+    background: var(--card);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    transition: all 0.25s ease;
+
+    overflow: hidden; /* ← ADD THIS */
+}
+
 
         .box:hover {
             transform: translateY(-4px);
@@ -112,34 +114,50 @@
             color: var(--accent);
         }
 
-        table {
-            width: 100%;
-            max-width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
+        /* ===========================
+           TOKENOMICS TABLE (FIXED)
+        =========================== */
 
-        thead th {
-            color: var(--accent-glow);
-            font-weight: 600;
-            text-align: center;
-            padding: 0.75rem 0.55rem;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-            white-space: normal;
-        }
+table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
 
-        tbody td {
-            padding: 0.75rem 0.55rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            text-align: center;
-            color: var(--text-dim);
-            font-variant-numeric: tabular-nums;
-        }
+thead th {
+    color: var(--accent-glow);
+    font-weight: 600;
+    text-align: center;
+    padding: 0.75rem 0.55rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    white-space: normal; /* allow wrapping if needed */
+}
 
-        tbody tr:nth-child(odd) {
-            background: rgba(255,255,255,0.02);
-        }
+thead th:first-child,
+tbody td:first-child {
+    text-align: left;
+}
 
+tbody td {
+    padding: 0.75rem 0.55rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+tbody td:first-child {
+    color: var(--text);
+    font-weight: 600;
+}
+
+tbody tr:nth-child(odd) {
+    background: rgba(255,255,255,0.02);
+}
+
+
+        /* mobile safety */
         @media (max-width: 640px) {
             table {
                 font-size: 0.85rem;
@@ -193,51 +211,63 @@
             <h2>⚡ How It Works</h2>
             <ul>
                 <li>Deposit <strong>ESHARE</strong> to grab the chicken</li>
+                <li>Opening bid capped at 20% of seed</li>
                 <li>Each grab resets timer to 90% of remaining time</li>
-                <li>Bids during HOT ZONE (last ~5 mins) resets timer to 4m:20s</li>
-                <li>Next grab costs +10% more than previous</li>
-                <li>Timer hits zero → Lead Plucker (current holder) loses their bid, but receives the Seed</li>
+                <li>During HOT ZONE (last ~5 mins), timer floor is 4m:20s</li>
+                <li>Next grab costs between +10% and +20% more than previous</li>
+                <li>Timer hits zero → Lead Plucker (current holder) loses their bid, but receives the Seed as consolation</li>
                 <li>Only Lead Plucker + previous holder are eligible for lotto</li>
-                <li>Payouts happen instantly on settlement and new round begins</li>
+                <li>Everyone else wins — payouts happen instantly on settlement and new round begins</li>
             </ul>
         </div>
 
-        <div class="box">
-            <h2>💸 Tokenomics</h2>
+<div class="box">
+    <h2>💸 Tokenomics</h2>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Burn</th>
-                        <th>Dev</th>
-                        <th>Lotto</th>
-                        <th>Hot Zone</th>
-                        <th>Total Tax</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>3%</td>
-                        <td>0.5%</td>
-                        <td>10%</td>
-                        <td>3%</td>
-                        <td>16.5%</td>
-                    </tr>
-                </tbody>
-            </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Burn</th>
+                <th>Dev</th>
+                <th>Lotto</th>
+                <th>Hot Zone</th>
+                <th>Total Tax</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Winners</td>
+                <td>4%</td>
+                <td>0.5%</td>
+                <td>10%</td>
+                <td>—</td>
+                <td>14.5%</td>
+            </tr>
+            <tr>
+                <td>Loser (Lead Plucker)</td>
+                <td>4%</td>
+                <td>0.5%</td>
+                <td>10%</td>
+                <td>1%</td>
+                <td>15.5%</td>
+            </tr>
+        </tbody>
+    </table>
 
-            <div class="note">
-                <p style="margin-bottom: 0.5rem;">→ Seed is <strong>tax-free</strong> and goes to the Lead Plucker</p>
-                <p style="margin-bottom: 0.5rem;">→ Lotto = 10% of deposits (adjustable 5–20%)</p>
-                <p>→ Hot Zone = 3% bonus redistributed to participants who bid during Hot Zone</p>
-                <p style="margin-top: 0.5rem;">→ Seed Vault = funded by <a href="https://dexfi.com/bonds" target="_blank" style="color: var(--accent-glow); text-decoration: underline;">DexFi Bonds</a> and community contributions</p>
-            </div>
-        </div>
+    <div class="note">
+        <p style="margin-bottom: 0.5rem;">→ Seed is <strong>tax-free</strong> and goes to the Lead Plucker (loser)</p>
+        <p style="margin-bottom: 0.5rem;">→ Lotto = 10% of deposits (adjustable 5–20%)</p>
+        <p>→ Hot Zone = 1% bonus redistributed to participants who bid during Hot Zone</p>
+        <p style="margin-top: 0.5rem;">→ Seed Vault = funded by <a href="https://dexfi.com/bonds" target="_blank" style="color: var(--accent-glow); text-decoration: underline;">DexFi Bonds</a> and community contributions</p>
+    </div>
+</div>
+
 
         <div class="box full">
             <h2>📜 Contract (Base Network)</h2>
             <div class="contract">
-                0x9bCa87Bc7be6e5E55F4355bC2934Ba0cBF14E6cD
+                0x1E818fE4d91EA720D01Bad1d1d5dbdd8827681fA
             </div>
             <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:#8888aa;">
                 • Seed vault funded by CoolSheet DexFi bonds + community contributions.
