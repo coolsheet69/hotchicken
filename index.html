@@ -529,17 +529,20 @@
         .quick-bid-row {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-top: 5px;
+            gap: 6px;
+            margin-top: 2px;
+            margin-bottom: 6px;
         }
         .quick-bid-btn {
             font-family: var(--font-display);
-            font-size: 10px;
+            font-size: 13px;
             font-weight: 700;
-            letter-spacing: 1px;
-            padding: 4px 14px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            letter-spacing: 1.5px;
+            padding: 7px 0;
+            width: 80px;
+            text-align: center;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
             background: rgba(20, 20, 40, 0.8);
             color: var(--text-secondary);
             cursor: pointer;
@@ -1677,7 +1680,7 @@
             .amount-input-container { margin: 6px auto; }
             .amount-input { font-size: 15px; padding: 5px; width: 115px; }
             .amount-label { font-size: 11px; }
-            .quick-bid-btn { font-size: 9px; padding: 3px 10px; }
+            .quick-bid-btn { font-size: 11px; padding: 6px 0; width: 70px; }
 
             .connect-wallet { font-size: 13px; padding: 10px 18px; max-width: 90%; }
 
@@ -2079,13 +2082,6 @@
                 <button class="connect-wallet" id="connectWallet">Connect Wallet</button>
             </div>
             
-            <div class="connected-wallet-combined" id="connectedWallet" style="display: none;">
-                <span class="connected-label-text">Connected:</span>
-                <span id="connectedAddress" class="connected-addr-text"></span>
-                <span class="wallet-sep">|</span>
-                <span class="balance-value" id="balanceValue">0.00 ESHARE</span>
-            </div>
-            
             <div class="amount-input-container" id="amountContainer">
                 <input 
                     type="number" 
@@ -2110,6 +2106,13 @@
                 <button class="quick-bid-btn bid-min active" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
                 <button class="quick-bid-btn bid-mid" id="quickBid20" onclick="setQuickBid(20)">+20%</button>
                 <button class="quick-bid-btn bid-max" id="quickBid30" onclick="setQuickBid(30)">+30%</button>
+            </div>
+            
+            <div class="connected-wallet-combined" id="connectedWallet" style="display: none;">
+                <span class="connected-label-text">Connected:</span>
+                <span id="connectedAddress" class="connected-addr-text"></span>
+                <span class="wallet-sep">|</span>
+                <span class="balance-value" id="balanceValue">0.00 ESHARE</span>
             </div>
         </div>
 
@@ -2632,16 +2635,16 @@
                         const blocksLeft = parseInt(roundInfo.blocksLeft);
                         
                         if (blocksLeft === 0) {
-                            minimumCost = 0.001;
+                            minimumCost = 0.005;
                         } else if (minGrabWei && minGrabWei !== '0') {
                             const rawMin = parseFloat(web3.utils.fromWei(minGrabWei, 'ether'));
                             minimumCost = roundUp4Decimals(rawMin);
                         } else {
-                            minimumCost = 0.001;
+                            minimumCost = 0.005;
                         }
                     }
                 } else {
-                    minimumCost = 0.001;
+                    minimumCost = 0.005;
                 }
                 
                 // Auto-fill the input with the minimum required amount
@@ -2652,7 +2655,7 @@
                 }
             } catch (error) {
                 console.error('Error getting minimum cost:', error);
-                minimumCost = 0.001;
+                minimumCost = 0.005;
                 const inputBox = document.getElementById('eshareAmount');
                 if (inputBox) {
                     inputBox.value = minimumCost.toFixed(4);
@@ -3027,17 +3030,26 @@
                 
                 // Refresh bid range from contract before validating
                 try {
-                    const bidRange = await chickenContract.methods.getBidRange().call();
-                    const rawMin = parseFloat(web3.utils.fromWei(bidRange.minBid, 'ether'));
-                    const rawMax = parseFloat(web3.utils.fromWei(bidRange.maxBid, 'ether'));
-                    minimumCost = Math.ceil(rawMin * 10000) / 10000;
-                    window._maxBid = Math.floor(rawMax * 10000) / 10000;
-                    window._isFirstBid = bidRange.isFirstBid;
-                    console.log('Fresh bid range - min:', minimumCost, 'max:', window._maxBid, 'isFirst:', window._isFirstBid);
-                    
-                    // If settling, auto-set input to new minimum
                     if (isSettlement) {
+                        // Settlement grab starts a NEW round — use base minGrabCost
+                        // getBidRange returns stale data when round is over
+                        const config = await chickenContract.methods.getConfig().call();
+                        const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
+                        minimumCost = Math.ceil(baseMin * 10000) / 10000;
+                        // First bid cap = 20% of seed, but we don't know next seed yet
+                        // Just use minGrabCost and let contract validate the cap
+                        window._maxBid = null; // Don't enforce max on settlement
+                        window._isFirstBid = true;
                         eshareAmountInput.value = minimumCost.toFixed(4);
+                        console.log('Settlement grab - using base min:', minimumCost);
+                    } else {
+                        const bidRange = await chickenContract.methods.getBidRange().call();
+                        const rawMin = parseFloat(web3.utils.fromWei(bidRange.minBid, 'ether'));
+                        const rawMax = parseFloat(web3.utils.fromWei(bidRange.maxBid, 'ether'));
+                        minimumCost = Math.ceil(rawMin * 10000) / 10000;
+                        window._maxBid = Math.floor(rawMax * 10000) / 10000;
+                        window._isFirstBid = bidRange.isFirstBid;
+                        console.log('Fresh bid range - min:', minimumCost, 'max:', window._maxBid, 'isFirst:', window._isFirstBid);
                     }
                 } catch(e) {
                     console.log('Could not refresh bid range:', e.message);
@@ -3349,7 +3361,7 @@
             }
         });
 
-        function triggerGameOver() {
+        async function triggerGameOver() {
             console.log('Game Over!');
             
             // Explode the chicken
@@ -3370,14 +3382,28 @@
             }, 500);
             
             // Reset input to default minimum for new round
-            minimumCost = 0.001;
+            try {
+                const config = await chickenContract.methods.getConfig().call();
+                const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
+                minimumCost = Math.ceil(baseMin * 10000) / 10000;
+            } catch(e) {
+                minimumCost = 0.005;
+            }
             const inputBox = document.getElementById('eshareAmount');
             if (inputBox) {
-                inputBox.value = '0.0010';
-                inputBox.placeholder = '0.0010';
-                console.log('Reset input box to 0.0010 for new round');
+                inputBox.value = minimumCost.toFixed(4);
+                inputBox.placeholder = minimumCost.toFixed(4);
+                console.log('Reset input box to', minimumCost.toFixed(4), 'for new round');
             }
-            console.log('Reset minimum cost to 0.001 for new round');
+            console.log('Reset minimum cost to', minimumCost, 'for new round');
+            
+            // Show opening bid buttons
+            const quickRow = document.getElementById('quickBidRow');
+            const quickRowFirst = document.getElementById('quickBidRowFirst');
+            if (quickRow) quickRow.style.display = 'none';
+            if (quickRowFirst) quickRowFirst.style.display = 'flex';
+            const labelEl = document.querySelector('.amount-min-label');
+            if (labelEl) labelEl.textContent = 'min.';
             
             // After a delay, refresh the minimum cost from contract (in case new round started)
             setTimeout(() => {
