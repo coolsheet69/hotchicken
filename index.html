@@ -1708,6 +1708,10 @@
                     <span class="game-info-label">Pool:</span>
                     <span class="game-info-value highlight" id="poolEshare">0.000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                 </div>
+                <div class="game-info-item">
+                    <span class="game-info-label">Lotto:</span>
+                    <span class="game-info-value highlight" id="lottoEstimate" style="color: var(--neon-green);">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                </div>
             </div>
         </div>
         
@@ -3315,7 +3319,7 @@
                             
                             // Clear the updating pause - we have real data now
                             // But only if at least 4 seconds have passed (early fetches return stale data)
-                            if (window._timerPausedUntilSync && (Date.now() - (window._timerPausedAt || 0)) > 4000) {
+                            if (window._timerPausedUntilSync && (Date.now() - (window._timerPausedAt || 0)) > 8000) {
                                 window._timerPausedUntilSync = false;
                                 document.getElementById('timer').textContent = formatTime(secs);
                                 document.getElementById('timer').classList.remove('timer-updating');
@@ -3423,9 +3427,26 @@
                         // Calculate actual pool from player deposits
                         const playerDepositsEshare = parseFloat(web3.utils.fromWei(detailedInfo.playerDeps, 'ether'));
                         document.getElementById('poolEshare').innerHTML = playerDepositsEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                        
+                        // Estimate lotto prize (10% of total pot + any rollover)
+                        try {
+                            const config = await chickenContract.methods.getConfig().call();
+                            const lottoBps = parseInt(config.lottoBps);
+                            const totalPot = parseFloat(web3.utils.fromWei(roundInfo.pot, 'ether'));
+                            let lottoEst = totalPot * (lottoBps / 10000);
+                            // Add pending rollover if any
+                            try {
+                                const rollover = await chickenContract.methods.pendingLottoRollover().call();
+                                lottoEst += parseFloat(web3.utils.fromWei(rollover, 'ether'));
+                            } catch(e) {}
+                            document.getElementById('lottoEstimate').innerHTML = lottoEst.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                        } catch(e) {
+                            console.log('Error estimating lotto:', e);
+                        }
                     } else {
                         document.getElementById('seedEshare').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         document.getElementById('poolEshare').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
+                        document.getElementById('lottoEstimate').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     }
                     
                     // Update seed vault info in actions box
@@ -3804,9 +3825,8 @@
                     let html = `
                         <div class="winner-item${lottoClass}">
                             <div class="winner-info">
-                                <span class="winner-round">R${p.round}</span>
                                 <span class="winner-address">${formatAddress(p.address)}</span>
-                                ${p.isLottoWinner ? '<span class="lotto-badge">🎰 LOTTO</span>' : ''}
+                                ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
                             </div>
                             <div class="winner-amount" style="color: ${roiColor};">
                                 ${roiDisplay}
