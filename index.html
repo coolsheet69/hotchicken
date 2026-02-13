@@ -1043,9 +1043,10 @@
             .action-pill-icon { width: 15px; height: 15px; }
 
             .grab-btn-wrapper { width: 100%; display: flex; justify-content: center; }
-            .grab-btn-ring, .grab-btn-ring-2 { border-radius: 16px; }
-            .connect-wallet { font-size: 13px; padding: 12px 28px; letter-spacing: 2px; }
-            .connect-wallet.is-grab-button { font-size: 14px; padding: 14px 36px; letter-spacing: 3px; }
+            .grab-btn-ring { width: calc(100% + 14px); height: calc(100% + 14px); border-radius: 16px; }
+            .grab-btn-ring-2 { width: calc(100% + 24px); height: calc(100% + 24px); border-radius: 18px; }
+            .connect-wallet { font-size: 13px; padding: 10px 24px; letter-spacing: 2px; }
+            .connect-wallet.is-grab-button { font-size: 13px; padding: 11px 28px; letter-spacing: 2px; }
         }
 
         @media (max-width: 480px) {
@@ -1722,21 +1723,22 @@
             .holder-amount, .holder-winnings { font-size: 12px; }
             .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 15px; height: 15px; }
 
-            .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 10px; }
-            .previous-winners-title { font-size: 13px; letter-spacing: 2px; }
-            .winner-item { padding: 8px 10px; }
-            .winner-round { font-size: 12px; }
-            .winner-address { font-size: 12px; }
-            .winner-amount { font-size: 13px; }
-            .winner-amount .eshare-symbol { width: 16px; height: 16px; }
-            .lotto-badge { font-size: 9px; padding: 2px 6px; }
+            .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 8px; }
+            .previous-winners-title { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 6px; }
+            .winner-item { padding: 4px 8px; margin-bottom: 2px; }
+            .winner-address { font-size: 10px; }
+            .winner-amount { font-size: 10px; }
+            .winner-amount .eshare-symbol { width: 13px; height: 13px; }
+            .lotto-badge { font-size: 7px; padding: 1px 5px; }
 
             .bid-row { margin-top: 8px; gap: 4px; }
             .bid-row .amount-input { font-size: 13px; padding: 5px; width: 80px; }
             .amount-label { font-size: 10px; }
             .quick-bid-btn { font-size: 10px; padding: 5px 0; width: 48px; }
 
-            .connect-wallet { font-size: 13px; padding: 10px 18px; max-width: 90%; }
+            .connect-wallet { font-size: 12px; padding: 9px 18px; max-width: 85%; letter-spacing: 1.5px; }
+            .grab-btn-ring { width: calc(100% + 12px); height: calc(100% + 12px); }
+            .grab-btn-ring-2 { width: calc(100% + 20px); height: calc(100% + 20px); }
 
             .rooster-combo { max-width: 90%; }
             .rooster-combo-10x { max-width: 90%; }
@@ -1773,6 +1775,14 @@
 
             .game-over-message { font-size: 12px; padding: 12px 18px; max-width: 260px; letter-spacing: 1px; }
             .burnt-bones { font-size: 18px; margin-top: 6px; letter-spacing: 4px; }
+
+            .previous-winners-container { padding: 6px; }
+            .previous-winners-title { font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; }
+            .winner-item { padding: 3px 6px; margin-bottom: 1px; border-radius: 6px; }
+            .winner-address { font-size: 9px; }
+            .winner-amount { font-size: 9px; gap: 2px; }
+            .winner-amount .eshare-symbol { width: 11px; height: 11px; }
+            .lotto-badge { font-size: 6px; padding: 1px 4px; }
         }
 
         /* ===== OWNER SEED (compat) ===== */
