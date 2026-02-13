@@ -490,7 +490,7 @@
         /* ===== GRAB BUTTON AREA ===== */
         .grab-button-container {
             text-align: center;
-            margin-top: -100px;
+            margin-top: -70px;
             display: flex; flex-direction: column; align-items: center;
             gap: 6px;
             position: relative; z-index: 100000;
@@ -498,7 +498,7 @@
 
         .amount-input-container {
             display: flex; flex-direction: row; align-items: center;
-            gap: 10px; margin-bottom: 8px;
+            gap: 10px; margin-top: 14px; margin-bottom: 4px;
         }
 
         .amount-input {
@@ -781,7 +781,7 @@
 
         .connected-label-text {
             color: var(--neon-blue);
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-family: var(--font-display);
@@ -791,7 +791,7 @@
         .connected-addr-text {
             color: var(--neon-blue);
             font-weight: 700;
-            font-size: 12px;
+            font-size: 13px;
             font-family: var(--text-mono);
         }
 
@@ -1076,13 +1076,16 @@
             margin-bottom: 4px; flex-wrap: wrap;
         }
         .wallet-sep {
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 11px;
-            margin: 0 2px;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            margin: 0 3px;
         }
         .connected-wallet-combined .balance-value {
-            color: var(--neon-blue);
-            font-size: 12px;
+            color: var(--neon-green);
+            font-size: 14px;
+            font-weight: 800;
+            font-family: var(--text-mono);
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
         }
         .connected-wallet-top {
             display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -1352,6 +1355,52 @@
             justify-content: center; align-items: center;
         }
         .seed-modal-overlay.show { display: flex; }
+
+        /* Custom Alert */
+        .alert-overlay {
+            cursor: auto !important;
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200000;
+            justify-content: center; align-items: center;
+        }
+        .alert-overlay * { cursor: auto !important; }
+        .alert-overlay.show { display: flex; }
+        .alert-box {
+            background: linear-gradient(135deg, rgba(25, 25, 50, 0.98) 0%, rgba(12, 12, 25, 0.98) 100%);
+            border: 1px solid rgba(255, 106, 0, 0.3);
+            border-radius: 14px;
+            padding: 22px 28px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 106, 0, 0.15);
+        }
+        .alert-msg {
+            font-family: var(--text-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .alert-ok {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            padding: 8px 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 106, 0, 0.4);
+            background: rgba(255, 106, 0, 0.15);
+            color: var(--neon-orange);
+            cursor: pointer !important;
+            transition: all 0.2s;
+        }
+        .alert-ok:hover {
+            background: rgba(255, 106, 0, 0.25);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+        }
 
         .seed-modal {
             background: linear-gradient(135deg, rgba(20, 20, 40, 0.98) 0%, rgba(10, 10, 20, 0.98) 100%);
@@ -2212,6 +2261,14 @@
             </div>
         </div>
         
+        <!-- Custom Alert Modal -->
+        <div class="alert-overlay" id="alertOverlay">
+            <div class="alert-box">
+                <div class="alert-msg" id="alertMsg"></div>
+                <button class="alert-ok" id="alertOk">OK</button>
+            </div>
+        </div>
+        
         <!-- Owner Dashboard (only visible to owner) -->
         <div class="owner-dashboard" id="ownerDashboard" style="display: none;">
             <div class="owner-dashboard-header">⚙️ Owner Dashboard</div>
@@ -2382,11 +2439,26 @@
 
         // Helper to restore cursor during browser alerts
         function showAlert(msg) {
-            document.body.style.cursor = 'auto';
+            const overlay = document.getElementById('alertOverlay');
+            const msgEl = document.getElementById('alertMsg');
+            const okBtn = document.getElementById('alertOk');
+            msgEl.textContent = msg;
+            overlay.classList.add('show');
             handCursor.style.display = 'none';
-            alert(msg);
-            document.body.style.cursor = '';
-            handCursor.style.display = '';
+            document.body.style.cursor = 'auto';
+            
+            function closeAlert() {
+                overlay.classList.remove('show');
+                handCursor.style.display = '';
+                document.body.style.cursor = '';
+                okBtn.removeEventListener('click', closeAlert);
+                overlay.removeEventListener('click', handleOverlayClick);
+            }
+            function handleOverlayClick(e) {
+                if (e.target === overlay) closeAlert();
+            }
+            okBtn.addEventListener('click', closeAlert);
+            overlay.addEventListener('click', handleOverlayClick);
         }
         
         // Hide hand cursor when seed modal is open
