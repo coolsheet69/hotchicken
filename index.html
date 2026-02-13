@@ -3428,12 +3428,11 @@
                         const playerDepositsEshare = parseFloat(web3.utils.fromWei(detailedInfo.playerDeps, 'ether'));
                         document.getElementById('poolEshare').innerHTML = playerDepositsEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         
-                        // Estimate lotto prize (10% of total pot + any rollover)
+                        // Estimate lotto prize (lottoBps% of player deposits + any rollover)
                         try {
                             const config = await chickenContract.methods.getConfig().call();
                             const lottoBps = parseInt(config.lottoBps);
-                            const totalPot = parseFloat(web3.utils.fromWei(roundInfo.pot, 'ether'));
-                            let lottoEst = totalPot * (lottoBps / 10000);
+                            let lottoEst = playerDepositsEshare * (lottoBps / 10000);
                             // Add pending rollover if any
                             try {
                                 const rollover = await chickenContract.methods.pendingLottoRollover().call();
