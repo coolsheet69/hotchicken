@@ -2599,48 +2599,66 @@
         async function updateMinimumCost() {
             try {
                 if (chickenContract) {
-                    // Use getBidRange for accurate min/max bids
-                    try {
-                        const bidRange = await chickenContract.methods.getBidRange().call();
-                        const rawMin = parseFloat(web3.utils.fromWei(bidRange.minBid, 'ether'));
-                        const rawMax = parseFloat(web3.utils.fromWei(bidRange.maxBid, 'ether'));
-                        minimumCost = roundUp4Decimals(rawMin);
-                        window._maxBid = Math.floor(rawMax * 10000) / 10000; // round down max
-                        window._isFirstBid = bidRange.isFirstBid;
-                        console.log('Bid range - min:', minimumCost, 'max:', window._maxBid, 'isFirst:', window._isFirstBid);
+                    // First check if round is over (needs settle)
+                    const roundInfo = await chickenContract.methods.getCurrentRound().call();
+                    const blocksLeft = parseInt(roundInfo.blocksLeft);
+                    const roundActive = parseInt(roundInfo.round) > 0 && blocksLeft > 0;
+                    
+                    if (!roundActive) {
+                        // Round is over or no round started — opening bid mode
+                        try {
+                            const config = await chickenContract.methods.getConfig().call();
+                            const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
+                            minimumCost = Math.ceil(baseMin * 10000) / 10000;
+                        } catch(e) {
+                            minimumCost = 0.005;
+                        }
+                        window._maxBid = null;
+                        window._isFirstBid = true;
                         
-                        // Update label and quick bid buttons
                         const labelEl = document.querySelector('.amount-min-label');
                         const quickRow = document.getElementById('quickBidRow');
                         const quickRowFirst = document.getElementById('quickBidRowFirst');
-                        if (window._isFirstBid) {
-                            // Opening bid: show min bid button, hide escalating buttons
-                            if (labelEl) labelEl.textContent = window._maxBid > 0 ? `max ${window._maxBid.toFixed(4)}` : 'min.';
-                            if (quickRow) quickRow.style.display = 'none';
-                            if (quickRowFirst) quickRowFirst.style.display = 'flex';
-                        } else {
-                            // Escalating bid: show 10/20/30 buttons, hide opening button
-                            if (labelEl) labelEl.textContent = 'min.';
-                            if (quickRow) quickRow.style.display = 'flex';
-                            if (quickRowFirst) quickRowFirst.style.display = 'none';
-                            // Auto-highlight +10% since that's the default
-                            document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
-                            const btn10 = document.getElementById('quickBid10');
-                            if (btn10) btn10.classList.add('active');
-                        }
-                    } catch(e) {
-                        // Fallback to getCurrentRound
-                        const roundInfo = await chickenContract.methods.getCurrentRound().call();
-                        const minGrabWei = roundInfo.minGrab;
-                        const blocksLeft = parseInt(roundInfo.blocksLeft);
+                        if (labelEl) labelEl.textContent = 'min.';
+                        if (quickRow) quickRow.style.display = 'none';
+                        if (quickRowFirst) quickRowFirst.style.display = 'flex';
                         
-                        if (blocksLeft === 0) {
-                            minimumCost = 0.005;
-                        } else if (minGrabWei && minGrabWei !== '0') {
-                            const rawMin = parseFloat(web3.utils.fromWei(minGrabWei, 'ether'));
+                        console.log('Round not active - opening bid mode, min:', minimumCost);
+                    } else {
+                        // Round is active — use getBidRange
+                        try {
+                            const bidRange = await chickenContract.methods.getBidRange().call();
+                            const rawMin = parseFloat(web3.utils.fromWei(bidRange.minBid, 'ether'));
+                            const rawMax = parseFloat(web3.utils.fromWei(bidRange.maxBid, 'ether'));
                             minimumCost = roundUp4Decimals(rawMin);
-                        } else {
-                            minimumCost = 0.005;
+                            window._maxBid = Math.floor(rawMax * 10000) / 10000;
+                            window._isFirstBid = bidRange.isFirstBid;
+                            console.log('Bid range - min:', minimumCost, 'max:', window._maxBid, 'isFirst:', window._isFirstBid);
+                            
+                            const labelEl = document.querySelector('.amount-min-label');
+                            const quickRow = document.getElementById('quickBidRow');
+                            const quickRowFirst = document.getElementById('quickBidRowFirst');
+                            if (window._isFirstBid) {
+                                if (labelEl) labelEl.textContent = window._maxBid > 0 ? `max ${window._maxBid.toFixed(4)}` : 'min.';
+                                if (quickRow) quickRow.style.display = 'none';
+                                if (quickRowFirst) quickRowFirst.style.display = 'flex';
+                            } else {
+                                if (labelEl) labelEl.textContent = 'min.';
+                                if (quickRow) quickRow.style.display = 'flex';
+                                if (quickRowFirst) quickRowFirst.style.display = 'none';
+                                // Auto-highlight +10% since that's the default
+                                document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
+                                const btn10 = document.getElementById('quickBid10');
+                                if (btn10) btn10.classList.add('active');
+                            }
+                        } catch(e) {
+                            // Fallback
+                            const minGrabWei = roundInfo.minGrab;
+                            if (minGrabWei && minGrabWei !== '0') {
+                                minimumCost = roundUp4Decimals(parseFloat(web3.utils.fromWei(minGrabWei, 'ether')));
+                            } else {
+                                minimumCost = 0.005;
+                            }
                         }
                     }
                 } else {
