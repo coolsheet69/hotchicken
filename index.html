@@ -3058,19 +3058,17 @@
                 // Detect if this is a settlement grab
                 const isSettlement = document.querySelector('.chicken').classList.contains('exploded');
                 
-                // Refresh bid range from contract before validating
+                // Capture user's chosen amount BEFORE any refresh
+                const amountEshare = parseFloat(eshareAmountInput.value);
+                
+                // Refresh bid limits from contract for validation only (don't touch input)
                 try {
                     if (isSettlement) {
-                        // Settlement grab starts a NEW round — use base minGrabCost
-                        // getBidRange returns stale data when round is over
                         const config = await chickenContract.methods.getConfig().call();
                         const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
                         minimumCost = Math.ceil(baseMin * 10000) / 10000;
-                        // First bid cap = 20% of seed, but we don't know next seed yet
-                        // Just use minGrabCost and let contract validate the cap
-                        window._maxBid = null; // Don't enforce max on settlement
+                        window._maxBid = null;
                         window._isFirstBid = true;
-                        eshareAmountInput.value = minimumCost.toFixed(4);
                         console.log('Settlement grab - using base min:', minimumCost);
                     } else {
                         const bidRange = await chickenContract.methods.getBidRange().call();
@@ -3085,8 +3083,7 @@
                     console.log('Could not refresh bid range:', e.message);
                 }
                 
-                // Get amount from input
-                const amountEshare = parseFloat(eshareAmountInput.value);
+                // Validate the user's chosen amount
                 if (isNaN(amountEshare) || amountEshare < minimumCost) {
                     showAlert(`Please enter at least ${minimumCost.toFixed(4)} ESHARE`);
                     return;
