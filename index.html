@@ -254,10 +254,10 @@
         }
 
         .chicken {
-            width: 260px; height: 390px;
+            width: 234px; height: 351px;
             position: relative;
             transition: transform 0.2s ease-out;
-            transform-origin: center 260px;
+            transform-origin: center 234px;
             user-select: none;
             -webkit-user-select: none;
             z-index: 99999;
@@ -306,11 +306,12 @@
         .chicken .bling {
             animation: bling-jiggle 3s ease-in-out infinite;
             transform-origin: 150px 240px;
+            transform: scale(1.11);
         }
         @keyframes bling-jiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(0.5deg); }
-            75% { transform: rotate(-0.5deg); }
+            0%, 100% { transform: scale(1.11) rotate(0deg); }
+            25% { transform: scale(1.11) rotate(0.5deg); }
+            75% { transform: scale(1.11) rotate(-0.5deg); }
         }
 
         .chicken.dodging { transition: transform 0.15s ease-out; }
@@ -351,8 +352,8 @@
             animation: bling-swing 0.15s ease-in-out infinite !important;
         }
         @keyframes bling-swing {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(3deg); }
+            0%, 100% { transform: scale(1.11) rotate(-3deg); }
+            50% { transform: scale(1.11) rotate(3deg); }
         }
 
         @keyframes grab-eye-left { 0%, 100% { transform: translateX(-8px); } 50% { transform: translateX(8px); } }
@@ -496,9 +497,20 @@
             position: relative; z-index: 100000;
         }
 
-        .amount-input-container {
-            display: flex; flex-direction: row; align-items: center;
-            gap: 10px; margin-top: 14px; margin-bottom: 4px;
+        .bid-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            flex-wrap: nowrap;
+        }
+        .bid-row .amount-input {
+            width: 100px;
+        }
+        .bid-row .amount-label {
+            margin-right: 4px;
         }
 
         .amount-input {
@@ -526,13 +538,6 @@
         .amount-input.above-maximum { color: var(--neon-red); border-color: rgba(255, 45, 45, 0.6); background: rgba(255, 45, 45, 0.1); box-shadow: 0 0 15px rgba(255, 45, 45, 0.2); }
 
         /* Quick bid buttons */
-        .quick-bid-row {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 2px;
-            margin-bottom: 6px;
-        }
         .quick-bid-btn {
             font-family: var(--font-display);
             font-size: 13px;
@@ -1687,7 +1692,7 @@
 
             .chicken-area { min-height: 200px; padding-top: 0; }
             .chicken-area::before { width: 200px; height: 200px; }
-            .chicken { width: 150px; height: 150px; }
+            .chicken { width: 135px; height: 135px; }
 
             .hotzone-message { top: 45%; }
             .hotzone-text { font-size: 14px; letter-spacing: 1px; }
@@ -1726,10 +1731,10 @@
             .winner-amount .eshare-symbol { width: 16px; height: 16px; }
             .lotto-badge { font-size: 9px; padding: 2px 6px; }
 
-            .amount-input-container { margin: 6px auto; }
-            .amount-input { font-size: 15px; padding: 5px; width: 115px; }
-            .amount-label { font-size: 11px; }
-            .quick-bid-btn { font-size: 11px; padding: 6px 0; width: 70px; }
+            .bid-row { margin-top: 8px; gap: 4px; }
+            .bid-row .amount-input { font-size: 13px; padding: 5px; width: 80px; }
+            .amount-label { font-size: 10px; }
+            .quick-bid-btn { font-size: 10px; padding: 5px 0; width: 48px; }
 
             .connect-wallet { font-size: 13px; padding: 10px 18px; max-width: 90%; }
 
@@ -1741,7 +1746,7 @@
         @media (max-width: 480px) {
             .title { font-size: 20px !important; letter-spacing: 2px; }
             .title-logo { width: 30px; height: 30px; margin: 0 3px -4px; }
-            .chicken { width: 130px; height: 130px; }
+            .chicken { width: 117px; height: 117px; }
             .chicken-area { min-height: 170px; }
             .chicken-area::before { width: 160px; height: 160px; }
             .grab-button-container { margin-top: -25px; }
@@ -2131,28 +2136,18 @@
                 <button class="connect-wallet" id="connectWallet">Connect Wallet</button>
             </div>
             
-            <div class="amount-input-container" id="amountContainer">
-                <input 
-                    type="number" 
-                    class="amount-input" 
-                    id="eshareAmount" 
-                    placeholder="0.1000" 
-                    min="0.0001" 
-                    step="0.0001" 
-                    value="0.1000"
-                />
+            <!-- Opening bid: input + min/max buttons on one line -->
+            <div class="bid-row" id="quickBidRowFirst" style="display: none;">
+                <input type="number" class="amount-input" id="eshareAmountFirst" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
                 <label class="amount-label">ESHARE</label>
-                <label class="amount-min-label">min.</label>
+                <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min</button>
+                <button class="quick-bid-btn bid-max" id="quickBidMax" onclick="setQuickBid('max')">Max</button>
             </div>
             
-            <!-- Opening bid: just a min bid button -->
-            <div class="quick-bid-row" id="quickBidRowFirst" style="display: none;">
-                <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min Bid</button>
-                <button class="quick-bid-btn bid-max" id="quickBidMax" onclick="setQuickBid('max')">Max Bid</button>
-            </div>
-            
-            <!-- Escalating bids: 10%, 20%, 30% -->
-            <div class="quick-bid-row" id="quickBidRow" style="display: none;">
+            <!-- Escalating bids: input + 10%, 20%, 30% on one line -->
+            <div class="bid-row" id="quickBidRow" style="display: none;">
+                <input type="number" class="amount-input" id="eshareAmountEsc" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
+                <label class="amount-label">ESHARE</label>
                 <button class="quick-bid-btn bid-min active" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
                 <button class="quick-bid-btn bid-mid" id="quickBid20" onclick="setQuickBid(20)">+20%</button>
                 <button class="quick-bid-btn bid-max" id="quickBid30" onclick="setQuickBid(30)">+30%</button>
@@ -2654,7 +2649,22 @@
         const amountContainer = document.getElementById('amountContainer');
         const balanceContainer = document.getElementById('balanceContainer');
         const balanceValue = document.getElementById('balanceValue');
-        const eshareAmountInput = document.getElementById('eshareAmount');
+        // Both bid row inputs - always get the currently visible one
+        function getActiveInput() {
+            const firstRow = document.getElementById('quickBidRowFirst');
+            if (firstRow && firstRow.style.display !== 'none') {
+                return document.getElementById('eshareAmountFirst');
+            }
+            return document.getElementById('eshareAmountEsc');
+        }
+        // Sync inputs when either changes
+        function syncInputs(sourceEl) {
+            const first = document.getElementById('eshareAmountFirst');
+            const esc = document.getElementById('eshareAmountEsc');
+            if (sourceEl === first && esc) esc.value = first.value;
+            if (sourceEl === esc && first) first.value = esc.value;
+        }
+        const eshareAmountInput = { get value() { return getActiveInput().value; }, set value(v) { getActiveInput().value = v; } };
         const currentHolderEl = document.getElementById('currentHolder');
         const previousHoldersEl = document.getElementById('previousHolders');
 
@@ -2748,19 +2758,18 @@
                     minimumCost = 0.005;
                 }
                 
-                // Auto-fill the input with the minimum required amount
-                const inputBox = document.getElementById('eshareAmount');
-                if (inputBox) {
-                    inputBox.value = minimumCost.toFixed(4);
-                    inputBox.placeholder = minimumCost.toFixed(4);
-                }
+                // Auto-fill both inputs with the minimum required amount
+                const val = minimumCost.toFixed(4);
+                [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
+                    if (inp) { inp.value = val; inp.placeholder = val; inp.classList.remove('below-minimum', 'above-maximum'); }
+                });
             } catch (error) {
                 console.error('Error getting minimum cost:', error);
                 minimumCost = 0.005;
-                const inputBox = document.getElementById('eshareAmount');
-                if (inputBox) {
-                    inputBox.value = minimumCost.toFixed(4);
-                }
+                const val = minimumCost.toFixed(4);
+                [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
+                    if (inp) { inp.value = val; }
+                });
             }
         }
 
@@ -2786,9 +2795,14 @@
             }
             
             if (amount) {
-                const inputBox = document.getElementById('eshareAmount');
-                inputBox.value = amount.toFixed(4);
-                inputBox.classList.remove('below-minimum', 'above-maximum');
+                // Set value on both inputs and clear red styles
+                const first = document.getElementById('eshareAmountFirst');
+                const esc = document.getElementById('eshareAmountEsc');
+                [first, esc].forEach(inp => {
+                    if (!inp) return;
+                    inp.value = amount.toFixed(4);
+                    inp.classList.remove('below-minimum', 'above-maximum');
+                });
                 
                 // Toggle active state on ALL quick bid buttons
                 document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
@@ -2801,22 +2815,31 @@
             }
         }
 
-        eshareAmountInput.addEventListener('input', function() {
-            const amount = parseFloat(this.value) || 0;
+        function handleBidInput(el) {
+            const amount = parseFloat(el.value) || 0;
+            syncInputs(el);
             // Clear quick bid active state on manual input
             document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
             
-            if (amount < minimumCost) {
-                this.classList.add('below-minimum');
-                this.classList.remove('above-maximum');
-            } else if (window._maxBid && amount > window._maxBid) {
-                this.classList.remove('below-minimum');
-                this.classList.add('above-maximum');
-            } else {
-                this.classList.remove('below-minimum');
-                this.classList.remove('above-maximum');
-            }
-        });
+            const effectiveMax = window._maxBid || window._firstBidMax;
+            // Apply styling to BOTH inputs
+            const allInputs = [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')];
+            allInputs.forEach(inp => {
+                if (!inp) return;
+                if (amount < minimumCost) {
+                    inp.classList.add('below-minimum');
+                    inp.classList.remove('above-maximum');
+                } else if (effectiveMax && amount > effectiveMax) {
+                    inp.classList.remove('below-minimum');
+                    inp.classList.add('above-maximum');
+                } else {
+                    inp.classList.remove('below-minimum');
+                    inp.classList.remove('above-maximum');
+                }
+            });
+        }
+        document.getElementById('eshareAmountFirst').addEventListener('input', function() { handleBidInput(this); });
+        document.getElementById('eshareAmountEsc').addEventListener('input', function() { handleBidInput(this); });
 
         // Initialize with minimum cost
         updateMinimumCost();
@@ -3255,7 +3278,7 @@
                     document.getElementById('roundTransition').classList.add('show');
                     
                     // Countdown timer
-                    let countdown = 10;
+                    let countdown = 15;
                     const cdEl = document.getElementById('roundTransitionTimer');
                     cdEl.textContent = countdown;
                     const cdInterval = setInterval(() => {
@@ -3273,7 +3296,7 @@
                     connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
                     connectWalletBtn.disabled = false;
                     
-                    // After 10 seconds, reveal everything
+                    // After 15 seconds, reveal everything
                     setTimeout(() => {
                         document.getElementById('roundTransition').classList.remove('show');
                         chicken.classList.remove('exploded', 'hotzone');
@@ -3295,11 +3318,12 @@
                         loadPreviousWinners();
                         updateMinimumCost();
                         updateGameInfo();
-                    }, 10000);
+                    }, 15000);
                     
                     // Background refreshes during transition
                     setTimeout(() => { loadPreviousWinners(); updateMinimumCost(); }, 3000);
-                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(); }, 6000);
+                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(); }, 7000);
+                    setTimeout(() => { loadLeaderboard(); updateMinimumCost(); updateGameInfo(); }, 12000);
                     
                 } else {
                     // === NORMAL GRAB (mid-round) ===
@@ -3378,7 +3402,7 @@
                     
                     setTimeout(() => {
                         loadLeaderboard();
-                    }, 10000);
+                    }, 15000);
                     
                     setTimeout(() => {
                         loadLeaderboard();
@@ -3488,13 +3512,11 @@
             } catch(e) {
                 minimumCost = 0.005;
             }
-            const inputBox = document.getElementById('eshareAmount');
-            if (inputBox) {
-                inputBox.value = minimumCost.toFixed(4);
-                inputBox.placeholder = minimumCost.toFixed(4);
-                console.log('Reset input box to', minimumCost.toFixed(4), 'for new round');
-            }
-            console.log('Reset minimum cost to', minimumCost, 'for new round');
+            const val = minimumCost.toFixed(4);
+            [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
+                if (inp) { inp.value = val; inp.placeholder = val; inp.classList.remove('below-minimum', 'above-maximum'); }
+            });
+            console.log('Reset input boxes to', val, 'for new round');
             
             // Show opening bid buttons
             const quickRow = document.getElementById('quickBidRow');
