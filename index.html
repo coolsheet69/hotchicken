@@ -2099,6 +2099,7 @@
             <!-- Opening bid: just a min bid button -->
             <div class="quick-bid-row" id="quickBidRowFirst" style="display: none;">
                 <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min Bid</button>
+                <button class="quick-bid-btn bid-max" id="quickBidMax" onclick="setQuickBid('max')">Max Bid</button>
             </div>
             
             <!-- Escalating bids: 10%, 20%, 30% -->
@@ -2610,6 +2611,15 @@
                             const config = await chickenContract.methods.getConfig().call();
                             const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
                             minimumCost = Math.ceil(baseMin * 10000) / 10000;
+                            // Calculate max first bid (firstBidCapBps% of seed)
+                            try {
+                                const vaultInfo = await chickenContract.methods.getSeedVaultInfo().call();
+                                const seedPerRound = parseFloat(web3.utils.fromWei(vaultInfo.amountPerRound, 'ether'));
+                                const firstBidCapBps = parseInt(config.firstBidCapBps);
+                                window._firstBidMax = Math.floor(seedPerRound * (firstBidCapBps / 10000) * 10000) / 10000;
+                            } catch(e) {
+                                window._firstBidMax = null;
+                            }
                         } catch(e) {
                             minimumCost = 0.005;
                         }
@@ -2639,6 +2649,7 @@
                             const quickRow = document.getElementById('quickBidRow');
                             const quickRowFirst = document.getElementById('quickBidRowFirst');
                             if (window._isFirstBid) {
+                                window._firstBidMax = window._maxBid;
                                 if (labelEl) labelEl.textContent = window._maxBid > 0 ? `max ${window._maxBid.toFixed(4)}` : 'min.';
                                 if (quickRow) quickRow.style.display = 'none';
                                 if (quickRowFirst) quickRowFirst.style.display = 'flex';
@@ -2688,13 +2699,13 @@
             if (percent === 'min') {
                 // Opening bid: set to minimum
                 amount = minimumCost;
+            } else if (percent === 'max') {
+                // Opening bid max: 20% of seed cap
+                amount = window._firstBidMax || window._maxBid;
             } else if (percent === 10) {
                 amount = minimumCost; // min is the +10% escalation
             } else if (percent === 20) {
-                // Calculate 20% escalation from the base (min is 10%, so 20% = min * 1.2/1.1)
-                // Or just use midpoint between min and max
                 if (window._maxBid) {
-                    // 20% is 2/3 between min(10%) and max(30%)
                     amount = minimumCost + (window._maxBid - minimumCost) * 0.5;
                     amount = Math.ceil(amount * 10000) / 10000;
                 }
@@ -2709,7 +2720,8 @@
                 
                 // Toggle active state on ALL quick bid buttons
                 document.querySelectorAll('.quick-bid-btn').forEach(b => b.classList.remove('active'));
-                const btnId = percent === 'min' ? 'quickBidMin' : 
+                const btnId = percent === 'min' ? 'quickBidMin' :
+                              percent === 'max' ? 'quickBidMax' :
                               percent === 10 ? 'quickBid10' : 
                               percent === 20 ? 'quickBid20' : 'quickBid30';
                 const btn = document.getElementById(btnId);
