@@ -819,7 +819,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 14px;
+            padding: 8px 14px;
             border-radius: 14px;
             background: var(--bg-card);
             border: 1px solid var(--glass-border);
@@ -840,19 +840,19 @@
         }
 
         .action-card-icon {
-            font-size: 22px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 10px;
             flex-shrink: 0;
         }
 
         .action-card-logo {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
         }
 
         .action-card-text {
@@ -900,10 +900,11 @@
         }
         .buy-card .action-card-sub {
             color: var(--neon-green);
+            font-size: 11px;
         }
         .buy-card .buy-card-title {
-            font-size: 16px;
-            letter-spacing: 3px;
+            font-size: 14px;
+            letter-spacing: 2px;
         }
 
         /* Burnt card */
@@ -1142,6 +1143,23 @@
             letter-spacing: 1px;
             color: var(--neon-green);
             margin-left: 4px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .hz-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: linear-gradient(135deg, rgba(255, 45, 45, 0.2), rgba(255, 80, 0, 0.15));
+            border: 1px solid rgba(255, 45, 45, 0.3);
+            font-family: var(--font-display);
+            font-size: 6px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--neon-red);
+            margin-left: 3px;
             vertical-align: middle;
             white-space: nowrap;
         }
@@ -3862,7 +3880,12 @@
                     const lottoTagHTML = '<span class="lotto-tag">🎰 LOTTO ENTRY</span>';
                     
                     if (holder && holder !== '0x0000000000000000000000000000000000000000') {
-                        currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '');
+                        let holderHZTag = '';
+                        try {
+                            const holderHZ = await chickenContract.methods.hotZoneDeposits(currentRoundNum, holder).call();
+                            if (BigInt(holderHZ) > BigInt(0)) holderHZTag = ' <span class="hz-tag">HOT</span>';
+                        } catch(e) {}
+                        currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '') + holderHZTag;
                         
                         // Get the holder's individual deposit using deposits mapping
                         try {
@@ -3910,7 +3933,11 @@
                                 const participantsWithDeposits = await Promise.all(
                                     participants.map(async (addr) => {
                                         const deposit = await chickenContract.methods.deposits(currentRoundNum, addr).call();
-                                        return { address: addr, deposit };
+                                        let hzDeposit = '0';
+                                        try {
+                                            hzDeposit = await chickenContract.methods.hotZoneDeposits(currentRoundNum, addr).call();
+                                        } catch(e) {}
+                                        return { address: addr, deposit, hzDeposit };
                                     })
                                 );
                                 
@@ -3956,11 +3983,13 @@
                                         
                                         const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
                                         const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO ENTRY</span>' : '';
+                                        const isHZBidder = BigInt(plucker.hzDeposit) > BigInt(0);
+                                        const hzTag = isHZBidder ? ' <span class="hz-tag">HOT</span>' : '';
                                         
                                         return `
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">🐔</span>
-                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}</span>
+                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${hzTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                             <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
