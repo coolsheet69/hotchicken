@@ -262,56 +262,127 @@
             -webkit-user-select: none;
             z-index: 99999;
             filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+            cursor: grab;
         }
 
-        /* Idle breathing animation on the body */
+        .chicken:active {
+            cursor: grabbing;
+        }
+
+        /* Idle breathing animation on the body - ENHANCED */
         .chicken .body-group {
-            animation: idle-breathe 3s ease-in-out infinite;
+            animation: idle-breathe 2.5s ease-in-out infinite;
             transform-origin: 150px 260px;
         }
         @keyframes idle-breathe {
             0%, 100% { transform: scaleX(1) scaleY(1); }
-            50% { transform: scaleX(1.02) scaleY(0.985); }
+            50% { transform: scaleX(1.025) scaleY(0.975); }
         }
 
-        /* Subtle wing idle sway */
+        /* Subtle wing idle sway - ENHANCED with occasional flap */
         .chicken .wing-left {
-            animation: wing-idle-left 4s ease-in-out infinite;
+            animation: wing-idle-left 3s ease-in-out infinite;
             transform-origin: 120px 255px;
         }
         .chicken .wing-right {
-            animation: wing-idle-right 4s ease-in-out infinite;
+            animation: wing-idle-right 3s ease-in-out infinite;
             transform-origin: 180px 255px;
         }
         @keyframes wing-idle-left {
             0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(-2deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(1deg); }
         }
         @keyframes wing-idle-right {
             0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(2deg); }
+            25% { transform: rotate(3deg); }
+            75% { transform: rotate(-1deg); }
         }
 
-        /* Subtle tail sway */
+        /* Subtle tail sway - ENHANCED */
         .chicken .tail-feathers {
-            animation: tail-sway 5s ease-in-out infinite;
+            animation: tail-sway 4s ease-in-out infinite;
             transform-origin: 70px 260px;
         }
         @keyframes tail-sway {
             0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(-1.5deg) translateX(-2px); }
+            25% { transform: rotate(-2deg) translateX(-3px); }
+            75% { transform: rotate(1deg) translateX(-1px); }
         }
 
-        /* Chain bling subtle jiggle */
+        /* Chain bling subtle jiggle - ENHANCED */
         .chicken .bling {
-            animation: bling-jiggle 3s ease-in-out infinite;
+            animation: bling-jiggle 2s ease-in-out infinite;
             transform-origin: 150px 240px;
             transform: scale(1.11);
         }
         @keyframes bling-jiggle {
             0%, 100% { transform: scale(1.11) rotate(0deg); }
-            25% { transform: scale(1.11) rotate(0.5deg); }
-            75% { transform: scale(1.11) rotate(-0.5deg); }
+            25% { transform: scale(1.11) rotate(1deg); }
+            75% { transform: scale(1.11) rotate(-1deg); }
+        }
+
+        /* ===== EYE TRACKING - Follow cursor! ===== */
+        .chicken .eye-tracking-left,
+        .chicken .eye-tracking-right {
+            transition: transform 0.15s ease-out;
+        }
+
+        /* ===== BLINKING ANIMATION ===== */
+        .chicken .eyelid-left,
+        .chicken .eyelid-right {
+            transform-origin: 50% 0%;
+            animation: blink 4s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(0); }  /* Eyes open */
+            48%, 52% { transform: scaleY(1); }  /* Eyes closed briefly */
+        }
+
+        /* Grabbed state - rapid blinking */
+        .chicken.grabbed .eyelid-left,
+        .chicken.grabbed .eyelid-right {
+            animation: blink-rapid 0.15s ease-in-out infinite;
+        }
+        @keyframes blink-rapid {
+            0%, 50%, 100% { transform: scaleY(0); }
+            25%, 75% { transform: scaleY(1); }
+        }
+
+        /* ===== SWEAT DROPS - Hot zone anxiety ===== */
+        .chicken .sweat-drop-left,
+        .chicken .sweat-drop-right {
+            opacity: 0;
+            transform-origin: center bottom;
+        }
+        .chicken.hotzone .sweat-drop-left,
+        .chicken.hotzone .sweat-drop-right {
+            animation: sweat-drop 1.2s ease-in-out infinite;
+        }
+        .chicken.hotzone .sweat-drop-left { animation-delay: 0.3s; }
+        .chicken.hotzone .sweat-drop-right { animation-delay: 0.6s; }
+
+        @keyframes sweat-drop {
+            0% { opacity: 0; transform: translateY(0) scale(0.5); }
+            20% { opacity: 1; transform: translateY(5px) scale(1); }
+            80% { opacity: 0.8; transform: translateY(25px) scale(0.8); }
+            100% { opacity: 0; transform: translateY(40px) scale(0.3); }
+        }
+
+        /* ===== WORRIED EXPRESSION IN HOT ZONE ===== */
+        .chicken.hotzone .eyebrow-left {
+            animation: eyebrow-worried-left 0.8s ease-in-out infinite;
+        }
+        .chicken.hotzone .eyebrow-right {
+            animation: eyebrow-worried-right 0.8s ease-in-out infinite;
+        }
+        @keyframes eyebrow-worried-left {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+        @keyframes eyebrow-worried-right {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
         }
 
         .chicken.dodging { transition: transform 0.15s ease-out; }
@@ -320,7 +391,7 @@
             transform: scale(0.88, 1.12) rotate(-2deg) !important;
         }
 
-        /* Grabbed: neck squeezes, head shakes, eyes go crazy, wings flap */
+        /* Grabbed: neck squeezes, head shakes, eyes go crazy, wings flap - ENHANCED */
         .chicken.grabbed .neck-squeeze { transform: scaleX(0.3) scaleY(1.4); }
         .chicken.grabbed .head-squeeze {
             transform: scale(1.08);
@@ -330,40 +401,73 @@
         .chicken.grabbed .eye-squeeze { transform: scale(1.3); }
         .chicken.grabbed .pupil-left { animation: grab-eye-left 0.08s ease-in-out infinite !important; }
         .chicken.grabbed .pupil-right { animation: grab-eye-right 0.08s ease-in-out infinite !important; }
+        .chicken.grabbed .chicken-tongue { opacity: 1; animation: tongue-flicker 0.15s ease-in-out infinite; }
+        
+        /* Grabbed face - worried eyebrows */
+        .chicken.grabbed .eyebrow-left,
+        .chicken.grabbed .eyebrow-right {
+            animation: eyebrow-scare 0.12s ease-in-out infinite;
+        }
+        @keyframes eyebrow-scare {
+            0%, 100% { transform: translateY(3px); }
+            50% { transform: translateY(-2px); }
+        }
+        
+        @keyframes tongue-flicker {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+        }
 
-        /* Wings flap wildly when grabbed */
+        /* Wings flap wildly when grabbed - ENHANCED */
         .chicken.grabbed .wing-left {
-            animation: wing-flap-left 0.12s ease-in-out infinite !important;
+            animation: wing-flap-left 0.1s ease-in-out infinite !important;
         }
         .chicken.grabbed .wing-right {
-            animation: wing-flap-right 0.12s ease-in-out infinite !important;
+            animation: wing-flap-right 0.1s ease-in-out infinite !important;
         }
         @keyframes wing-flap-left {
             0%, 100% { transform: rotate(0deg) scaleX(1); }
-            50% { transform: rotate(-25deg) scaleX(0.8); }
+            25% { transform: rotate(-20deg) scaleX(0.85); }
+            50% { transform: rotate(-35deg) scaleX(0.75); }
+            75% { transform: rotate(-20deg) scaleX(0.85); }
         }
         @keyframes wing-flap-right {
             0%, 100% { transform: rotate(0deg) scaleX(1); }
-            50% { transform: rotate(25deg) scaleX(0.8); }
+            25% { transform: rotate(20deg) scaleX(0.85); }
+            50% { transform: rotate(35deg) scaleX(0.75); }
+            75% { transform: rotate(20deg) scaleX(0.85); }
         }
 
-        /* Chain swings when grabbed */
+        /* Chain swings when grabbed - ENHANCED */
         .chicken.grabbed .bling {
-            animation: bling-swing 0.15s ease-in-out infinite !important;
+            animation: bling-swing 0.12s ease-in-out infinite !important;
         }
         @keyframes bling-swing {
-            0%, 100% { transform: scale(1.11) rotate(-3deg); }
-            50% { transform: scale(1.11) rotate(3deg); }
+            0%, 100% { transform: scale(1.11) rotate(-5deg); }
+            50% { transform: scale(1.11) rotate(5deg); }
         }
 
-        @keyframes grab-eye-left { 0%, 100% { transform: translateX(-8px); } 50% { transform: translateX(8px); } }
-        @keyframes grab-eye-right { 0%, 100% { transform: translateX(8px); } 50% { transform: translateX(-8px); } }
+        @keyframes grab-eye-left { 0%, 100% { transform: translateX(-10px); } 50% { transform: translateX(10px); } }
+        @keyframes grab-eye-right { 0%, 100% { transform: translateX(10px); } 50% { transform: translateX(-10px); } }
         @keyframes head-shake {
-            0% { transform: scale(1.08) rotate(-8deg) translateX(-3px); }
-            25% { transform: scale(1.08) rotate(8deg) translateX(3px); }
-            50% { transform: scale(1.08) rotate(-8deg) translateX(-3px); }
-            75% { transform: scale(1.08) rotate(8deg) translateX(3px); }
-            100% { transform: scale(1.08) rotate(-8deg) translateX(-3px); }
+            0% { transform: scale(1.08) rotate(-10deg) translateX(-4px); }
+            25% { transform: scale(1.08) rotate(10deg) translateX(4px); }
+            50% { transform: scale(1.08) rotate(-10deg) translateX(-4px); }
+            75% { transform: scale(1.08) rotate(10deg) translateX(4px); }
+            100% { transform: scale(1.08) rotate(-10deg) translateX(-4px); }
+        }
+
+        /* ===== FEATHERS FALLING - Grabbed effect ===== */
+        .feather-fall {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 100000;
+            animation: feather-fall 1.5s ease-out forwards;
+        }
+        @keyframes feather-fall {
+            0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translate(var(--fall-x, 50px), 150px) rotate(720deg) scale(0.3); }
         }
 
         /* ===== HOT ZONE - chicken on fire ===== */
@@ -371,43 +475,159 @@
             filter: hue-rotate(-20deg) saturate(1.6) brightness(1.15) 
                     drop-shadow(0 0 20px rgba(255, 45, 45, 0.6))
                     drop-shadow(0 0 50px rgba(255, 45, 45, 0.3));
+            animation: hotzone-shake 0.5s ease-in-out infinite;
+        }
+        @keyframes hotzone-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
         }
 
         .chicken.hotzone .pupil-left,
-        .chicken.hotzone .pupil-right { animation-duration: 0.5s !important; }
+        .chicken.hotzone .pupil-right { animation-duration: 0.4s !important; }
 
-        /* Tail feathers glow during hotzone */
+        /* Tail feathers glow during hotzone - ENHANCED */
         .chicken.hotzone .tail-feathers {
-            animation: tail-hotzone 0.8s ease-in-out infinite !important;
+            animation: tail-hotzone 0.6s ease-in-out infinite !important;
         }
         @keyframes tail-hotzone {
-            0%, 100% { transform: rotate(0deg); opacity: 1; }
-            50% { transform: rotate(-3deg) translateX(-3px); opacity: 0.85; }
+            0%, 100% { transform: rotate(0deg); opacity: 1; filter: brightness(1.2); }
+            50% { transform: rotate(-5deg) translateX(-5px); opacity: 0.8; filter: brightness(1.5); }
+        }
+
+        /* Hot zone body pulses */
+        .chicken.hotzone .body-group {
+            animation: hotzone-pulse 0.8s ease-in-out infinite !important;
+        }
+        @keyframes hotzone-pulse {
+            0%, 100% { transform: scaleX(1) scaleY(1); filter: brightness(1); }
+            50% { transform: scaleX(1.03) scaleY(0.97); filter: brightness(1.3); }
+        }
+
+        /* Hot zone wings flutter */
+        .chicken.hotzone .wing-left {
+            animation: wing-hotzone-left 0.6s ease-in-out infinite !important;
+        }
+        .chicken.hotzone .wing-right {
+            animation: wing-hotzone-right 0.6s ease-in-out infinite !important;
+        }
+        @keyframes wing-hotzone-left {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-8deg); }
+        }
+        @keyframes wing-hotzone-right {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(8deg); }
+        }
+
+        /* ===== FIRE PARTICLES - Hot zone effect ===== */
+        .fire-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 99997;
+        }
+        .fire-particle::before {
+            content: '🔥';
+            font-size: 16px;
+            position: absolute;
+            animation: fire-flicker 0.8s ease-in-out infinite;
+        }
+        .chicken.hotzone .fire-particle {
+            opacity: 1;
+        }
+        .fire-particle:nth-child(1) { top: 0%; left: 30%; animation: fire-rise 2s ease-out infinite; }
+        .fire-particle:nth-child(2) { top: 10%; left: 50%; animation: fire-rise 2s ease-out infinite 0.3s; }
+        .fire-particle:nth-child(3) { top: 5%; left: 70%; animation: fire-rise 2s ease-out infinite 0.6s; }
+        .fire-particle:nth-child(4) { top: 15%; left: 40%; animation: fire-rise 2s ease-out infinite 0.9s; }
+
+        @keyframes fire-rise {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translateY(-10px) scale(1); }
+            100% { transform: translateY(-80px) scale(0.3); opacity: 0; }
         }
 
         .hotzone-smoke {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 280px; height: 410px;
+            width: 320px; height: 450px;
             pointer-events: none; opacity: 0;
             transition: opacity 0.5s ease;
         }
         .hotzone-smoke.active { opacity: 1; }
 
         .smoke-particle {
-            position: absolute; width: 60px; height: 60px;
-            background: radial-gradient(circle, rgba(255, 100, 100, 0.3) 0%, rgba(255, 150, 0, 0.1) 50%, transparent 100%);
+            position: absolute; width: 70px; height: 70px;
+            background: radial-gradient(circle, rgba(255, 80, 80, 0.4) 0%, rgba(255, 120, 0, 0.2) 50%, transparent 100%);
             border-radius: 50%;
-            animation: smoke-rise 3s ease-in-out infinite;
+            animation: smoke-rise 2s ease-in-out infinite;
         }
-        .smoke-particle:nth-child(1) { left: 20%; animation-delay: 0s; }
-        .smoke-particle:nth-child(2) { left: 50%; animation-delay: 1s; }
-        .smoke-particle:nth-child(3) { left: 70%; animation-delay: 2s; }
+        .smoke-particle:nth-child(1) { left: 15%; animation-delay: 0s; }
+        .smoke-particle:nth-child(2) { left: 35%; animation-delay: 0.6s; }
+        .smoke-particle:nth-child(3) { left: 55%; animation-delay: 1.2s; }
+        .smoke-particle:nth-child(4) { left: 75%; animation-delay: 0.3s; }
+        .smoke-particle:nth-child(5) { left: 95%; animation-delay: 0.9s; }
 
         @keyframes smoke-rise {
             0% { bottom: 0; opacity: 0; transform: scale(0.5); }
-            50% { opacity: 0.6; transform: scale(1); }
-            100% { bottom: 100%; opacity: 0; transform: scale(1.5); }
+            40% { opacity: 0.7; transform: scale(1.1); }
+            100% { bottom: 100%; opacity: 0; transform: scale(1.8); }
+        }
+
+        /* ===== STAR EYES - Happy state ===== */
+        .chicken.star-eyes .pupil-left::after,
+        .chicken.star-eyes .pupil-right::after {
+            content: '⭐';
+            position: absolute;
+            font-size: 10px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: star-spin 1s linear infinite;
+        }
+        @keyframes star-spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* ===== DIZZY EYES - After big combo ===== */
+        .chicken.dizzy-eyes .pupil-left {
+            animation: dizzy-spin-left 0.5s linear infinite !important;
+        }
+        .chicken.dizzy-eyes .pupil-right {
+            animation: dizzy-spin-right 0.5s linear infinite !important;
+        }
+        @keyframes dizzy-spin-left {
+            0% { transform: translate(-5px, -5px); }
+            25% { transform: translate(5px, -5px); }
+            50% { transform: translate(5px, 5px); }
+            75% { transform: translate(-5px, 5px); }
+            100% { transform: translate(-5px, -5px); }
+        }
+        @keyframes dizzy-spin-right {
+            0% { transform: translate(5px, -5px); }
+            25% { transform: translate(-5px, -5px); }
+            50% { transform: translate(-5px, 5px); }
+            75% { transform: translate(5px, 5px); }
+            100% { transform: translate(5px, -5px); }
+        }
+        
+        /* ===== HEART EYES - Love state ===== */
+        .chicken.heart-eyes .eye-left .pupil-left::after,
+        .chicken.heart-eyes .eye-right .pupil-right::after {
+            content: '💕';
+            position: absolute;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heart-beat 0.8s ease-in-out infinite;
+        }
+        @keyframes heart-beat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
         }
 
         /* Hotzone Floating Messages */
@@ -455,6 +675,17 @@
             0%, 100% { transform: rotate(0deg); }
             25% { transform: rotate(-5deg) scale(0.9, 1.1); }
             75% { transform: rotate(5deg) scale(0.9, 1.1); }
+        }
+
+        /* Funny dance animation */
+        .chicken.dancing { animation: chicken-dance 1s ease-in-out; }
+        @keyframes chicken-dance {
+            0% { transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(-20px) rotate(-10deg); }
+            40% { transform: translateY(0) rotate(10deg); }
+            60% { transform: translateY(-15px) rotate(-5deg); }
+            80% { transform: translateY(-5px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
         }
 
         /* Spinning pupils */
@@ -1580,7 +1811,7 @@
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 100002;
-            background: rgba(5, 5, 15, 0.92);
+            background: rgba(5, 5, 15, 1);
             align-items: center;
             justify-content: center;
             border-radius: 16px;
@@ -2112,6 +2343,8 @@
                         <path d="M 140 88 L 150 82 L 160 88 L 150 93 Z" fill="url(#beakGrad)" stroke="#D4A800" stroke-width="1.5"/>
                         <!-- Lower beak (slightly open - looks like talking/squawking) -->
                         <path d="M 142 93 L 150 99 L 158 93 Z" fill="#E8B500" stroke="#C49800" stroke-width="1" opacity="0.85"/>
+                        <!-- Tongue - shows when grabbed -->
+                        <path class="chicken-tongue" d="M 145 128 Q 150 140 155 128" fill="#E74C3C" stroke="#B83227" stroke-width="1.5" opacity="0"/>
                     </g>
                     
                     <!-- ===== LEGS ===== -->
@@ -2149,6 +2382,8 @@
                 
                 <!-- Hot Zone Smoke -->
                 <div class="hotzone-smoke" id="hotzone Smoke">
+                    <div class="smoke-particle"></div>
+                    <div class="smoke-particle"></div>
                     <div class="smoke-particle"></div>
                     <div class="smoke-particle"></div>
                     <div class="smoke-particle"></div>
@@ -2545,11 +2780,19 @@
             if (!isHovering) {
                 isHovering = true;
                 createHoverSound();
+                // Add heart eyes briefly when first hovering
+                chicken.classList.add('heart-eyes');
+                setTimeout(() => {
+                    if (!chicken.classList.contains('grabbed')) {
+                        chicken.classList.remove('heart-eyes');
+                    }
+                }, 800);
             }
         });
 
         chicken.addEventListener('mouseleave', () => {
             isHovering = false;
+            chicken.classList.remove('heart-eyes', 'star-eyes', 'dizzy-eyes');
         });
 
         // Touch support for mobile - play hover sound on touch start
@@ -2577,6 +2820,25 @@
             
             // Create particles
             createParticles(e.clientX, e.clientY);
+            
+            // Create falling feathers when grabbed
+            createFeatherFalls();
+            
+            // 10% chance to trigger a dance
+            if (Math.random() < 0.1) {
+                chicken.classList.add('dancing');
+                setTimeout(() => {
+                    chicken.classList.remove('dancing');
+                }, 1000);
+            }
+            
+            // After animation, maybe show star eyes briefly
+            setTimeout(() => {
+                if (!chicken.classList.contains('grabbed')) {
+                    chicken.classList.add('star-eyes');
+                    setTimeout(() => chicken.classList.remove('star-eyes'), 1500);
+                }
+            }, 500);
             
             // Reset after animation
             setTimeout(() => {
@@ -2606,8 +2868,8 @@
         }
 
         function createParticles(x, y) {
-            const particles = ['💥', '⭐', '✨', '💫', '🔥'];
-            const numParticles = 5;
+            const particles = ['💥', '⭐', '✨', '💫', '🔥', '🌟'];
+            const numParticles = 7;
             
             for (let i = 0; i < numParticles; i++) {
                 const particle = document.createElement('div');
@@ -2615,11 +2877,78 @@
                 particle.textContent = particles[Math.floor(Math.random() * particles.length)];
                 particle.style.left = x + (Math.random() - 0.5) * 100 + 'px';
                 particle.style.top = y + (Math.random() - 0.5) * 100 + 'px';
+                
+                // Random animation duration
+                particle.style.animationDuration = (0.8 + Math.random() * 0.5) + 's';
+                
                 document.body.appendChild(particle);
                 
-                setTimeout(() => particle.remove(), 1000);
+                setTimeout(() => particle.remove(), 1200);
             }
         }
+        
+        // Create falling feathers when chicken is grabbed
+        function createFeatherFalls() {
+            const featherEmojis = ['🪶', '🪶', '🪶', '💨'];
+            const chickenRect = chicken.getBoundingClientRect();
+            const chickenArea = document.querySelector('.chicken-area');
+            
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const feather = document.createElement('div');
+                    feather.className = 'feather-fall';
+                    feather.textContent = featherEmojis[Math.floor(Math.random() * featherEmojis.length)];
+                    
+                    // Position relative to chicken area
+                    const rect = chickenArea.getBoundingClientRect();
+                    const startX = rect.left + rect.width * (0.2 + Math.random() * 0.6);
+                    const startY = rect.top + rect.height * (0.2 + Math.random() * 0.3);
+                    
+                    feather.style.left = startX + 'px';
+                    feather.style.top = startY + 'px';
+                    // Random horizontal fall direction
+                    feather.style.setProperty('--fall-x', (Math.random() > 0.5 ? '' : '-') + (30 + Math.random() * 60) + 'px');
+                    
+                    document.body.appendChild(feather);
+                    
+                    setTimeout(() => feather.remove(), 1500);
+                }, i * 80 + Math.random() * 100);
+            }
+        }
+        
+        // ===== EYE TRACKING - Make pupils follow cursor! =====
+        const pupilLeft = document.querySelector('.pupil-left');
+        const pupilRight = document.querySelector('.pupil-right');
+        
+        function updateEyeTracking() {
+            if (!pupilLeft || !pupilRight) return;
+            
+            const chickenRect = chicken.getBoundingClientRect();
+            const eyeCenterX = chickenRect.left + chickenRect.width * 0.45;
+            const eyeCenterY = chickenRect.top + chickenRect.height * 0.25;
+            
+            // Calculate angle and distance to mouse
+            const angle = Math.atan2(mouseY - eyeCenterY, mouseX - eyeCenterX);
+            const distance = Math.min(50, Math.sqrt(Math.pow(mouseX - eyeCenterX, 2) + Math.pow(mouseY - eyeCenterY, 2)));
+            
+            // Move pupils in direction of mouse (limited range)
+            const offsetX = Math.cos(angle) * (distance * 0.15);
+            const offsetY = Math.sin(angle) * (distance * 0.15);
+            
+            // Apply to both pupils (they already have spin animation, so we add to it)
+            if (!chicken.classList.contains('grabbed')) {
+                pupilLeft.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                pupilRight.style.transform = `translate(${-offsetX}px, ${offsetY}px)`;
+            }
+        }
+        
+        // Update eye tracking on mouse move
+        document.addEventListener('mousemove', () => {
+            updateEyeTracking();
+        });
+        
+        // Initialize eye tracking
+        setTimeout(updateEyeTracking, 100);
 
         // Placeholder for blockchain integration
         function grabChickenBlockchain() {
@@ -3276,18 +3605,44 @@
                     document.getElementById('hotzoneLeft').classList.remove('active');
                     document.getElementById('hotzoneRight').classList.remove('active');
                     
-                    // Try to get round stats from the just-settled round
+                    // Try to get round stats from the tx receipt events first (most accurate)
                     let statsHTML = '';
                     try {
-                        const prevRound = await chickenContract.methods.currentRound().call();
-                        const settledRound = Math.max(1, parseInt(prevRound) - 1);
-                        const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
-                        const pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
-                        const burned = parseFloat(web3.utils.fromWei(roundData.burned || roundData.burnedAmount || '0', 'ether'));
-                        const lottoPrize = parseFloat(web3.utils.fromWei(roundData.lottoPrize || roundData.actualLottoPot || '0', 'ether'));
-                        const loser = roundData.loser || '0x0000000000000000000000000000000000000000';
-                        const lottoWinner = roundData.lottoWinner || '0x0000000000000000000000000000000000000000';
+                        let pot = 0, burned = 0, lottoPrize = 0, loser = '', lottoWinner = '';
+                        let settledRound = 0;
                         const zeroAddr = '0x0000000000000000000000000000000000000000';
+                        
+                        // Parse events from the settlement transaction receipt
+                        const events = grabTx.events || {};
+                        console.log('Settlement tx events:', Object.keys(events));
+                        
+                        if (events.RoundSettled) {
+                            const rs = events.RoundSettled.returnValues;
+                            settledRound = parseInt(rs.round);
+                            burned = parseFloat(web3.utils.fromWei(rs.burned || '0', 'ether'));
+                            lottoPrize = parseFloat(web3.utils.fromWei(rs.lottoPrize || '0', 'ether'));
+                            loser = rs.loser || zeroAddr;
+                            lottoWinner = rs.lottoWinner || zeroAddr;
+                            pot = parseFloat(web3.utils.fromWei(rs.loserDeposits || '0', 'ether'));
+                            // Get full pot from getRoundInfo
+                            try {
+                                const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
+                                pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
+                            } catch(e) {}
+                            console.log('From RoundSettled event - round:', settledRound, 'loser:', loser, 'lottoWinner:', lottoWinner);
+                        } else {
+                            // Fallback: query contract after delay
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            const prevRound = await chickenContract.methods.currentRound().call();
+                            settledRound = Math.max(1, parseInt(prevRound) - 1);
+                            const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
+                            console.log('Fallback round data:', JSON.stringify(roundData));
+                            pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
+                            burned = parseFloat(web3.utils.fromWei(roundData.burned || roundData.burnedAmount || '0', 'ether'));
+                            lottoPrize = parseFloat(web3.utils.fromWei(roundData.lottoPrize || roundData.actualLottoPot || '0', 'ether'));
+                            loser = roundData.loser || zeroAddr;
+                            lottoWinner = roundData.lottoWinner || zeroAddr;
+                        }
                         
                         statsHTML = `
                             <div class="rt-stat"><span class="rt-stat-label">Round</span><span class="rt-stat-value gold">#${settledRound}</span></div>
@@ -3527,9 +3882,11 @@
             // Create feather explosion
             createFeathers();
             
-            // Show game over message
+            // Show game over message (only if round transition isn't showing)
             setTimeout(() => {
-                document.getElementById('gameOverMessage').classList.add('show');
+                if (!document.getElementById('roundTransition').classList.contains('show')) {
+                    document.getElementById('gameOverMessage').classList.add('show');
+                }
             }, 500);
             
             // Reset input to default minimum for new round
