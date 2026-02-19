@@ -1364,12 +1364,12 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            padding: 1px 6px;
+            padding: 2px 6px;
             border-radius: 4px;
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 200, 100, 0.1));
             border: 1px solid rgba(0, 255, 136, 0.25);
             font-family: var(--font-display);
-            font-size: 7px;
+            font-size: 9px;
             font-weight: 700;
             letter-spacing: 1px;
             color: var(--neon-green);
@@ -1381,12 +1381,12 @@
         .hz-tag {
             display: inline-flex;
             align-items: center;
-            padding: 1px 5px;
+            padding: 2px 5px;
             border-radius: 3px;
             background: linear-gradient(135deg, rgba(255, 45, 45, 0.2), rgba(255, 80, 0, 0.15));
             border: 1px solid rgba(255, 45, 45, 0.3);
             font-family: var(--font-display);
-            font-size: 6px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 1px;
             color: var(--neon-red);
@@ -1398,29 +1398,23 @@
         .dc-tag {
             display: inline-flex;
             align-items: center;
-            padding: 1px 5px;
+            padding: 2px 5px;
             border-radius: 3px;
             background: linear-gradient(135deg, rgba(180, 0, 255, 0.2), rgba(120, 0, 200, 0.15));
             border: 1px solid rgba(180, 0, 255, 0.35);
             font-family: var(--font-display);
-            font-size: 6px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 1px;
             color: #c84dff;
             margin-left: 3px;
             vertical-align: middle;
             white-space: nowrap;
-            animation: dcPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes dcPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
         }
 
         .leaderboard-column-headers {
             display: grid;
-            grid-template-columns: 55px 1fr 85px 85px;
+            grid-template-columns: 55px 1fr 95px 95px;
             gap: 6px; padding: 6px 10px; margin-bottom: 4px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
@@ -1428,7 +1422,7 @@
 
         .leaderboard-column-headers span {
             color: var(--text-secondary);
-            font-size: 10px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-family: var(--font-display);
@@ -1446,7 +1440,7 @@
             border: 1px solid rgba(255, 215, 0, 0.25);
             box-shadow: var(--glow-gold);
             display: grid;
-            grid-template-columns: 55px 1fr 85px 85px;
+            grid-template-columns: 55px 1fr 95px 95px;
             align-items: center; gap: 6px;
             transition: box-shadow 0.3s;
         }
@@ -1484,9 +1478,9 @@
         /* Holder items */
         .holder-item {
             background: rgba(255, 255, 255, 0.03);
-            padding: 5px 10px; border-radius: 8px; margin-bottom: 3px;
+            padding: 7px 10px; border-radius: 8px; margin-bottom: 3px;
             display: grid;
-            grid-template-columns: 55px 1fr 85px 85px;
+            grid-template-columns: 55px 1fr 95px 95px;
             align-items: center;
             transition: background 0.2s ease, border-color 0.2s;
             gap: 6px;
@@ -1501,22 +1495,22 @@
         .holder-item.user-connected:hover { background: rgba(0, 212, 255, 0.1); }
         .holder-item.user-connected .holder-address { color: var(--neon-blue); font-weight: 700; }
 
-        .holder-rank { color: var(--text-secondary); font-size: 13px; font-weight: 700; text-align: left; font-family: var(--font-display); }
-        .holder-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 13px; text-align: left; padding-left: 0.5em; }
+        .holder-rank { color: var(--text-secondary); font-size: 15px; font-weight: 700; text-align: left; font-family: var(--font-display); }
+        .holder-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 15px; text-align: left; padding-left: 0.5em; }
         .holder-amount {
-            color: var(--neon-gold); font-size: 14px; font-weight: 700;
+            color: var(--neon-gold); font-size: 16px; font-weight: 700;
             white-space: nowrap; display: flex; align-items: center;
             gap: 2px; justify-content: flex-end;
             font-family: var(--text-mono);
         }
-        .holder-amount .eshare-symbol { width: 18px; height: 18px; }
+        .holder-amount .eshare-symbol { width: 20px; height: 20px; }
         .holder-winnings {
-            color: var(--neon-green); font-size: 14px; font-weight: 700;
+            color: var(--neon-green); font-size: 16px; font-weight: 700;
             white-space: nowrap; display: flex; align-items: center;
             gap: 2px; justify-content: flex-end;
             font-family: var(--text-mono);
         }
-        .holder-winnings .eshare-symbol { width: 18px; height: 18px; }
+        .holder-winnings .eshare-symbol { width: 20px; height: 20px; }
         .holder-time { color: var(--text-secondary); font-size: 10px; white-space: nowrap; text-align: right; }
 
         .previous-holders { max-height: 360px; overflow-y: auto; overflow-x: hidden; }
@@ -1978,10 +1972,10 @@
             .leaderboard-container { max-width: 100%; overflow-x: hidden; padding: 10px; }
             .leaderboard-title { font-size: 14px; letter-spacing: 2px; }
             .lotto-tag { font-size: 6px; padding: 1px 4px; }
-            .leaderboard-column-headers { grid-template-columns: 50px 1fr 72px 72px; gap: 4px; padding: 5px 8px; }
+            .leaderboard-column-headers { grid-template-columns: 50px 1fr 80px 80px; gap: 4px; padding: 5px 8px; }
             .leaderboard-column-headers span { font-size: 9px; }
 
-            .current-holder { padding: 8px; gap: 4px; grid-template-columns: 50px 1fr 72px 72px; }
+            .current-holder { padding: 8px; gap: 4px; grid-template-columns: 50px 1fr 80px 80px; }
             .current-holder-label { font-size: 9px; }
             .current-holder-address { font-size: 12px; }
             .current-holder-amount { font-size: 13px; }
@@ -1989,11 +1983,11 @@
             .current-holder-winnings { font-size: 13px; }
             .current-holder-winnings .eshare-symbol { width: 16px; height: 16px; }
 
-            .holder-item { padding: 6px 8px; gap: 4px; grid-template-columns: 50px 1fr 72px 72px; }
-            .holder-rank { font-size: 12px; }
-            .holder-address { font-size: 12px; }
-            .holder-amount, .holder-winnings { font-size: 12px; }
-            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 15px; height: 15px; }
+            .holder-item { padding: 6px 8px; gap: 4px; grid-template-columns: 50px 1fr 80px 80px; }
+            .holder-rank { font-size: 13px; }
+            .holder-address { font-size: 13px; }
+            .holder-amount, .holder-winnings { font-size: 13px; }
+            .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 16px; height: 16px; }
 
             .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 8px; }
             .previous-winners-title { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 6px; }
@@ -3682,8 +3676,8 @@
                         } catch(e) { console.log('Dead chicken info not available:', e.message); }
                         
                         const dcHTML = dcVictim !== zeroAddr 
-                            ? `<div class="rt-stat"><span class="rt-stat-label">💀 Dead Chicken</span><span class="rt-stat-value" style="color: #c84dff;">${formatAddress(dcVictim)} (−${dcLost.toFixed(4)})</span></div>`
-                            : `<div class="rt-stat"><span class="rt-stat-label">💀 Dead Chicken</span><span class="rt-stat-value" style="color: #666;">None (< 3 players)</span></div>`;
+                            ? `<div class="rt-stat"><span class="rt-stat-label">💀☠️ Dead Chicken</span><span class="rt-stat-value" style="color: #c84dff;">${formatAddress(dcVictim)} (−${dcLost.toFixed(4)})</span></div>`
+                            : `<div class="rt-stat"><span class="rt-stat-label">💀☠️ Dead Chicken</span><span class="rt-stat-value" style="color: #666;">None (< 3 players)</span></div>`;
                         
                         statsHTML = `
                             <div class="rt-stat"><span class="rt-stat-label">Round</span><span class="rt-stat-value gold">#${settledRound}</span></div>
@@ -4664,7 +4658,7 @@
                             <div class="winner-info">
                                 <span class="winner-address">${formatAddress(p.address)}</span>
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
-                                ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀 Dead Chicken</span>' : ''}
+                                ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀☠️ Dead Chicken</span>' : ''}
                             </div>
                             <div class="winner-amount" style="color: ${roiColor};">
                                 ${roiDisplay}
