@@ -1565,7 +1565,7 @@
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
         }
 
-        .previous-winners-list { max-height: 220px; overflow-y: auto; overflow-x: hidden; }
+        .previous-winners-list { max-height: 420px; overflow-y: auto; overflow-x: hidden; }
         .previous-winners-list::-webkit-scrollbar { width: 4px; }
         .previous-winners-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
         .previous-winners-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
@@ -3710,6 +3710,7 @@
                     
                     document.getElementById('roundTransitionStats').innerHTML = statsHTML;
                     document.getElementById('roundTransition').classList.add('show');
+                    document.querySelector('.grab-button-container').style.display = 'none';
                     
                     // Countdown timer
                     let countdown = 15;
@@ -3733,6 +3734,7 @@
                     // After 15 seconds, reveal everything
                     setTimeout(() => {
                         document.getElementById('roundTransition').classList.remove('show');
+                        document.querySelector('.grab-button-container').style.display = '';
                         chicken.classList.remove('exploded', 'hotzone');
                         chicken.style.opacity = '1';
                         chicken.style.transform = '';
