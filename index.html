@@ -3664,14 +3664,29 @@
                         // Fetch dead chicken info for settled round
                         let dcVictim = zeroAddr, dcLost = 0;
                         try {
+                            // Try parsing from tx events first
                             if (events.DeadChicken) {
-                                const dc = events.DeadChicken.returnValues;
+                                const dcEvent = events.DeadChicken;
+                                const dc = dcEvent.returnValues || {};
+                                console.log('DeadChicken event returnValues:', JSON.stringify(dc));
                                 dcVictim = dc.victim || zeroAddr;
                                 dcLost = parseFloat(web3.utils.fromWei(dc.lostAmount || '0', 'ether'));
-                            } else if (settledRound > 0) {
-                                const dcInfo = await chickenContract.methods.getDeadChickenInfo(settledRound).call();
-                                dcVictim = dcInfo.victim || zeroAddr;
-                                dcLost = parseFloat(web3.utils.fromWei(dcInfo.lostAmount || '0', 'ether'));
+                                console.log('DeadChicken from event:', dcVictim, dcLost);
+                            }
+                            
+                            // Always verify/fallback with getDeadChickenInfo if we have a settled round
+                            if (settledRound > 0 && (dcVictim === zeroAddr || !events.DeadChicken)) {
+                                try {
+                                    const dcInfo = await chickenContract.methods.getDeadChickenInfo(settledRound).call();
+                                    console.log('getDeadChickenInfo result:', JSON.stringify(dcInfo));
+                                    const infoVictim = dcInfo.victim || dcInfo[0] || zeroAddr;
+                                    const infoLost = dcInfo.lostAmount || dcInfo[1] || '0';
+                                    if (infoVictim.toLowerCase() !== zeroAddr) {
+                                        dcVictim = infoVictim;
+                                        dcLost = parseFloat(web3.utils.fromWei(infoLost, 'ether'));
+                                    }
+                                    console.log('DeadChicken from getDeadChickenInfo:', dcVictim, dcLost);
+                                } catch(e2) { console.log('getDeadChickenInfo failed:', e2.message); }
                             }
                         } catch(e) { console.log('Dead chicken info not available:', e.message); }
                         
