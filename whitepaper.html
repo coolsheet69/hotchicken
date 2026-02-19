@@ -18,6 +18,7 @@
             --text-dim: #b0b0cc;
             --card: rgba(40, 40, 60, 0.7);
             --border: rgba(255, 77, 0, 0.2);
+            --flow-step-bg: rgba(30, 30, 45, 0.8);
         }
 
         * {
@@ -35,7 +36,7 @@
         }
 
         .container {
-            max-width: 920px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -59,9 +60,17 @@
             font-style: italic;
         }
 
-        .grid {
+        /* two-column layout */
+        .two-col {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .left-stack {
+            display: flex;
+            flex-direction: column;
             gap: 1.5rem;
         }
 
@@ -180,15 +189,89 @@
             font-size: 0.96rem;
         }
 
+        /* graphical game flow styles */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .flow-step {
+            background: var(--flow-step-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid rgba(255,77,0,0.2);
+            transition: 0.2s;
+        }
+
+        .flow-step:hover {
+            border-color: var(--accent);
+            background: #2a2a42;
+        }
+
+        .step-icon {
+            font-size: 1.8rem;
+            min-width: 2.2rem;
+            text-align: center;
+            filter: drop-shadow(0 0 4px #ff4d00);
+        }
+
+        .step-desc {
+            color: #d0d0f0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .step-desc strong {
+            color: var(--accent-glow);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+            opacity: 0.7;
+            line-height: 1;
+            margin: -0.2rem 0;
+        }
+
+        .flow-legend {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            background: rgba(255,77,0,0.08);
+            padding: 0.7rem;
+            border-radius: 12px;
+            border: 1px dashed var(--accent);
+        }
+
+        .legend-item {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #ffbb88;
+        }
+
         footer {
             text-align: center;
             color: #666688;
             font-size: 0.85rem;
             margin-top: 3rem;
         }
+
+        @media (max-width: 800px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-
 <body>
 <div class="container">
 
@@ -197,65 +280,116 @@
         <p class="tagline">Grab it. Pass it. Don't get burnt !</p>
     </header>
 
-    <div class="grid">
+    <!-- two columns: left = original How It Works + Tokenomics stacked, right = graphical flow -->
+    <div class="two-col">
+        <!-- LEFT STACK (exact original content) -->
+        <div class="left-stack">
+            <!-- How It Works (original) -->
+            <div class="box">
+                <h2>⚡ How It Works</h2>
+                <ul>
+                    <li>Opening bid capped at 30% of seed</li>
+                    <li>Deposit <strong>ESHARE</strong> to play</li>
+                    <li>Grabs costs +10% to +30% more than previous</li>
+                    <li>HOT ZONE (≤5 min left) players get 1% bonus</li>
+                    <li>Timer hits zero → GAME OVER</li>
+                    <li>Payouts, Lotto, and Dead Chicken settle instantly on a new bid and new round begins</li>
+<br>
+                            💡💡Recommended Strategy💡💡
+                            <br><br>
+                    ✔️Don't bid higher than Seed amount...........
+                         &nbsp;&nbsp;&nbsp;&nbsp...unless Gambl000r is feeling lucky AF!
+                    <br><br>
+                    ✔️Beware of dead chicken. ☠️☠️☠️
+                    <br><br>
+                    ✔️Only Risk what you are willing to lose.
+                    <br><br>
+                    ✔️Buy Coolsheet a banana cognac if you win big!!!❤️
+                </ul>
+            </div>
 
-        <div class="box">
-            <h2>⚡ How It Works</h2>
-            <ul>
-                <li>Opening bid capped at 30% of seed</li>
-                <li>Deposit <strong>ESHARE</strong> to grab the chicken, becoming the Lead Plucker</li>
-                <li>Next grab costs between +10% and +30% more than previous</li>
-                <li>During HOT ZONE (last ~5 mins), 1% bonus to grabbers and timer resets to 4m:20s each grab</li>
-                <li>Timer hits zero → Lead Plucker loses their bid, but receives the Seed</li>
-                <li>Only Lead Plucker + previous holder are eligible for lotto</li>
-                <li>💀 <strong>Dead Chicken</strong>: one random player (not Lead Plucker or Previous Holder) loses their deposit</li>
-                <li>Payouts, Lotto, and Dead Chicken settle instantly on a new bid and new round begins</li>
-            </ul>
-        </div>
+            <!-- Tokenomics (original) -->
+            <div class="box">
+                <h2>💸 Tokenomics</h2>
 
-        <div class="box">
-            <h2>💸 Tokenomics</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Burn</th>
+                            <th>Dev</th>
+                            <th>Lotto</th>
+                            <th>Hot Zone</th>
+                            <th>Total Tax</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>5%</td>
+                            <td>0.5%</td>
+                            <td>10%</td>
+                            <td>1%</td>
+                            <td>16.5%</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Burn</th>
-                        <th>Dev</th>
-                        <th>Lotto</th>
-                        <th>Hot Zone</th>
-                        <th>Total Tax</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>5%</td>
-                        <td>0.5%</td>
-                        <td>10%</td>
-                        <td>1%</td>
-                        <td>16.5%</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="note">
-                <p style="margin-bottom: 0.5rem;">→ Seed is <strong>tax-free</strong> to the Lead Plucker</p>
-                <p style="margin-bottom: 0.5rem;">→ Lotto = 10% of deposits</p>
-                <p>→ Hot Zone = 1% bonus to participants</p>
-                <p style="margin-top: 0.5rem;">→ Seed Vault = funded by <a href="https://dexfi.com/bonds" target="_blank" style="color: var(--accent-glow); text-decoration: underline;">DexFi Bonds</a> and community contributions</p>
+                <div class="note">
+                    <p style="margin-bottom: 0.5rem;">→ Seed is <strong>tax-free</strong> to the Lead Plucker</p>
+                    <p style="margin-bottom: 0.5rem;">→ Lotto = 10% of deposits</p>
+                    <p>→ Hot Zone = 1% bonus to participants</p>
+                    <p style="margin-top: 0.5rem;">→ Seed Vault = funded by <a href="https://dexfi.com/bonds" target="_blank" style="color: var(--accent-glow); text-decoration: underline;">DexFi Bonds</a> and community contributions</p>
+                </div>
             </div>
         </div>
 
-        <div class="box full">
-            <h2>📜 Contract (Base Network)</h2>
-            <div class="contract">
-                0x0a4339B907Ed3000901BdA73E9af7276caC6425D
+        <!-- RIGHT COLUMN: graphical game flow (new) -->
+        <div class="box">
+            <h2>🎮 Game Flow</h2>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <span class="step-icon">🥚🐔</span>
+                    <span class="step-desc"><strong>Start:</strong> First bidder becomes Lead Plucker.</span>
+                </div>
+                <div class="flow-arrow">⬇️</div>
+                <div class="flow-step">
+                    <span class="step-icon">🔄🔥</span>
+                    <span class="step-desc"><strong>Grabs:</strong> next player's bid must be <strong>+10% to +30%</strong>; and becomes Lead Plucker. </span>
+                </div>
+                <div class="flow-arrow">⬇️</div>
+                <div class="flow-step">
+                    <span class="step-icon">🌶️⏲️</span>
+                    <span class="step-desc"><strong>HOT ZONE</strong> (≤5 min left): each grab adds <strong>1% bonus</strong> to the grabber & timer resets to 4m:20s.</span>
+                </div>
+                <div class="flow-arrow">⬇️</div>
+                <div class="flow-step">
+                    <span class="step-icon">⌛💥</span>
+                    <span class="step-desc"><strong>Timer Ends:</strong> Lead Plucker loses Deposit but gets the tax‑free seed.</span>
+                </div>
+                <div class="flow-arrow">⬇️</div>
+                <div class="flow-step">
+                    <span class="step-icon">💀🎲</span>
+                    <span class="step-desc"><strong>Dead Chicken:</strong> random player (not Lead Plucker or previous Lead Plucker) loses deposit. <br><br><strong>50/50 Chance Lotto</strong> between Lead Plucker & previous Lead Plucker.</span>
+                </div>
+                <div class="flow-arrow">⬇️</div>
+                <div class="flow-step">
+                    <span class="step-icon">🏆💰</span>
+                    <span class="step-desc"><strong>Payouts:</strong> Everything is settled on New bid and New round begins.</span>
+                </div>
             </div>
-            <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:#8888aa;">
-                • Seed vault funded by CoolSheet DexFi bonds + community contributions.<br>
-                • Contribute Eshare @ Seed button at bottom of website.
-            </p>
-        </div>
 
+        </div>
+    </div>
+
+    <!-- Contract section (original, full width) -->
+    <div class="box full">
+        <h2>📜 Contract (Base Network)</h2>
+        <div class="contract">
+            0x0a4339B907Ed3000901BdA73E9af7276caC6425D
+        </div>
+        <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:#8888aa;">
+            • Seed vault funded by CoolSheet DexFi bonds + community contributions.<br>
+            • Contribute Eshare @ Seed button at bottom of website.
+        </p>
     </div>
 
     <footer>
