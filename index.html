@@ -1519,7 +1519,7 @@
         .holder-winnings .eshare-symbol { width: 18px; height: 18px; }
         .holder-time { color: var(--text-secondary); font-size: 10px; white-space: nowrap; text-align: right; }
 
-        .previous-holders { max-height: 180px; overflow-y: auto; overflow-x: hidden; }
+        .previous-holders { max-height: 360px; overflow-y: auto; overflow-x: hidden; }
         .previous-holders::-webkit-scrollbar { width: 4px; }
         .previous-holders::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
         .previous-holders::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
@@ -4357,40 +4357,83 @@
                                 console.log('Past pluckers (sorted by deposits):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
                                 
                                 // Calculate total deposits of past pluckers for pot distribution
-                                const totalPastDeposits = pastPluckers.reduce((sum, p) => sum + BigInt(p.deposit), BigInt(0));
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
                                 
-                                // TAX STRUCTURE: Winners pay 16% tax (5% burn + 1% owner + 10% lotto)
-                                // Winners get 84% of their deposit back, plus their share of chicken's contribution
-                                const afterTaxMultiplier = 0.845; // 84.5% after 16.5% tax
-                                console.log('Tax multiplier:', afterTaxMultiplier, '(16.5% tax on winners)');
+                                // TAX STRUCTURE: Winners pay 15.5% tax (5% burn + 0.5% owner + 10% lotto)
+                                // Lead plucker (chicken) pays 16.5% tax (+ 1% HZ)
+                                const winnerTaxRate = 0.845; // 84.5% after 15.5% tax
+                                const chickenTaxRate = 0.835; // 83.5% after 16.5% tax
+                                
+                                // DEAD CHICKEN SIMULATION: Assume lowest bidder becomes dead chicken
+                                // This gives conservative estimate - if anyone else is picked, winnings are higher
+                                let simDeadChicken = null;
+                                const eligibleForDC = pastPluckers.filter(p => {
+                                    // Dead chicken can't be lead plucker (already excluded) or previous holder
+                                    const isPrevHolder = lottoPrevious && p.address.toLowerCase() === lottoPrevious;
+                                    return !isPrevHolder;
+                                });
+                                
+                                // Need 3+ total participants for dead chicken (lead plucker + prev holder + at least 1 eligible)
+                                const totalParticipants = pastPluckers.length + 1; // +1 for lead plucker
+                                if (totalParticipants >= 3 && eligibleForDC.length > 0) {
+                                    // Pick lowest bidder as simulated dead chicken
+                                    simDeadChicken = eligibleForDC.reduce((min, p) => 
+                                        BigInt(p.deposit) < BigInt(min.deposit) ? p : min
+                                    , eligibleForDC[0]);
+                                }
+                                
+                                // Get lead plucker deposit for chicken contribution calc
+                                let holderDepositWei = '0';
+                                try { holderDepositWei = await chickenContract.methods.deposits(currentRoundNum, holder).call(); } catch(e) {}
+                                const holderDepositEshare = parseFloat(web3.utils.fromWei(holderDepositWei, 'ether'));
+                                
+                                // Dead chicken's deposit (100% confiscated)
+                                const dcDeposit = simDeadChicken ? parseFloat(web3.utils.fromWei(simDeadChicken.deposit, 'ether')) : 0;
+                                
+                                // Winner pool = lead plucker deposit * 83.5% + dead chicken deposit (100%)
+                                const chickenContribution = holderDepositEshare * chickenTaxRate + dcDeposit;
+                                
+                                // Total winner deposits (excluding dead chicken)
+                                let totalWinnerDeposits = BigInt(0);
+                                for (const p of pastPluckers) {
+                                    if (simDeadChicken && p.address.toLowerCase() === simDeadChicken.address.toLowerCase()) continue;
+                                    totalWinnerDeposits += BigInt(p.deposit);
+                                }
+                                
+                                console.log('DC simulation - simDC:', simDeadChicken ? formatAddress(simDeadChicken.address) : 'none', 
+                                    'dcDeposit:', dcDeposit, 'chickenContrib:', chickenContribution, 'totalWinnerDeps:', totalWinnerDeposits.toString());
                                 
                                 if (pastPluckers.length > 0) {
                                     previousHoldersEl.innerHTML = pastPluckers.map((plucker, index) => {
                                         const isUserConnected = userAccount && plucker.address.toLowerCase() === userAccount.toLowerCase();
                                         const userClass = isUserConnected ? ' user-connected' : '';
                                         const depositEshare = parseFloat(web3.utils.fromWei(plucker.deposit, 'ether'));
+                                        const isSimDC = simDeadChicken && plucker.address.toLowerCase() === simDeadChicken.address.toLowerCase();
                                         
-                                        // Calculate this player's share of the pot based on their deposit proportion
-                                        // They get their deposit back (minus 16.5% tax) + share of chicken's contribution
                                         let potentialWinnings = 0;
-                                        if (totalPastDeposits > BigInt(0)) {
-                                            const depositShare = Number(BigInt(plucker.deposit) * BigInt(10000) / totalPastDeposits) / 10000;
-                                            const grossWinnings = potEshare * depositShare;
-                                            potentialWinnings = grossWinnings * afterTaxMultiplier; // Apply taxes
+                                        if (isSimDC) {
+                                            // Dead chicken gets nothing
+                                            potentialWinnings = 0;
+                                        } else if (totalWinnerDeposits > BigInt(0)) {
+                                            // Winner gets: deposit back (after tax) + share of chicken contribution
+                                            const ownReturn = depositEshare * winnerTaxRate;
+                                            const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalWinnerDeposits) / 10000;
+                                            potentialWinnings = ownReturn + (shareRatio * chickenContribution);
                                         }
                                         
                                         const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
                                         const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO ENTRY</span>' : '';
                                         const isHZBidder = BigInt(plucker.hzDeposit) > BigInt(0);
                                         const hzTag = isHZBidder ? ' <span class="hz-tag">HOT</span>' : '';
+                                        const dcTag = isSimDC ? ' <span class="dc-tag">💀 DEAD</span>' : '';
+                                        const winningsColor = isSimDC ? 'color: #c84dff;' : '';
                                         
                                         return `
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">🐔</span>
-                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${hzTag}</span>
+                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${hzTag}${dcTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
-                                            <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                                            <span class="holder-winnings" style="${winningsColor}">${isSimDC ? '💀' : potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
                                         `;
                                     }).join('');
