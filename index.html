@@ -4412,8 +4412,16 @@
                                         
                                         let potentialWinnings = 0;
                                         if (isSimDC) {
-                                            // Dead chicken gets nothing
-                                            potentialWinnings = 0;
+                                            // Simulated DC - show what they'd win if they're NOT the DC
+                                            // (they don't know they're the sim target)
+                                            // Calculate as if no DC exists for this player's display
+                                            const totalDepsNoDC = pastPluckers.reduce((sum, p) => sum + BigInt(p.deposit), BigInt(0));
+                                            const noDCContrib = holderDepositEshare * chickenTaxRate;
+                                            if (totalDepsNoDC > BigInt(0)) {
+                                                const ownReturn = depositEshare * winnerTaxRate;
+                                                const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalDepsNoDC) / 10000;
+                                                potentialWinnings = ownReturn + (shareRatio * noDCContrib);
+                                            }
                                         } else if (totalWinnerDeposits > BigInt(0)) {
                                             // Winner gets: deposit back (after tax) + share of chicken contribution
                                             const ownReturn = depositEshare * winnerTaxRate;
@@ -4425,15 +4433,16 @@
                                         const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO ENTRY</span>' : '';
                                         const isHZBidder = BigInt(plucker.hzDeposit) > BigInt(0);
                                         const hzTag = isHZBidder ? ' <span class="hz-tag">HOT</span>' : '';
-                                        const dcTag = isSimDC ? ' <span class="dc-tag">💀 DEAD</span>' : '';
-                                        const winningsColor = isSimDC ? 'color: #c84dff;' : '';
+                                        // Show knife on all players eligible for dead chicken (not lotto-immune previous holder)
+                                        const isEligibleDC = totalParticipants >= 3 && !(lottoPrevious && plucker.address.toLowerCase() === lottoPrevious);
+                                        const knifeTag = isEligibleDC ? ' <span class="dc-tag">🔪</span>' : '';
                                         
                                         return `
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">🐔</span>
-                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${hzTag}${dcTag}</span>
+                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${hzTag}${knifeTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
-                                            <span class="holder-winnings" style="${winningsColor}">${isSimDC ? '💀' : potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                                            <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
                                         `;
                                     }).join('');
