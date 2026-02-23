@@ -2977,45 +2977,37 @@
         let tokenContract;
 
         // ===== FALLBACK RPC SYSTEM =====
-        // readWeb3 is used for all read-only calls (leaderboard, game info, etc.)
-        // Falls back through this list if the primary RPC keeps failing.
         const FALLBACK_RPCS = [
             'https://mainnet.base.org',
             'https://base.llamarpc.com',
             'https://base-rpc.publicnode.com',
             'https://1rpc.io/base',
         ];
-        let currentRpcIndex = 0;
-        let consecutiveRpcErrors = 0;
-        const RPC_ERROR_THRESHOLD = 3; // switch after this many consecutive errors
-        let readWeb3 = new Web3(new Web3.providers.HttpProvider(FALLBACK_RPCS[0]));
-
-        function getReadContracts() {
-            return {
-                chicken: new readWeb3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS),
-                token:   new readWeb3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS),
-            };
-        }
-
-        function onRpcSuccess() {
-            consecutiveRpcErrors = 0;
-        }
+        let _rpcIndex = 0;
+        let _rpcErrorCount = 0;
+        const RPC_SWITCH_THRESHOLD = 3;
 
         function onRpcError(err) {
-            const msg = err && err.message ? err.message : '';
+            const msg = (err && err.message) ? err.message : '';
             const isConnErr = msg.includes('connection refused') || msg.includes('dial tcp') ||
-                              msg.includes('timeout') || msg.includes('network') ||
-                              msg.includes('502') || msg.includes('503') || msg.includes('ECONNREFUSED');
+                              msg.includes('timeout') || msg.includes('502') ||
+                              msg.includes('503') || msg.includes('ECONNREFUSED');
             if (!isConnErr) return;
-            consecutiveRpcErrors++;
-            if (consecutiveRpcErrors >= RPC_ERROR_THRESHOLD) {
-                consecutiveRpcErrors = 0;
-                currentRpcIndex = (currentRpcIndex + 1) % FALLBACK_RPCS.length;
-                const nextRpc = FALLBACK_RPCS[currentRpcIndex];
-                console.warn('RPC failing — switching to fallback: ' + nextRpc);
-                readWeb3 = new Web3(new Web3.providers.HttpProvider(nextRpc));
+            _rpcErrorCount++;
+            if (_rpcErrorCount >= RPC_SWITCH_THRESHOLD) {
+                _rpcErrorCount = 0;
+                _rpcIndex = (_rpcIndex + 1) % FALLBACK_RPCS.length;
+                const next = FALLBACK_RPCS[_rpcIndex];
+                console.warn('RPC failing — switching to: ' + next);
+                // Rebuild web3 with new RPC (keeps wallet signer intact via window.ethereum)
+                if (web3) {
+                    web3.setProvider(new Web3.providers.HttpProvider(next));
+                    if (chickenContract) chickenContract = new web3.eth.Contract(chickenContract.options.jsonInterface, CHICKEN_CONTRACT_ADDRESS);
+                    if (tokenContract)   tokenContract   = new web3.eth.Contract(tokenContract.options.jsonInterface, TOKEN_CONTRACT_ADDRESS);
+                }
             }
         }
+        function onRpcSuccess() { _rpcErrorCount = 0; }
         // ===== END FALLBACK RPC SYSTEM =====
 
         // Contract addresses
@@ -3682,7 +3674,7 @@
                             pot = parseFloat(web3.utils.fromWei(rs.loserDeposits || '0', 'ether'));
                             // Get full pot from getRoundInfo
                             try {
-                                const roundData = await rc.chicken.methods.getRoundInfo(settledRound).call();
+                                const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
                                 pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
                             } catch(e) {}
                             console.log('From RoundSettled event - round:', settledRound, 'loser:', loser, 'lottoWinner:', lottoWinner);
@@ -3691,7 +3683,7 @@
                             await new Promise(resolve => setTimeout(resolve, 2000));
                             const prevRound = await chickenContract.methods.currentRound().call();
                             settledRound = Math.max(1, parseInt(prevRound) - 1);
-                            const roundData = await rc.chicken.methods.getRoundInfo(settledRound).call();
+                            const roundData = await chickenContract.methods.getRoundInfo(settledRound).call();
                             console.log('Fallback round data:', JSON.stringify(roundData));
                             pot = parseFloat(web3.utils.fromWei(roundData.playerDeps || '0', 'ether'));
                             burned = parseFloat(web3.utils.fromWei(roundData.burned || roundData.burnedAmount || '0', 'ether'));
@@ -4227,7 +4219,7 @@
                     
                     // Update seed (from current round's actual seed)
                     if (roundInfo.round > 0) {
-                        const detailedInfo = await rc.chicken.methods.getRoundInfo(roundInfo.round).call();
+                        const detailedInfo = await chickenContract.methods.getRoundInfo(roundInfo.round).call();
                         const seedEshare = parseFloat(web3.utils.fromWei(detailedInfo.seed, 'ether'));
                         document.getElementById('seedEshare').innerHTML = seedEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         
@@ -4291,16 +4283,14 @@
             try {
                 // Get current round info
                 if (chickenContract) {
-                    const rc = getReadContracts(); // use fallback-aware read provider
-                    const roundInfo = await rc.chicken.methods.getCurrentRound().call();
-                    onRpcSuccess();
+                    const roundInfo = await chickenContract.methods.getCurrentRound().call();
                     const currentRoundNum = roundInfo.round;
                     const holder = roundInfo.holder;
                     
                     // Get accurate pot from playerDeps
                     let actualPot = roundInfo.pot;
                     if (currentRoundNum > 0) {
-                        const detailedInfo = await rc.chicken.methods.getRoundInfo(currentRoundNum).call();
+                        const detailedInfo = await chickenContract.methods.getRoundInfo(currentRoundNum).call();
                         actualPot = detailedInfo.playerDeps; // Use playerDeps as the actual pot
                     }
                     
@@ -4311,7 +4301,7 @@
                     let lottoHolder = null;
                     let lottoPrevious = null;
                     try {
-                        const lottoEligible = await rc.chicken.methods.getLottoEligible().call();
+                        const lottoEligible = await chickenContract.methods.getLottoEligible().call();
                         lottoHolder = lottoEligible.holder ? lottoEligible.holder.toLowerCase() : null;
                         lottoPrevious = lottoEligible.previous ? lottoEligible.previous.toLowerCase() : null;
                         const zeroAddr = '0x0000000000000000000000000000000000000000';
@@ -4326,7 +4316,7 @@
                         }
                         // Try to get previous holder as fallback
                         try {
-                            const prevHolder = await rc.chicken.methods.previousChickenHolder().call();
+                            const prevHolder = await chickenContract.methods.previousChickenHolder().call();
                             if (prevHolder && prevHolder !== '0x0000000000000000000000000000000000000000') {
                                 lottoPrevious = prevHolder.toLowerCase();
                             }
@@ -4340,20 +4330,20 @@
                     if (holder && holder !== '0x0000000000000000000000000000000000000000') {
                         let holderHZTag = '';
                         try {
-                            const holderHZ = await rc.chicken.methods.hotZoneDeposits(currentRoundNum, holder).call();
+                            const holderHZ = await chickenContract.methods.hotZoneDeposits(currentRoundNum, holder).call();
                             if (BigInt(holderHZ) > BigInt(0)) holderHZTag = ' <span class="hz-tag">HOT</span>';
                         } catch(e) {}
                         currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '') + holderHZTag;
                         
                         // Get the holder's individual deposit using deposits mapping
                         try {
-                            const holderDeposit = await rc.chicken.methods.deposits(currentRoundNum, holder).call();
+                            const holderDeposit = await chickenContract.methods.deposits(currentRoundNum, holder).call();
                             const depositEshare = parseFloat(web3.utils.fromWei(holderDeposit, 'ether'));
                             document.getElementById('currentAmount').innerHTML = depositEshare.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             
                             // Calculate lead plucker potential winnings (gets FULL seed TAX FREE as consolation)
                             try {
-                                const roundDetails = await rc.chicken.methods.getRoundInfo(currentRoundNum).call();
+                                const roundDetails = await chickenContract.methods.getRoundInfo(currentRoundNum).call();
                                 const seedAmount = parseFloat(web3.utils.fromWei(roundDetails.seed, 'ether'));
                                 
                                 // Seed is TAX FREE - loser gets full amount as consolation
@@ -4379,7 +4369,7 @@
                     if (currentRoundNum > 0) {
                         try {
                             // Use getParticipants to get all participants
-                            const participants = await rc.chicken.methods.getParticipants(currentRoundNum).call();
+                            const participants = await chickenContract.methods.getParticipants(currentRoundNum).call();
                             
                             console.log('Participants:', participants);
                             
@@ -4390,10 +4380,10 @@
                                 // Fetch deposits for each participant
                                 const participantsWithDeposits = await Promise.all(
                                     participants.map(async (addr) => {
-                                        const deposit = await rc.chicken.methods.deposits(currentRoundNum, addr).call();
+                                        const deposit = await chickenContract.methods.deposits(currentRoundNum, addr).call();
                                         let hzDeposit = '0';
                                         try {
-                                            hzDeposit = await rc.chicken.methods.hotZoneDeposits(currentRoundNum, addr).call();
+                                            hzDeposit = await chickenContract.methods.hotZoneDeposits(currentRoundNum, addr).call();
                                         } catch(e) {}
                                         return { address: addr, deposit, hzDeposit };
                                     })
@@ -4453,7 +4443,7 @@
                                 
                                 // Get lead plucker deposit for chicken contribution calc
                                 let holderDepositWei = '0';
-                                try { holderDepositWei = await rc.chicken.methods.deposits(currentRoundNum, holder).call(); } catch(e) {}
+                                try { holderDepositWei = await chickenContract.methods.deposits(currentRoundNum, holder).call(); } catch(e) {}
                                 const holderDepositEshare = parseFloat(web3.utils.fromWei(holderDepositWei, 'ether'));
                                 
                                 // Total confiscated DC deposits
@@ -4482,14 +4472,14 @@
                                         if (totalWinnerDeposits > BigInt(0)) {
                                             const ownReturn = depositEshare * winnerTaxRate;
                                             if (isSimDC) {
-                                                // SimDC: show "if I survive" winnings.
-                                                // Their deposit is not in totalWinnerDeposits, so add it back as denominator.
-                                                // Pool still includes all other DCs' confiscated deposits via chickenContribution.
+                                                // SimDC player: "if I survive" winnings.
+                                                // Their deposit is excluded from totalWinnerDeposits, so add it back
+                                                // as the denominator. Pool still includes all other DCs' confiscated deposits.
                                                 const hypotheticalDenom = totalWinnerDeposits + BigInt(plucker.deposit);
                                                 const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / hypotheticalDenom) / 10000;
                                                 potentialWinnings = ownReturn + (shareRatio * chickenContribution);
                                             } else {
-                                                // Survivor: deposit already in totalWinnerDeposits.
+                                                // Surviving player: deposit already in totalWinnerDeposits.
                                                 // chickenContribution = lead plucker's 83% + all simDC deposits (100% confiscated).
                                                 const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalWinnerDeposits) / 10000;
                                                 potentialWinnings = ownReturn + (shareRatio * chickenContribution);
@@ -4567,10 +4557,10 @@
                     if (roundNum < 1) break;
                     
                     try {
-                        const roundInfo = await rc.chicken.methods.getRoundInfo(roundNum).call();
+                        const roundInfo = await chickenContract.methods.getRoundInfo(roundNum).call();
                         
                         if (roundInfo.settled) {
-                            const participants = await rc.chicken.methods.getParticipants(roundNum).call();
+                            const participants = await chickenContract.methods.getParticipants(roundNum).call();
                             const lottoWinner = roundInfo.lottoWinner;
                             const lottoPrize = parseFloat(web3.utils.fromWei(roundInfo.lottoPrize || '0', 'ether'));
                             const seedAmount = parseFloat(web3.utils.fromWei(roundInfo.seed || '0', 'ether'));
@@ -4617,7 +4607,7 @@
                             const playerDeposits = {};
                             
                             for (const addr of participants) {
-                                const deposit = await rc.chicken.methods.deposits(roundNum, addr).call();
+                                const deposit = await chickenContract.methods.deposits(roundNum, addr).call();
                                 const depositEshare = parseFloat(web3.utils.fromWei(deposit, 'ether'));
                                 playerDeposits[addr.toLowerCase()] = depositEshare;
                                 console.log('Player deposit:', addr, depositEshare);
