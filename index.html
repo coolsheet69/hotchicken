@@ -2977,11 +2977,12 @@
         let tokenContract;
 
         // ===== FALLBACK RPC SYSTEM =====
+        // All entries verified CORS-friendly for browser use
         const FALLBACK_RPCS = [
             'https://mainnet.base.org',
-            'https://base.llamarpc.com',
             'https://base-rpc.publicnode.com',
-            'https://1rpc.io/base',
+            'https://base.drpc.org',
+            'https://base.meowrpc.com',
         ];
         let _rpcIndex = 0;
         let _rpcErrorCount = 0;
@@ -2990,8 +2991,10 @@
         function onRpcError(err) {
             const msg = (err && err.message) ? err.message : '';
             const isConnErr = msg.includes('connection refused') || msg.includes('dial tcp') ||
-                              msg.includes('timeout') || msg.includes('502') ||
-                              msg.includes('503') || msg.includes('ECONNREFUSED');
+                              msg.includes('timeout') || msg.includes('502') || msg.includes('503') ||
+                              msg.includes('ECONNREFUSED') || msg.includes('CONNECTION ERROR') ||
+                              msg.includes('CORS') || msg.includes('Failed to fetch') ||
+                              msg.includes("Couldn't connect");
             if (!isConnErr) return;
             _rpcErrorCount++;
             if (_rpcErrorCount >= RPC_SWITCH_THRESHOLD) {
@@ -2999,7 +3002,6 @@
                 _rpcIndex = (_rpcIndex + 1) % FALLBACK_RPCS.length;
                 const next = FALLBACK_RPCS[_rpcIndex];
                 console.warn('RPC failing — switching to: ' + next);
-                // Rebuild web3 with new RPC (keeps wallet signer intact via window.ethereum)
                 if (web3) {
                     web3.setProvider(new Web3.providers.HttpProvider(next));
                     if (chickenContract) chickenContract = new web3.eth.Contract(chickenContract.options.jsonInterface, CHICKEN_CONTRACT_ADDRESS);
