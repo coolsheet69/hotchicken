@@ -2977,7 +2977,6 @@
         let tokenContract;
 
         // ===== FALLBACK RPC SYSTEM =====
-        // All entries verified CORS-friendly for browser use
         const FALLBACK_RPCS = [
             'https://mainnet.base.org',
             'https://base-rpc.publicnode.com',
@@ -3919,7 +3918,7 @@
         let lastBlockFetchTime = 0;
         let lastRoundEndBlock = 0;
         let isHotzoneFromServer = false;
-        const FETCH_INTERVAL_MS = 5000; // Fetch from blockchain every 5 seconds
+        const FETCH_INTERVAL_MS = 10000; // Fetch from blockchain every 10 seconds
         const BLOCK_TIME_SEC = 2; // Base blocks are ~2 seconds
 
         function formatTime(seconds) {
@@ -4049,8 +4048,8 @@
         function startTicker() {
             if (tickerInterval) clearInterval(tickerInterval);
             
-            let lastLeaderboardRefresh = 0;
-            const LEADERBOARD_REFRESH_MS = 5000; // Refresh leaderboard every 5 seconds
+            let lastLeaderboardRefresh = Date.now() - 5000; // slight offset so first refresh is at ~10s
+            const LEADERBOARD_REFRESH_MS = 15000; // Refresh leaderboard every 15 seconds
             let lastKnownRound = 0; // Track round changes
             
             tickerInterval = setInterval(async () => {
