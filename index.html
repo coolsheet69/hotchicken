@@ -1513,11 +1513,7 @@
         .holder-winnings .eshare-symbol { width: 20px; height: 20px; }
         .holder-time { color: var(--text-secondary); font-size: 10px; white-space: nowrap; text-align: right; }
 
-        .previous-holders { max-height: 360px; overflow-y: auto; overflow-x: hidden; }
-        .previous-holders::-webkit-scrollbar { width: 4px; }
-        .previous-holders::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
-        .previous-holders::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
-        .previous-holders::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .previous-holders { overflow: visible; }
 
         .previous-holders-wrapper { position: relative; }
         .previous-holders-label { display: none; }
@@ -4390,7 +4386,7 @@
                                 });
                                 
                                 // Calculate how many DCs to simulate
-                                const targetDead = Math.floor(totalParticipants / 10) + 1;
+                                const targetDead = Math.ceil(totalParticipants / 10);
                                 const maxDead = Math.max(0, eligibleForDC.length - 1); // always leave at least 1 eligible survivor
                                 const simDeadCount = Math.min(targetDead, maxDead);
                                 
