@@ -4048,7 +4048,7 @@
         function startTicker() {
             if (tickerInterval) clearInterval(tickerInterval);
             
-            let lastLeaderboardRefresh = Date.now() - 5000; // slight offset so first refresh is at ~10s
+            let lastLeaderboardRefresh = Date.now() - 5000; // offset so first refresh ~10s in
             const LEADERBOARD_REFRESH_MS = 15000; // Refresh leaderboard every 15 seconds
             let lastKnownRound = 0; // Track round changes
             
@@ -4378,17 +4378,23 @@
                             if (!participants || participants.length === 0) {
                                 previousHoldersEl.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">No participants yet</div>';
                             } else {
-                                // Fetch deposits for each participant
-                                const participantsWithDeposits = await Promise.all(
-                                    participants.map(async (addr) => {
+                                // Fetch deposits sequentially with a small delay to avoid RPC burst
+                                const participantsWithDeposits = [];
+                                for (const addr of participants) {
+                                    try {
                                         const deposit = await chickenContract.methods.deposits(currentRoundNum, addr).call();
                                         let hzDeposit = '0';
                                         try {
                                             hzDeposit = await chickenContract.methods.hotZoneDeposits(currentRoundNum, addr).call();
                                         } catch(e) {}
-                                        return { address: addr, deposit, hzDeposit };
-                                    })
-                                );
+                                        participantsWithDeposits.push({ address: addr, deposit, hzDeposit });
+                                    } catch(e) {
+                                        // Skip failed address rather than aborting entire leaderboard
+                                        console.warn('Failed to fetch deposit for', addr, e);
+                                    }
+                                    // Small stagger between each player to spread RPC load
+                                    await new Promise(r => setTimeout(r, 50));
+                                }
                                 
                                 console.log('Participants with deposits:', participantsWithDeposits);
                                 
@@ -4442,9 +4448,9 @@
                                 
                                 const simDeadAddrs = new Set(simDeadChickens.map(p => p.address.toLowerCase()));
                                 
-                                // Get lead plucker deposit for chicken contribution calc
-                                let holderDepositWei = '0';
-                                try { holderDepositWei = await chickenContract.methods.deposits(currentRoundNum, holder).call(); } catch(e) {}
+                                // Get lead plucker deposit from already-fetched participantsWithDeposits (no extra RPC call)
+                                const holderEntry = participantsWithDeposits.find(p => p.address.toLowerCase() === holder.toLowerCase());
+                                const holderDepositWei = holderEntry ? holderEntry.deposit : '0';
                                 const holderDepositEshare = parseFloat(web3.utils.fromWei(holderDepositWei, 'ether'));
                                 
                                 // Total confiscated DC deposits
