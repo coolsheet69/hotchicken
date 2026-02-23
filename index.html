@@ -4432,21 +4432,21 @@
                                         const isSimDC = simDeadAddrs.has(plucker.address.toLowerCase());
                                         
                                         let potentialWinnings = 0;
-                                        if (isSimDC) {
-                                            // This player is a simulated DC — show what they'd win if NOT selected as DC
-                                            // Calculate as if no DCs exist for this player's display
-                                            const totalDepsNoDC = pastPluckers.reduce((sum, p) => sum + BigInt(p.deposit), BigInt(0));
-                                            const noDCContrib = holderDepositEshare * chickenTaxRate;
-                                            if (totalDepsNoDC > BigInt(0)) {
-                                                const ownReturn = depositEshare * winnerTaxRate;
-                                                const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalDepsNoDC) / 10000;
-                                                potentialWinnings = ownReturn + (shareRatio * noDCContrib);
-                                            }
-                                        } else if (totalWinnerDeposits > BigInt(0)) {
-                                            // Winner gets: deposit back (after tax) + share of chicken contribution
+                                        if (totalWinnerDeposits > BigInt(0)) {
                                             const ownReturn = depositEshare * winnerTaxRate;
-                                            const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalWinnerDeposits) / 10000;
-                                            potentialWinnings = ownReturn + (shareRatio * chickenContribution);
+                                            if (isSimDC) {
+                                                // SimDC player: "if I survive" winnings.
+                                                // Their deposit is excluded from totalWinnerDeposits, so add it back
+                                                // as the denominator. Pool still includes all other DCs' confiscated deposits.
+                                                const hypotheticalDenom = totalWinnerDeposits + BigInt(plucker.deposit);
+                                                const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / hypotheticalDenom) / 10000;
+                                                potentialWinnings = ownReturn + (shareRatio * chickenContribution);
+                                            } else {
+                                                // Surviving player: deposit already in totalWinnerDeposits.
+                                                // chickenContribution = lead plucker's 83% + all simDC deposits (100% confiscated).
+                                                const shareRatio = Number(BigInt(plucker.deposit) * BigInt(10000) / totalWinnerDeposits) / 10000;
+                                                potentialWinnings = ownReturn + (shareRatio * chickenContribution);
+                                            }
                                         }
                                         
                                         const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
