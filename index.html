@@ -4364,7 +4364,7 @@
                                         if (BigInt(b.deposit) < BigInt(a.deposit)) return -1;
                                         return 0;
                                     })
-                                    .slice(0, 9);
+                                    .slice(0);
                                 
                                 console.log('Past pluckers (sorted by deposits):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
                                 
