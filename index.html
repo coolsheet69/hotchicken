@@ -2998,10 +2998,12 @@
         function onRpcError(err) {
             const msg = (err && err.message) ? err.message : JSON.stringify(err);
             const isConnErr = msg.includes('connection refused') || msg.includes('dial tcp') ||
-                              msg.includes('503') || msg.includes('502') || msg.includes('timeout') ||
-                              msg.includes('ECONNREFUSED') || msg.includes('CONNECTION ERROR') ||
-                              msg.includes("Couldn't connect") || msg.includes('Failed to fetch') ||
-                              msg.includes('Errno');
+                              msg.includes('503') || msg.includes('502') || msg.includes('429') ||
+                              msg.includes('timeout') || msg.includes('ECONNREFUSED') ||
+                              msg.includes('CONNECTION ERROR') || msg.includes("Couldn't connect") ||
+                              msg.includes('Failed to fetch') || msg.includes('Errno') ||
+                              msg.includes('over rate limit') || msg.includes('Too Many Requests') ||
+                              msg.includes('rate limit');
             if (!isConnErr) return;
             _readRpcErrors++;
             if (_readRpcErrors >= READ_RPC_THRESHOLD) {
@@ -3387,11 +3389,12 @@
                 connectWalletBtn.removeEventListener('click', connectWallet);
                 connectWalletBtn.addEventListener('click', handleGrabChicken);
 
-                loadLeaderboard();
+                // Stagger startup calls to avoid rate-limiting the RPC
                 loadBalance();
-                loadPreviousWinners(); // Load previous winners after wallet connects
-                updateMinimumCost(); // Update minimum cost from contract
-                updateGameInfo(); // Update timer, seed, pool
+                setTimeout(() => updateMinimumCost(), 500);
+                setTimeout(() => updateGameInfo(), 1000);
+                setTimeout(() => loadLeaderboard(), 1500);
+                setTimeout(() => loadPreviousWinners(), 3000);
             } catch (error) {
                 console.error('Error connecting wallet:', error);
                 showAlert('Failed to connect wallet');
