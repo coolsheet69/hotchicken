@@ -3014,8 +3014,7 @@
         }
         function onRpcSuccess() { _readRpcErrors = 0; }
 
-        // Initialize read provider immediately (before wallet connect)
-        buildReadWeb3();
+        // readWeb3 is initialized after Web3.js CDN loads (see bottom of file)
         // ===== END READ RPC =====
 
         // Contract addresses
@@ -4788,6 +4787,7 @@
 
     <!-- Web3.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <script>buildReadWeb3();</script>
 
 </body>
 </html>
