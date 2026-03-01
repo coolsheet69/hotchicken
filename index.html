@@ -4272,7 +4272,7 @@
                     try {
                         const totalBurnt = await readContract.methods.totalBurned().call();
                         const burntEshare = parseFloat(web3.utils.fromWei(totalBurnt, 'ether'));
-                        const HISTORICAL_BURNT = 0.310; // Burnt from prior contract deployments (v4.1 + v4.2)
+                        const HISTORICAL_BURNT = 0.4801785; // Burnt from prior contract deployments (v4.1 + v4.2)
                         document.getElementById('totalBurnt').textContent = (burntEshare + HISTORICAL_BURNT).toFixed(3);
                     } catch (e) {
                         console.log('Error getting total burnt:', e);
