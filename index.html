@@ -1340,13 +1340,22 @@
         /* ===== LEADERBOARD ===== */
         .leaderboard-container {
             margin-top: 8px;
-            background: var(--bg-card);
+            background: linear-gradient(160deg, rgba(28, 18, 8, 0.97) 0%, rgba(22, 14, 6, 0.97) 100%);
             border-radius: 16px;
             padding: 14px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 140, 0, 0.45);
             max-width: 100%;
             margin-left: auto; margin-right: auto;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4),
+                        0 0 0 1px rgba(255, 100, 0, 0.08),
+                        inset 0 1px 0 rgba(255, 160, 0, 0.1),
+                        0 0 24px rgba(255, 120, 0, 0.12),
+                        0 0 60px rgba(255, 80, 0, 0.06);
+            animation: coop-pulse 3s ease-in-out infinite;
+        }
+        @keyframes coop-pulse {
+            0%, 100% { border-color: rgba(255, 140, 0, 0.45); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255, 100, 0, 0.08), inset 0 1px 0 rgba(255, 160, 0, 0.1), 0 0 24px rgba(255, 120, 0, 0.12), 0 0 60px rgba(255, 80, 0, 0.06); }
+            50% { border-color: rgba(255, 160, 0, 0.7); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255, 120, 0, 0.15), inset 0 1px 0 rgba(255, 180, 0, 0.15), 0 0 36px rgba(255, 140, 0, 0.22), 0 0 80px rgba(255, 100, 0, 0.1); }
         }
 
         .leaderboard-title {
