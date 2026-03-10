@@ -2985,6 +2985,23 @@
         let userAccount;
         let chickenContract;  // bound to MetaMask (for .send())
         let readContract;     // bound to public RPC (for .call())
+
+        // Live tax rates fetched from contract — updated on connect
+        let _winnerReturnRate = 0.82;   // fallback: 18% tax (7% burn + 1% owner + 10% lotto)
+        let _chickenReturnRate = 0.81;  // fallback: 19% tax (above + 1% HZ)
+        async function fetchLiveTaxRates() {
+            try {
+                const t = await readContract.methods.getTaxRates().call();
+                const BPS = 10000;
+                const totalWinnerTax = (parseInt(t.burnBps) + parseInt(t.ownerBps) + parseInt(t.lottoBps)) / BPS;
+                const totalChickenTax = totalWinnerTax + parseInt(t.hotZoneBps) / BPS;
+                _winnerReturnRate = 1 - totalWinnerTax;
+                _chickenReturnRate = 1 - totalChickenTax;
+                console.log(`Live tax rates — winner: ${(totalWinnerTax*100).toFixed(1)}% tax (${(_winnerReturnRate*100).toFixed(1)}% return), chicken: ${(totalChickenTax*100).toFixed(1)}% tax (${(_chickenReturnRate*100).toFixed(1)}% return)`);
+            } catch(e) {
+                console.warn('Could not fetch live tax rates, using fallback:', e.message);
+            }
+        }
         let tokenContract;
 
         // ===== READ RPC — always use a reliable public endpoint for reads =====
@@ -3358,6 +3375,7 @@
                 chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS); // for .send() only
                 tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
                 refreshReadContract(); // readContract uses public RPC for all .call() reads
+                fetchLiveTaxRates();   // fetch live burn/owner/lotto bps from contract
 
                 // Play connect sound - simple beep
                 try {
@@ -4434,8 +4452,8 @@
                                 
                                 // TAX STRUCTURE: Winners pay 16% tax (5% burn + 1% owner + 10% lotto)
                                 // Lead plucker (chicken) pays 17% tax (+ 1% HZ)
-                                const winnerTaxRate = 0.84; // 84% after 16% tax
-                                const chickenTaxRate = 0.83; // 83% after 17% tax
+                                const winnerTaxRate = _winnerReturnRate;   // live from getTaxRates()
+                                const chickenTaxRate = _chickenReturnRate; // live from getTaxRates()
                                 
                                 // DEAD CHICKEN SIMULATION: Scale with participant count
                                 // Formula: floor(totalParticipants / 10) + 1, capped so eligible players always remain
@@ -4622,8 +4640,8 @@
                             // TAX STRUCTURE (v4.1):
                             // Winners: 16% tax (5% burn + 1% owner + 10% lotto) - get 84% back
                             // Chicken: 17% tax (5% burn + 1% owner + 10% lotto + 1% HZ) - 83% goes to winners
-                            const winnerReturnRate = 0.84; // Winners get 84% of their deposit back (after 16% tax)
-                            const chickenToWinnersRate = 0.83; // Chicken's 17% tax means 83% goes to winners pool
+                            const winnerReturnRate = _winnerReturnRate;      // live from getTaxRates()
+                            const chickenToWinnersRate = _chickenReturnRate; // live from getTaxRates()
                             
                             // Get all deposits to calculate shares
                             let loserDeposit = 0;
