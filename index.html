@@ -1758,6 +1758,12 @@
             font-family: var(--font-display);
         }
         .owner-set-btn:hover { box-shadow: 0 0 10px rgba(180, 74, 255, 0.4); }
+        .owner-current-val {
+            font-size: 9px; font-family: var(--text-mono);
+            color: rgba(180, 74, 255, 0.75);
+            text-align: center; letter-spacing: 0.3px;
+        }
+        .owner-current-val span { color: #c084fc; font-weight: 700; }
         .owner-set-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ===== STATS (unused but kept for compat) ===== */
@@ -2555,16 +2561,19 @@
             <div class="owner-dashboard-row">
                 <div class="owner-input-group">
                     <label>Timer Blocks</label>
+                    <div class="owner-current-val">now: <span id="curTimerBlocks">—</span></div>
                     <input type="number" id="ownerTimerBlocks" placeholder="1800" min="1">
                     <button class="owner-set-btn" id="setTimerBlocksBtn">Set</button>
                 </div>
                 <div class="owner-input-group">
                     <label>Min Grab (ESHARE)</label>
+                    <div class="owner-current-val">now: <span id="curMinGrab">—</span></div>
                     <input type="number" id="ownerMinGrab" placeholder="0.001" min="0.0001" step="0.0001">
                     <button class="owner-set-btn" id="setMinGrabBtn">Set</button>
                 </div>
                 <div class="owner-input-group">
                     <label>Seed/Round (ESHARE)</label>
+                    <div class="owner-current-val">now: <span id="curSeedAmount">—</span></div>
                     <input type="number" id="ownerSeedAmount" placeholder="0.002" min="0.0001" step="0.0001">
                     <button class="owner-set-btn" id="setSeedAmountBtn">Set</button>
                 </div>
@@ -2987,8 +2996,8 @@
         let readContract;     // bound to public RPC (for .call())
 
         // Live tax rates fetched from contract — updated on connect
-        let _winnerReturnRate = 0.82;   // fallback: 18% tax (7% burn + 1% owner + 10% lotto)
-        let _chickenReturnRate = 0.81;  // fallback: 19% tax (above + 1% HZ)
+        let _winnerReturnRate = 0.82;
+        let _chickenReturnRate = 0.81;
         async function fetchLiveTaxRates() {
             try {
                 const t = await readContract.methods.getTaxRates().call();
@@ -2997,10 +3006,8 @@
                 const totalChickenTax = totalWinnerTax + parseInt(t.hotZoneBps) / BPS;
                 _winnerReturnRate = 1 - totalWinnerTax;
                 _chickenReturnRate = 1 - totalChickenTax;
-                console.log(`Live tax rates — winner: ${(totalWinnerTax*100).toFixed(1)}% tax (${(_winnerReturnRate*100).toFixed(1)}% return), chicken: ${(totalChickenTax*100).toFixed(1)}% tax (${(_chickenReturnRate*100).toFixed(1)}% return)`);
-            } catch(e) {
-                console.warn('Could not fetch live tax rates, using fallback:', e.message);
-            }
+                console.log(`Live tax rates — winner: ${(totalWinnerTax*100).toFixed(1)}% tax, chicken: ${(totalChickenTax*100).toFixed(1)}% tax`);
+            } catch(e) { console.warn('Tax rate fetch failed, using fallback:', e.message); }
         }
         let tokenContract;
 
@@ -3375,7 +3382,7 @@
                 chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS); // for .send() only
                 tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
                 refreshReadContract(); // readContract uses public RPC for all .call() reads
-                fetchLiveTaxRates();   // fetch live burn/owner/lotto bps from contract
+                fetchLiveTaxRates();
 
                 // Play connect sound - simple beep
                 try {
@@ -3405,6 +3412,7 @@
                 // Show owner dashboard if owner
                 if (userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase()) {
                     document.getElementById('ownerDashboard').style.display = 'block';
+                    fetchOwnerCurrentValues();
                 }
 
                 // Transform button into grab chicken button
@@ -3512,6 +3520,21 @@
         }
 
         // Owner Dashboard Handlers
+        async function fetchOwnerCurrentValues() {
+            try {
+                const config = await readContract.methods.getConfig().call();
+                const seedInfo = await readContract.methods.getSeedVaultInfo().call();
+                const timerBlocks = config.baseTimerBlocks;
+                const minGrab = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
+                const seedPerRound = parseFloat(web3.utils.fromWei(seedInfo.amountPerRound, 'ether'));
+                document.getElementById('curTimerBlocks').textContent = timerBlocks;
+                document.getElementById('curMinGrab').textContent = minGrab.toFixed(4);
+                document.getElementById('curSeedAmount').textContent = seedPerRound.toFixed(4);
+            } catch(e) {
+                console.warn('Could not fetch owner config values:', e.message);
+            }
+        }
+
         document.getElementById('setTimerBlocksBtn').addEventListener('click', async () => {
             if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
                 showAlert('Owner only');
@@ -3527,6 +3550,7 @@
                 btn.disabled = true;
                 btn.textContent = '...';
                 await chickenContract.methods.setBaseTimerBlocks(value).send({ from: userAccount });
+                setTimeout(fetchOwnerCurrentValues, 1500);
                 btn.textContent = '✓';
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; }, 1500);
             } catch (error) {
@@ -3553,6 +3577,7 @@
                 btn.textContent = '...';
                 const weiValue = web3.utils.toWei(value.toString(), 'ether');
                 await chickenContract.methods.setMinGrabCost(weiValue).send({ from: userAccount });
+                setTimeout(fetchOwnerCurrentValues, 1500);
                 btn.textContent = '✓';
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; updateMinimumCost(); }, 1500);
             } catch (error) {
@@ -3579,6 +3604,7 @@
                 btn.textContent = '...';
                 const weiValue = web3.utils.toWei(value.toString(), 'ether');
                 await chickenContract.methods.setRoundSeedAmount(weiValue).send({ from: userAccount });
+                setTimeout(fetchOwnerCurrentValues, 1500);
                 btn.textContent = '✓';
                 setTimeout(() => { btn.textContent = 'Set'; btn.disabled = false; updateGameInfo(); }, 1500);
             } catch (error) {
@@ -4452,8 +4478,8 @@
                                 
                                 // TAX STRUCTURE: Winners pay 16% tax (5% burn + 1% owner + 10% lotto)
                                 // Lead plucker (chicken) pays 17% tax (+ 1% HZ)
-                                const winnerTaxRate = _winnerReturnRate;   // live from getTaxRates()
-                                const chickenTaxRate = _chickenReturnRate; // live from getTaxRates()
+                                const winnerTaxRate = _winnerReturnRate;
+                                const chickenTaxRate = _chickenReturnRate;
                                 
                                 // DEAD CHICKEN SIMULATION: Scale with participant count
                                 // Formula: floor(totalParticipants / 10) + 1, capped so eligible players always remain
@@ -4640,8 +4666,8 @@
                             // TAX STRUCTURE (v4.1):
                             // Winners: 16% tax (5% burn + 1% owner + 10% lotto) - get 84% back
                             // Chicken: 17% tax (5% burn + 1% owner + 10% lotto + 1% HZ) - 83% goes to winners
-                            const winnerReturnRate = _winnerReturnRate;      // live from getTaxRates()
-                            const chickenToWinnersRate = _chickenReturnRate; // live from getTaxRates()
+                            const winnerReturnRate = _winnerReturnRate;
+                            const chickenToWinnersRate = _chickenReturnRate;
                             
                             // Get all deposits to calculate shares
                             let loserDeposit = 0;
@@ -4724,7 +4750,6 @@
                                     isLottoWinner: isLottoWinner,
                                     isLoser: isLoser,
                                     isDeadChicken: isDeadChicken,
-                                    isLeadPlucker: isLoser, // lead plucker = the loser (held chicken when timer ran out)
                                     wasSoloRound: participants.length === 1 // Track if this was a solo round (refunded)
                                 });
                             }
@@ -4770,7 +4795,6 @@
                                 <span class="winner-address">${formatAddress(p.address)}</span>
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
                                 ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀☠️ Dead Chicken</span>' : ''}
-                                ${p.isLeadPlucker ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(200,80,0,0.12)); border-color: rgba(255,140,0,0.45); color: #ff8c00;">🐔 Lead Plucker</span>' : ''}
                             </div>
                             <div class="winner-amount" style="color: ${roiColor};">
                                 ${roiDisplay}
