@@ -1760,8 +1760,7 @@
         .owner-set-btn:hover { box-shadow: 0 0 10px rgba(180, 74, 255, 0.4); }
         .owner-current-val {
             font-size: 9px; font-family: var(--text-mono);
-            color: rgba(180, 74, 255, 0.75);
-            text-align: center; letter-spacing: 0.3px;
+            color: rgba(180, 74, 255, 0.75); text-align: center; letter-spacing: 0.3px;
         }
         .owner-current-val span { color: #c084fc; font-weight: 700; }
         .owner-set-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2577,6 +2576,12 @@
                     <input type="number" id="ownerSeedAmount" placeholder="0.002" min="0.0001" step="0.0001">
                     <button class="owner-set-btn" id="setSeedAmountBtn">Set</button>
                 </div>
+                <div class="owner-input-group">
+                    <label>Burn Tax (%)</label>
+                    <div class="owner-current-val">now: <span id="curBurnBps">—</span></div>
+                    <input type="number" id="ownerBurnBps" placeholder="7" min="0" max="50" step="0.1">
+                    <button class="owner-set-btn" id="setBurnBpsBtn">Set</button>
+                </div>
             </div>
         </div>
 
@@ -2995,7 +3000,6 @@
         let chickenContract;  // bound to MetaMask (for .send())
         let readContract;     // bound to public RPC (for .call())
 
-        // Live tax rates fetched from contract — updated on connect
         let _winnerReturnRate = 0.82;
         let _chickenReturnRate = 0.81;
         async function fetchLiveTaxRates() {
@@ -3007,7 +3011,7 @@
                 _winnerReturnRate = 1 - totalWinnerTax;
                 _chickenReturnRate = 1 - totalChickenTax;
                 console.log(`Live tax rates — winner: ${(totalWinnerTax*100).toFixed(1)}% tax, chicken: ${(totalChickenTax*100).toFixed(1)}% tax`);
-            } catch(e) { console.warn('Tax rate fetch failed, using fallback:', e.message); }
+            } catch(e) { console.warn('Tax rate fetch failed:', e.message); }
         }
         let tokenContract;
 
@@ -3520,21 +3524,6 @@
         }
 
         // Owner Dashboard Handlers
-        async function fetchOwnerCurrentValues() {
-            try {
-                const config = await readContract.methods.getConfig().call();
-                const seedInfo = await readContract.methods.getSeedVaultInfo().call();
-                const timerBlocks = config.baseTimerBlocks;
-                const minGrab = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
-                const seedPerRound = parseFloat(web3.utils.fromWei(seedInfo.amountPerRound, 'ether'));
-                document.getElementById('curTimerBlocks').textContent = timerBlocks;
-                document.getElementById('curMinGrab').textContent = minGrab.toFixed(4);
-                document.getElementById('curSeedAmount').textContent = seedPerRound.toFixed(4);
-            } catch(e) {
-                console.warn('Could not fetch owner config values:', e.message);
-            }
-        }
-
         document.getElementById('setTimerBlocksBtn').addEventListener('click', async () => {
             if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
                 showAlert('Owner only');
@@ -3612,6 +3601,43 @@
                 showAlert('Error: ' + (error.message || 'Unknown error'));
                 btn.textContent = 'Set';
                 btn.disabled = false;
+            }
+        });
+
+        async function fetchOwnerCurrentValues() {
+            try {
+                const config = await readContract.methods.getConfig().call();
+                const seedInfo = await readContract.methods.getSeedVaultInfo().call();
+                document.getElementById('curTimerBlocks').textContent = config.baseTimerBlocks;
+                document.getElementById('curMinGrab').textContent = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether')).toFixed(4);
+                document.getElementById('curSeedAmount').textContent = parseFloat(web3.utils.fromWei(seedInfo.amountPerRound, 'ether')).toFixed(4);
+                document.getElementById('curBurnBps').textContent = (parseInt(config.burnBps) / 100).toFixed(1) + '%';
+            } catch(e) { console.warn('Could not fetch owner config:', e.message); }
+        }
+
+        document.getElementById('setBurnBpsBtn').addEventListener('click', async () => {
+            if (!userAccount || userAccount.toLowerCase() !== OWNER_ADDRESS.toLowerCase()) {
+                showAlert('Owner only'); return;
+            }
+            const btn = document.getElementById('setBurnBpsBtn');
+            const pct = parseFloat(document.getElementById('ownerBurnBps').value);
+            if (isNaN(pct) || pct < 0 || pct > 50) {
+                showAlert('Enter a valid burn % (0–50)'); return;
+            }
+            try {
+                btn.disabled = true; btn.textContent = '...';
+                const bpsValue = Math.round(pct * 100);
+                await chickenContract.methods.setBurnBps(bpsValue).send({ from: userAccount });
+                btn.textContent = '✓';
+                setTimeout(() => {
+                    btn.textContent = 'Set'; btn.disabled = false;
+                    fetchOwnerCurrentValues();
+                    fetchLiveTaxRates();
+                }, 1500);
+            } catch (error) {
+                console.error('Error setting burn bps:', error);
+                showAlert('Error: ' + (error.message || 'Unknown error'));
+                btn.textContent = 'Set'; btn.disabled = false;
             }
         });
 
