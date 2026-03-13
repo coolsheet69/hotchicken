@@ -4776,6 +4776,7 @@
                                     isLottoWinner: isLottoWinner,
                                     isLoser: isLoser,
                                     isDeadChicken: isDeadChicken,
+                                    isLeadPlucker: isLoser,
                                     wasSoloRound: participants.length === 1 // Track if this was a solo round (refunded)
                                 });
                             }
@@ -4821,6 +4822,7 @@
                                 <span class="winner-address">${formatAddress(p.address)}</span>
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
                                 ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀☠️ Dead Chicken</span>' : ''}
+                                ${p.isLeadPlucker ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(200,80,0,0.12)); border-color: rgba(255,140,0,0.45); color: #ff8c00;">🐔 Lead Plucker</span>' : ''}
                             </div>
                             <div class="winner-amount" style="color: ${roiColor};">
                                 ${roiDisplay}
