@@ -1358,15 +1358,58 @@
             50% { border-color: rgba(255, 160, 0, 0.7); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255, 120, 0, 0.15), inset 0 1px 0 rgba(255, 180, 0, 0.15), 0 0 36px rgba(255, 140, 0, 0.22), 0 0 80px rgba(255, 100, 0, 0.1); }
         }
 
+        .leaderboard-title-row {
+            display: flex; align-items: center; justify-content: center;
+            position: relative; margin-bottom: 10px;
+        }
         .leaderboard-title {
             font-family: var(--font-display);
             font-size: 16px; font-weight: 700;
             color: var(--neon-gold);
-            text-align: center; margin-bottom: 10px;
+            text-align: center; margin-bottom: 0;
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
+        .legend-btn {
+            position: absolute; left: 0;
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 8px;
+            font-size: 24px; line-height: 1;
+            padding: 2px 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .legend-btn:hover {
+            background: rgba(255,215,0,0.18);
+            border-color: rgba(255,215,0,0.6);
+            box-shadow: 0 0 8px rgba(255,215,0,0.2);
+        }
+        .coop-legend {
+            display: none;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            animation: legendFadeIn 0.2s ease;
+        }
+        @keyframes legendFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .legend-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px; line-height: 1.5;
+        }
+        .legend-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .legend-row:first-child { padding-top: 0; }
+        .legend-icon { flex-shrink: 0; min-width: 105px; }
+        .legend-desc { color: rgba(255,255,255,0.7); font-family: var(--text-mono); }
+        .legend-desc em { color: rgba(255,255,255,0.42); font-style: normal; display: block; font-size: 11px; margin-top: 2px; }
 
         /* Lotto eligible tag on rows */
         .lotto-tag {
@@ -2453,8 +2496,28 @@
 
         <!-- Leaderboard -->
         <div class="leaderboard-container">
-            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔</div>
-            
+            <div class="leaderboard-title-row">
+                <button class="legend-btn" id="legendToggleBtn" onclick="toggleCoopLegend()">ℹ️</button>
+                <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔</div>
+            </div>
+
+            <div class="coop-legend" id="coopLegend">
+                <div class="legend-row">
+                    <span class="legend-icon"><span class="dc-tag">🔪</span></span>
+                    <span class="legend-desc">At risk of Dead Chicken — loses full deposit
+                        <em>+1 dead chicken per 10 players in round</em>
+                    </span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-icon"><span class="lotto-tag">🎰 LOTTO ENTRY</span></span>
+                    <span class="legend-desc">Lottery eligible + immune to Dead Chicken</span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-icon"><span class="hz-tag">HOT</span></span>
+                    <span class="legend-desc">Hot zone bidder (bids with less than 5 minutes left) — earns 1% bonus pool share</span>
+                </div>
+            </div>
+
             <div class="leaderboard-column-headers">
                 <span class="header-rank"></span>
                 <span class="header-address"></span>
@@ -3640,6 +3703,15 @@
                 btn.textContent = 'Set'; btn.disabled = false;
             }
         });
+
+        function toggleCoopLegend() {
+            const legend = document.getElementById('coopLegend');
+            const btn = document.getElementById('legendToggleBtn');
+            const isOpen = legend.style.display === 'block';
+            legend.style.display = isOpen ? 'none' : 'block';
+            btn.style.background = isOpen ? 'rgba(255,215,0,0.08)' : 'rgba(255,215,0,0.22)';
+            btn.style.borderColor = isOpen ? 'rgba(255,215,0,0.25)' : 'rgba(255,215,0,0.7)';
+        }
 
         async function handleGrabChicken() {
             if (!userAccount) return;
