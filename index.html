@@ -4486,16 +4486,11 @@
                                 console.log('Participants with deposits:', participantsWithDeposits);
                                 
                                 // Lead Plucker = current holder (shown separately above)
-                                // Everyone else sorted by total bids (deposits) descending
+                                // Everyone else in reverse grab order (most recent grab = #2)
+                                // getParticipants returns addresses in first-grab order, so reverse for most-recent-first
                                 const pastPluckers = [...participantsWithDeposits]
                                     .filter(p => p.address.toLowerCase() !== holder.toLowerCase())
-                                    .sort((a, b) => {
-                                        // Sort by deposit descending (highest bids first)
-                                        if (BigInt(b.deposit) > BigInt(a.deposit)) return 1;
-                                        if (BigInt(b.deposit) < BigInt(a.deposit)) return -1;
-                                        return 0;
-                                    })
-                                    .slice(0);
+                                    .reverse();
                                 
                                 console.log('Past pluckers (sorted by deposits):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
                                 
@@ -4590,7 +4585,7 @@
                                         
                                         return `
                                         <div class="holder-item${userClass}">
-                                            <span class="holder-rank">🐔</span>
+                                            <span class="holder-rank">#${index + 2}</span>
                                             <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${knifeTag}${hzTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                             <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
