@@ -4569,11 +4569,17 @@
                                 }
 
                                 // Lead Plucker = current holder (shown separately above)
-                                // Sort by grabCount descending — most grabs = held it most recently
+                                // Sort by deposit descending — each grab escalates cost, so
+                                // whoever paid the most grabbed most recently (#2), down to
+                                // whoever grabbed earliest/cheapest at the bottom.
                                 const pastPluckers = nonHolders
-                                    .sort((a, b) => b.grabs - a.grabs);
+                                    .sort((a, b) => {
+                                        if (BigInt(b.deposit) > BigInt(a.deposit)) return 1;
+                                        if (BigInt(b.deposit) < BigInt(a.deposit)) return -1;
+                                        return 0;
+                                    });
 
-                                console.log('Past pluckers (sorted by grab count):', pastPluckers.map(p => ({addr: p.address, grabs: p.grabs, deposit: p.deposit})));
+                                console.log('Past pluckers (sorted by deposit desc):', pastPluckers.map(p => ({addr: p.address, grabs: p.grabs, deposit: p.deposit})));
                                 
                                 // Calculate total deposits of past pluckers for pot distribution
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
