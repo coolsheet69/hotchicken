@@ -4557,15 +4557,23 @@
                                 }
                                 
                                 console.log('Participants with deposits:', participantsWithDeposits);
-                                
+
+                                // Fetch grabCount for each non-holder to sort by most recent grab
+                                // Higher grabCount = grabbed more recently = closer to the top
+                                const nonHolders = participantsWithDeposits.filter(p => p.address.toLowerCase() !== holder.toLowerCase());
+                                for (const p of nonHolders) {
+                                    try {
+                                        p.grabs = parseInt(await readContract.methods.grabCount(currentRoundNum, p.address).call());
+                                    } catch(e) { p.grabs = 0; }
+                                    await new Promise(r => setTimeout(r, 50));
+                                }
+
                                 // Lead Plucker = current holder (shown separately above)
-                                // Everyone else in reverse grab order (most recent grab = #2)
-                                // getParticipants returns addresses in first-grab order, so reverse for most-recent-first
-                                const pastPluckers = [...participantsWithDeposits]
-                                    .filter(p => p.address.toLowerCase() !== holder.toLowerCase())
-                                    .reverse();
-                                
-                                console.log('Past pluckers (sorted by deposits):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
+                                // Sort by grabCount descending — most grabs = held it most recently
+                                const pastPluckers = nonHolders
+                                    .sort((a, b) => b.grabs - a.grabs);
+
+                                console.log('Past pluckers (sorted by grab count):', pastPluckers.map(p => ({addr: p.address, grabs: p.grabs, deposit: p.deposit})));
                                 
                                 // Calculate total deposits of past pluckers for pot distribution
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
