@@ -3654,27 +3654,106 @@
 
         // ===== ESHARE USD PRICE =====
         let _esharePriceUsd = null;
-        const ESHARE_TOKEN = '0xb7C10146bA1b618956a38605AB6496523d450871';
+
+        // Uniswap V3 factory on Base — pool looked up dynamically
+        const UNISWAP_V3_FACTORY = '0x33128a8fC17869897dcE68Ed026d694621f6FDfD';
+        const WETH_ADDRESS       = '0x4200000000000000000000000000000000000006';
+        const ESHARE_ADDRESS     = '0xb7C10146bA1b618956a38605AB6496523d450871';
+        // Chainlink ETH/USD feed on Base
+        const CHAINLINK_ETH_USD  = '0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70';
 
         async function fetchEsharePrice() {
             try {
-                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ESHARE_TOKEN}`);
-                const data = await res.json();
-                const pairs = data.pairs;
-                if (pairs && pairs.length > 0) {
-                    // Pick the pair with highest liquidity on Base
-                    const basePairs = pairs.filter(p => p.chainId === 'base');
-                    const best = basePairs.sort((a, b) => (parseFloat(b.liquidity?.usd || 0) - parseFloat(a.liquidity?.usd || 0)))[0];
-                    if (best && best.priceUsd) {
-                        _esharePriceUsd = parseFloat(best.priceUsd);
-                        console.log('ESHARE price:', _esharePriceUsd);
-                        updateBidUsdDisplay();
-                        // Mark spans as loaded
-                        document.querySelectorAll('.bid-usd-value').forEach(el => el.classList.add('loaded'));
-                    }
+                // Look up the best pool from factory (try 1%, 0.3%, 0.05% fee tiers)
+                const factoryAbi = [{
+                    name: 'getPool', type: 'function', stateMutability: 'view',
+                    inputs: [{ type: 'address' }, { type: 'address' }, { type: 'uint24' }],
+                    outputs: [{ type: 'address' }]
+                }];
+                const factory = new readWeb3.eth.Contract(factoryAbi, UNISWAP_V3_FACTORY);
+                const zeroAddr = '0x0000000000000000000000000000000000000000';
+                let ESHARE_WETH_POOL = null;
+                for (const fee of [10000, 3000, 500]) {
+                    const pool = await factory.methods.getPool(ESHARE_ADDRESS, WETH_ADDRESS, fee).call();
+                    if (pool && pool !== zeroAddr) { ESHARE_WETH_POOL = pool; console.log(`Found ESHARE/WETH pool fee=${fee}:`, pool); break; }
                 }
+                if (!ESHARE_WETH_POOL) throw new Error('No ESHARE/WETH pool found');
+
+                const poolAbi = [
+                    { name: 'slot0', type: 'function', stateMutability: 'view',
+                      inputs: [],
+                      outputs: [
+                        { name: 'sqrtPriceX96', type: 'uint160' },
+                        { name: 'tick', type: 'int24' },
+                        { name: 'observationIndex', type: 'uint16' },
+                        { name: 'observationCardinality', type: 'uint16' },
+                        { name: 'observationCardinalityNext', type: 'uint16' },
+                        { name: 'feeProtocol', type: 'uint8' },
+                        { name: 'unlocked', type: 'bool' }
+                      ]
+                    },
+                    { name: 'token0', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
+                    { name: 'token1', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] }
+                ];
+                const chainlinkAbi = [
+                    { name: 'latestRoundData', type: 'function', stateMutability: 'view',
+                      inputs: [],
+                      outputs: [
+                        { name: 'roundId', type: 'uint80' },
+                        { name: 'answer', type: 'int256' },
+                        { name: 'startedAt', type: 'uint256' },
+                        { name: 'updatedAt', type: 'uint256' },
+                        { name: 'answeredInRound', type: 'uint80' }
+                      ]
+                    }
+                ];
+
+                const poolContract      = new readWeb3.eth.Contract(poolAbi, ESHARE_WETH_POOL);
+                const chainlinkContract = new readWeb3.eth.Contract(chainlinkAbi, CHAINLINK_ETH_USD);
+
+                // Fetch in parallel
+                const [slot0, token0Addr, roundData] = await Promise.all([
+                    poolContract.methods.slot0().call(),
+                    poolContract.methods.token0().call(),
+                    chainlinkContract.methods.latestRoundData().call()
+                ]);
+
+                // ETH price from Chainlink (8 decimals)
+                const ethUsd = parseFloat(roundData.answer) / 1e8;
+
+                // Compute ESHARE/WETH price from sqrtPriceX96
+                // price = (sqrtPriceX96 / 2^96)^2
+                const sqrtPrice = parseFloat(slot0.sqrtPriceX96);
+                const rawPrice  = (sqrtPrice / Math.pow(2, 96)) ** 2;
+
+                // Determine if ESHARE is token0 or token1
+                const eshareIsToken0 = token0Addr.toLowerCase() === ESHARE_ADDRESS.toLowerCase();
+                // rawPrice = token1/token0 — if ESHARE is token0, price = rawPrice (WETH per ESHARE)
+                // if ESHARE is token1, price = 1/rawPrice
+                let eshareInWeth = eshareIsToken0 ? rawPrice : (1 / rawPrice);
+
+                // Both tokens are 18 decimals so no decimal adjustment needed
+                _esharePriceUsd = eshareInWeth * ethUsd;
+                console.log(`ESHARE price: $${_esharePriceUsd.toFixed(4)} (${eshareInWeth.toFixed(8)} ETH, ETH=$${ethUsd.toFixed(2)})`);
+                updateBidUsdDisplay();
+                document.querySelectorAll('.bid-usd-value').forEach(el => el.classList.add('loaded'));
+
             } catch(e) {
                 console.warn('Could not fetch ESHARE price:', e.message);
+                // Fallback: try GeckoTerminal public API (no key needed)
+                try {
+                    const res = await fetch('https://api.geckoterminal.com/api/v2/networks/base/tokens/0xb7C10146bA1b618956a38605AB6496523d450871');
+                    const data = await res.json();
+                    const price = data?.data?.attributes?.price_usd;
+                    if (price) {
+                        _esharePriceUsd = parseFloat(price);
+                        console.log('ESHARE price (GeckoTerminal fallback):', _esharePriceUsd);
+                        updateBidUsdDisplay();
+                        document.querySelectorAll('.bid-usd-value').forEach(el => el.classList.add('loaded'));
+                    }
+                } catch(e2) {
+                    console.warn('GeckoTerminal fallback also failed:', e2.message);
+                }
             }
         }
 
