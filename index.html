@@ -2438,7 +2438,7 @@
             <!-- Opening bid: input + min/max buttons on one line -->
             <div class="bid-row" id="quickBidRowFirst" style="display: none;">
                 <span class="bid-usd-value" id="bidUsdFirst">loading...</span>
-                <input type="number" class="amount-input" id="eshareAmountFirst" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
+                <input type="number" class="amount-input" id="eshareAmountFirst" placeholder="0.1000" min="0.0001" step="0.0001" />
                 <label class="amount-label">ESHARE</label>
                 <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min</button>
                 <button class="quick-bid-btn bid-max" id="quickBidMax" onclick="setQuickBid('max')">Max</button>
@@ -2447,7 +2447,7 @@
             <!-- Escalating bids: input + 10%, 20%, 30% on one line -->
             <div class="bid-row" id="quickBidRow" style="display: none;">
                 <span class="bid-usd-value" id="bidUsdEsc">loading...</span>
-                <input type="number" class="amount-input" id="eshareAmountEsc" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
+                <input type="number" class="amount-input" id="eshareAmountEsc" placeholder="0.1000" min="0.0001" step="0.0001" />
                 <label class="amount-label">ESHARE</label>
                 <button class="quick-bid-btn bid-min active" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
                 <button class="quick-bid-btn bid-mid" id="quickBid20" onclick="setQuickBid(20)">+20%</button>
@@ -3316,22 +3316,30 @@
             if (typeof window.ethereum !== 'undefined') {
                 console.log('Adding click listener to connect button');
                 connectWalletBtn.addEventListener('click', connectWallet);
-                
+
+                // Auto-connect if wallet was previously connected (no popup)
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts && accounts.length > 0) {
+                        console.log('Auto-connecting previously connected wallet:', accounts[0]);
+                        await connectWallet();
+                    }
+                } catch(e) {
+                    console.warn('Auto-connect check failed:', e.message);
+                }
+
                 // Listen for account changes
                 window.ethereum.on('accountsChanged', async (accounts) => {
                     console.log('Account changed:', accounts);
                     if (accounts.length > 0) {
-                        // User switched accounts - reconnect
                         await connectWallet();
                     } else {
-                        // User disconnected - reload page
                         location.reload();
                     }
                 });
                 
                 // Listen for chain changes
                 window.ethereum.on('chainChanged', () => {
-                    // Reload page on chain change
                     location.reload();
                 });
             } else {
