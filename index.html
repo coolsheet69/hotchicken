@@ -4348,6 +4348,23 @@
                         fetchInProgress = true;
                         lastBlockFetchTime = now;
                         
+                        // Also fetch current minimum grab cost for responsive bid updates
+                        readContract.methods.currentMinGrab().call().then(minGrabWei => {
+                            try {
+                                const newMin = roundUp4Decimals(parseFloat(web3.utils.fromWei(minGrabWei, 'ether')));
+                                if (newMin !== minimumCost) {
+                                    minimumCost = newMin;
+                                    const val = newMin.toFixed(4);
+                                    [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
+                                        if (inp) { inp.value = val; inp.placeholder = val; inp.classList.remove('below-minimum', 'above-maximum'); }
+                                    });
+                                    _contractMinReady = true;
+                                    updateBidUsdDisplay();
+                                    console.log('Min grab updated to:', val);
+                                }
+                            } catch(e) {}
+                        }).catch(() => {});
+
                         readContract.methods.getTimeLeft().call().then(timeLeft => {
                             const secs = parseInt(timeLeft.secs);
                             const isHZ = timeLeft.isHZ;
