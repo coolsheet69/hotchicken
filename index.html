@@ -744,6 +744,14 @@
             margin-right: 4px;
         }
 
+        .bid-usd-value {
+            font-size: 11px; font-family: var(--text-mono);
+            color: rgba(255,255,255,0.45);
+            white-space: nowrap; min-width: 52px;
+            text-align: right;
+        }
+        .bid-usd-value.loaded { color: rgba(0, 255, 136, 0.6); }
+
         .amount-input {
             background: var(--bg-card);
             border: 2px solid rgba(255, 106, 0, 0.3);
@@ -1358,58 +1366,15 @@
             50% { border-color: rgba(255, 160, 0, 0.7); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255, 120, 0, 0.15), inset 0 1px 0 rgba(255, 180, 0, 0.15), 0 0 36px rgba(255, 140, 0, 0.22), 0 0 80px rgba(255, 100, 0, 0.1); }
         }
 
-        .leaderboard-title-row {
-            display: flex; align-items: center; justify-content: center;
-            position: relative; margin-bottom: 10px;
-        }
         .leaderboard-title {
             font-family: var(--font-display);
             font-size: 16px; font-weight: 700;
             color: var(--neon-gold);
-            text-align: center; margin-bottom: 0;
+            text-align: center; margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
-        .legend-btn {
-            position: absolute; left: 0;
-            background: rgba(255,215,0,0.08);
-            border: 1px solid rgba(255,215,0,0.25);
-            border-radius: 8px;
-            font-size: 24px; line-height: 1;
-            padding: 2px 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .legend-btn:hover {
-            background: rgba(255,215,0,0.18);
-            border-color: rgba(255,215,0,0.6);
-            box-shadow: 0 0 8px rgba(255,215,0,0.2);
-        }
-        .coop-legend {
-            display: none;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,215,0,0.15);
-            border-radius: 10px;
-            padding: 10px 14px;
-            margin-bottom: 10px;
-            animation: legendFadeIn 0.2s ease;
-        }
-        @keyframes legendFadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .legend-row {
-            display: flex; align-items: flex-start; gap: 10px;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 13px; line-height: 1.5;
-        }
-        .legend-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .legend-row:first-child { padding-top: 0; }
-        .legend-icon { flex-shrink: 0; min-width: 115px; display: flex; align-items: center; justify-content: center; }
-        .legend-desc { color: rgba(255,255,255,0.7); font-family: var(--text-mono); }
-        .legend-desc em { color: rgba(255,255,255,0.42); font-style: normal; display: block; font-size: 11px; margin-top: 2px; }
 
         /* Lotto eligible tag on rows */
         .lotto-tag {
@@ -1421,7 +1386,7 @@
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 200, 100, 0.1));
             border: 1px solid rgba(0, 255, 136, 0.25);
             font-family: var(--font-display);
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 700;
             letter-spacing: 1px;
             color: var(--neon-green);
@@ -1438,7 +1403,7 @@
             background: linear-gradient(135deg, rgba(255, 45, 45, 0.2), rgba(255, 80, 0, 0.15));
             border: 1px solid rgba(255, 45, 45, 0.3);
             font-family: var(--font-display);
-            font-size: 11px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 1px;
             color: var(--neon-red);
@@ -1455,7 +1420,7 @@
             background: linear-gradient(135deg, rgba(180, 0, 255, 0.2), rgba(120, 0, 200, 0.15));
             border: 1px solid rgba(180, 0, 255, 0.35);
             font-family: var(--font-display);
-            font-size: 13px;
+            font-size: 8px;
             font-weight: 700;
             letter-spacing: 1px;
             color: #c84dff;
@@ -1502,11 +1467,10 @@
             font-size: 10px; color: var(--neon-gold);
             text-transform: uppercase; letter-spacing: 1px;
             grid-column: 1; font-weight: 700;
-            text-align: center; line-height: 1.3;
         }
 
         .current-holder-address {
-            font-size: 15px; font-weight: 700; color: white;
+            font-size: 14px; font-weight: 700; color: white;
             font-family: var(--text-mono);
             text-align: left; grid-column: 2;
             padding-left: 0.5em;
@@ -1646,8 +1610,8 @@
 
         .lotto-badge {
             background: linear-gradient(135deg, var(--neon-green) 0%, #00cc66 100%);
-            color: var(--bg-deep); padding: 2px 8px;
-            border-radius: 5px; font-size: 11px; font-weight: 700;
+            color: var(--bg-deep); padding: 1px 6px;
+            border-radius: 5px; font-size: 8px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 1px;
             font-family: var(--font-display);
         }
@@ -2472,6 +2436,7 @@
             
             <!-- Opening bid: input + min/max buttons on one line -->
             <div class="bid-row" id="quickBidRowFirst" style="display: none;">
+                <span class="bid-usd-value" id="bidUsdFirst">loading...</span>
                 <input type="number" class="amount-input" id="eshareAmountFirst" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
                 <label class="amount-label">ESHARE</label>
                 <button class="quick-bid-btn bid-min active" id="quickBidMin" onclick="setQuickBid('min')">Min</button>
@@ -2480,6 +2445,7 @@
             
             <!-- Escalating bids: input + 10%, 20%, 30% on one line -->
             <div class="bid-row" id="quickBidRow" style="display: none;">
+                <span class="bid-usd-value" id="bidUsdEsc">loading...</span>
                 <input type="number" class="amount-input" id="eshareAmountEsc" placeholder="0.1000" min="0.0001" step="0.0001" value="0.1000" />
                 <label class="amount-label">ESHARE</label>
                 <button class="quick-bid-btn bid-min active" id="quickBid10" onclick="setQuickBid(10)">+10%</button>
@@ -2497,28 +2463,8 @@
 
         <!-- Leaderboard -->
         <div class="leaderboard-container">
-            <div class="leaderboard-title-row">
-                <button class="legend-btn" id="legendToggleBtn" onclick="toggleCoopLegend()">ℹ️</button>
-                <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔</div>
-            </div>
-
-            <div class="coop-legend" id="coopLegend">
-                <div class="legend-row">
-                    <span class="legend-icon"><span class="dc-tag">🔪</span></span>
-                    <span class="legend-desc">At risk of Dead Chicken — loses full deposit
-                        <em>+1 dead chicken per 10 players in round</em>
-                    </span>
-                </div>
-                <div class="legend-row">
-                    <span class="legend-icon"><span class="lotto-tag">🎰 LOTTO ENTRY</span></span>
-                    <span class="legend-desc">Lottery eligible + immune to Dead Chicken</span>
-                </div>
-                <div class="legend-row">
-                    <span class="legend-icon"><span class="hz-tag">HOT</span></span>
-                    <span class="legend-desc">Hot zone bidder (bids with less than 5 minutes left) — earns 1% bonus pool share</span>
-                </div>
-            </div>
-
+            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔</div>
+            
             <div class="leaderboard-column-headers">
                 <span class="header-rank"></span>
                 <span class="header-address"></span>
@@ -2527,7 +2473,7 @@
             </div>
             
             <div class="current-holder">
-                <div class="current-holder-label">Lead<br>Plucker</div>
+                <div class="current-holder-label">Lead Plucker:</div>
                 <div class="current-holder-address" id="currentHolder">0x0000...0000</div>
                 <div class="current-holder-amount" id="currentAmount">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
                 <div class="current-holder-winnings" id="currentWinnings">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
@@ -3353,8 +3299,8 @@
                 }
             });
         }
-        document.getElementById('eshareAmountFirst').addEventListener('input', function() { handleBidInput(this); });
-        document.getElementById('eshareAmountEsc').addEventListener('input', function() { handleBidInput(this); });
+        document.getElementById('eshareAmountFirst').addEventListener('input', function() { handleBidInput(this); updateBidUsdDisplay(); });
+        document.getElementById('eshareAmountEsc').addEventListener('input', function() { handleBidInput(this); updateBidUsdDisplay(); });
 
         // Initialize with minimum cost
         updateMinimumCost();
@@ -3494,6 +3440,7 @@
 
                 // Stagger startup calls to avoid rate-limiting the RPC
                 loadBalance();
+                fetchEsharePrice();
                 setTimeout(() => updateMinimumCost(), 500);
                 setTimeout(() => updateGameInfo(), 1000);
                 setTimeout(() => loadLeaderboard(), 1500);
@@ -3705,14 +3652,50 @@
             }
         });
 
-        function toggleCoopLegend() {
-            const legend = document.getElementById('coopLegend');
-            const btn = document.getElementById('legendToggleBtn');
-            const isOpen = legend.style.display === 'block';
-            legend.style.display = isOpen ? 'none' : 'block';
-            btn.style.background = isOpen ? 'rgba(255,215,0,0.08)' : 'rgba(255,215,0,0.22)';
-            btn.style.borderColor = isOpen ? 'rgba(255,215,0,0.25)' : 'rgba(255,215,0,0.7)';
+        // ===== ESHARE USD PRICE =====
+        let _esharePriceUsd = null;
+        const ESHARE_TOKEN = '0xb7C10146bA1b618956a38605AB6496523d450871';
+
+        async function fetchEsharePrice() {
+            try {
+                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${ESHARE_TOKEN}`);
+                const data = await res.json();
+                const pairs = data.pairs;
+                if (pairs && pairs.length > 0) {
+                    // Pick the pair with highest liquidity on Base
+                    const basePairs = pairs.filter(p => p.chainId === 'base');
+                    const best = basePairs.sort((a, b) => (parseFloat(b.liquidity?.usd || 0) - parseFloat(a.liquidity?.usd || 0)))[0];
+                    if (best && best.priceUsd) {
+                        _esharePriceUsd = parseFloat(best.priceUsd);
+                        console.log('ESHARE price:', _esharePriceUsd);
+                        updateBidUsdDisplay();
+                        // Mark spans as loaded
+                        document.querySelectorAll('.bid-usd-value').forEach(el => el.classList.add('loaded'));
+                    }
+                }
+            } catch(e) {
+                console.warn('Could not fetch ESHARE price:', e.message);
+            }
         }
+
+        function updateBidUsdDisplay() {
+            if (!_esharePriceUsd) return;
+            ['First', 'Esc'].forEach(suffix => {
+                const input = document.getElementById('eshareAmount' + suffix);
+                const usdEl = document.getElementById('bidUsd' + suffix);
+                if (!input || !usdEl) return;
+                const amount = parseFloat(input.value);
+                if (!isNaN(amount) && amount > 0) {
+                    const usd = amount * _esharePriceUsd;
+                    usdEl.textContent = usd >= 0.01
+                        ? '≈$' + usd.toFixed(2)
+                        : '≈$' + usd.toFixed(4);
+                } else {
+                    usdEl.textContent = 'loading...';
+                }
+            });
+        }
+        // ===== END ESHARE USD PRICE =====
 
         async function handleGrabChicken() {
             if (!userAccount) return;
@@ -4081,6 +4064,7 @@
         let lastRoundEndBlock = 0;
         let isHotzoneFromServer = false;
         const FETCH_INTERVAL_MS = 10000; // Fetch from blockchain every 10 seconds
+        setInterval(fetchEsharePrice, 120000); // Refresh ESHARE price every 2 minutes
         const BLOCK_TIME_SEC = 2; // Base blocks are ~2 seconds
 
         function formatTime(seconds) {
@@ -4557,29 +4541,29 @@
                                 }
                                 
                                 console.log('Participants with deposits:', participantsWithDeposits);
+                                
+                                // Lead Plucker = current holder (#1, shown separately above)
+                                // Previous holder = always #2 (lotto eligible, immune to DC)
+                                // Rest sorted by deposit descending (higher deposit = grabbed more recently)
+                                const nonHolders = [...participantsWithDeposits]
+                                    .filter(p => p.address.toLowerCase() !== holder.toLowerCase());
 
-                                // Fetch grabCount for each non-holder to sort by most recent grab
-                                // Higher grabCount = grabbed more recently = closer to the top
-                                const nonHolders = participantsWithDeposits.filter(p => p.address.toLowerCase() !== holder.toLowerCase());
-                                for (const p of nonHolders) {
-                                    try {
-                                        p.grabs = parseInt(await readContract.methods.grabCount(currentRoundNum, p.address).call());
-                                    } catch(e) { p.grabs = 0; }
-                                    await new Promise(r => setTimeout(r, 50));
-                                }
+                                const prevHolderEntry = lottoPrevious
+                                    ? nonHolders.find(p => p.address.toLowerCase() === lottoPrevious)
+                                    : null;
 
-                                // Lead Plucker = current holder (shown separately above)
-                                // Sort by deposit descending — each grab escalates cost, so
-                                // whoever paid the most grabbed most recently (#2), down to
-                                // whoever grabbed earliest/cheapest at the bottom.
-                                const pastPluckers = nonHolders
+                                const rest = nonHolders
+                                    .filter(p => !prevHolderEntry || p.address.toLowerCase() !== lottoPrevious)
                                     .sort((a, b) => {
                                         if (BigInt(b.deposit) > BigInt(a.deposit)) return 1;
                                         if (BigInt(b.deposit) < BigInt(a.deposit)) return -1;
                                         return 0;
                                     });
 
-                                console.log('Past pluckers (sorted by deposit desc):', pastPluckers.map(p => ({addr: p.address, grabs: p.grabs, deposit: p.deposit})));
+                                // #2 = previous holder (if exists), then rest by deposit
+                                const pastPluckers = prevHolderEntry ? [prevHolderEntry, ...rest] : rest;
+
+                                console.log('Past pluckers (prev holder #2, rest by deposit):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
                                 
                                 // Calculate total deposits of past pluckers for pot distribution
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
