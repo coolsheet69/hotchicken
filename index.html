@@ -3232,6 +3232,8 @@
                 [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
                     if (inp) { inp.value = val; }
                 });
+                _contractMinReady = true;
+                updateBidUsdDisplay();
             }
         }
 
@@ -3664,6 +3666,7 @@
 
         // ===== ESHARE USD PRICE =====
         let _esharePriceUsd = null;
+        let _contractMinReady = false; // true once updateMinimumCost has fetched from contract
 
         // Uniswap V3 factory on Base — pool looked up dynamically
         const UNISWAP_V3_FACTORY = '0x33128a8fC17869897dcE68Ed026d694621f6FDfD';
@@ -3768,7 +3771,7 @@
         }
 
         function updateBidUsdDisplay() {
-            if (!_esharePriceUsd) return;
+            if (!_esharePriceUsd || !_contractMinReady) return;
             ['First', 'Esc'].forEach(suffix => {
                 const input = document.getElementById('eshareAmount' + suffix);
                 const usdEl = document.getElementById('bidUsd' + suffix);
