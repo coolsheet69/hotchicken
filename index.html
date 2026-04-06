@@ -3224,6 +3224,8 @@
                 [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
                     if (inp) { inp.value = val; inp.placeholder = val; inp.classList.remove('below-minimum', 'above-maximum'); }
                 });
+                _contractMinReady = true;
+                updateBidUsdDisplay();
             } catch (error) {
                 onRpcError(error);
                 console.error('Error getting minimum cost:', error);
