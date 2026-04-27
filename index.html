@@ -3414,6 +3414,53 @@
         // Initialize with minimum cost (delayed slightly to let readWeb3 initialize)
         setTimeout(() => updateMinimumCost(), 2000);
 
+        // Flag to prevent duplicate connectWallet calls
+        let _walletConnecting = false;
+
+        // Update UI to show wallet is connected (button → GRAB CHICKEN, show address, etc.)
+        // Safe to call multiple times (idempotent).
+        function showWalletConnectedUI() {
+            // Show connected address
+            document.getElementById('connectedWallet').style.display = 'flex';
+            document.getElementById('connectedAddress').textContent = formatAddress(userAccount);
+
+            // Show owner dashboard if owner
+            if (userAccount && userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase()) {
+                document.getElementById('ownerDashboard').style.display = 'block';
+                fetchOwnerCurrentValues();
+            } else {
+                document.getElementById('ownerDashboard').style.display = 'none';
+            }
+
+            // Transform button into grab chicken button (only if not already done)
+            if (!connectWalletBtn.classList.contains('is-grab-button')) {
+                connectWalletBtn.classList.add('is-grab-button');
+                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
+                const wrapper = connectWalletBtn.closest('.grab-btn-wrapper');
+                if (wrapper) wrapper.classList.add('grab-mode');
+                connectWalletBtn.removeEventListener('click', connectWallet);
+                connectWalletBtn.addEventListener('click', handleGrabChicken);
+            }
+        }
+
+        // Reload all on-chain data with priority staggering
+        function reloadAllData() {
+            loadNicknamesFromGithub(); // Refresh nicknames from GitHub
+            updateGameInfo(true);
+            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
+            setTimeout(() => loadBalance(), 3000);
+            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
+            setTimeout(() => updateVaultAndBurnt(), 6000);
+        }
+
+        // Initialize Web3 contracts from window.ethereum (used by both connect and account change)
+        function initWalletContracts() {
+            web3 = new Web3(window.ethereum);
+            chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS);
+            tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
+            refreshReadContract();
+        }
+
         // Initialize
         window.addEventListener('load', async () => {
             console.log('Page loaded');
@@ -3424,12 +3471,41 @@
                 console.log('Adding click listener to connect button');
                 connectWalletBtn.addEventListener('click', connectWallet);
 
-                // Auto-connect if wallet was previously connected (no popup)
+                // Auto-connect: try silent connect first (eth_requestAccounts returns
+                // immediately without popup if the site was previously approved).
+                // Fall back to eth_accounts check.
                 try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    let accounts = [];
+                    // First try eth_requestAccounts — for previously-approved dApps this
+                    // returns instantly without a popup. For new dApps it shows the popup
+                    // which is fine since the user just navigated here.
+                    try {
+                        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    } catch(silentErr) {
+                        // User rejected or not approved yet — try eth_accounts as fallback
+                        console.log('eth_requestAccounts silent failed, trying eth_accounts:', silentErr.message);
+                        try {
+                            accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        } catch(e2) {
+                            console.warn('eth_accounts also failed:', e2.message);
+                        }
+                    }
+
                     if (accounts && accounts.length > 0) {
-                        console.log('Auto-connecting previously connected wallet:', accounts[0]);
-                        await connectWallet();
+                        console.log('Auto-connecting wallet:', accounts[0]);
+                        userAccount = accounts[0];
+
+                        // Make sure we're on the right network
+                        try {
+                            await checkAndSwitchNetwork();
+                        } catch(netErr) {
+                            console.warn('Network check failed during auto-connect:', netErr.message);
+                        }
+
+                        initWalletContracts();
+                        fetchLiveTaxRates();
+                        showWalletConnectedUI();
+                        reloadAllData();
                     }
                 } catch(e) {
                     console.warn('Auto-connect check failed:', e.message);
@@ -3439,47 +3515,24 @@
                 window.ethereum.on('accountsChanged', async (accounts) => {
                     console.log('Account changed:', accounts);
                     if (accounts.length > 0) {
-                        // Silently update account without re-prompting eth_requestAccounts
                         try {
                             userAccount = accounts[0];
-                            // Re-init Web3 contracts with new account context
-                            web3 = new Web3(window.ethereum);
-                            chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS);
-                            tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
-                            refreshReadContract();
+                            initWalletContracts();
                             fetchLiveTaxRates();
-
-                            // Update UI
-                            document.getElementById('connectedAddress').textContent = formatAddress(userAccount);
-
-                            // Show owner dashboard if new account is owner
-                            if (userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase()) {
-                                document.getElementById('ownerDashboard').style.display = 'block';
-                                fetchOwnerCurrentValues();
-                            } else {
-                                document.getElementById('ownerDashboard').style.display = 'none';
-                            }
-
-                            // Reload data with priority ordering
-                            updateGameInfo(true);
-                            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
-                            setTimeout(() => loadBalance(), 3000);
-                            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
-                            setTimeout(() => updateVaultAndBurnt(), 6000);
-
+                            showWalletConnectedUI();
+                            reloadAllData();
                             console.log('Wallet switched to:', userAccount);
                         } catch(e) {
                             console.error('Error handling account change:', e);
-                            // Fallback: full page reload
                             location.reload();
                         }
                     } else {
-                        // Wallet disconnected
+                        // Wallet disconnected — reload to reset state
                         location.reload();
                     }
                 });
 
-                // Listen for chain changes — silent reconnect instead of hard reload
+                // Listen for chain changes — reconnect data
                 window.ethereum.on('chainChanged', async (chainId) => {
                     console.log('Chain changed:', chainId);
                     if (chainId !== BASE_CHAIN_ID) {
@@ -3489,7 +3542,6 @@
                                 params: [{ chainId: BASE_CHAIN_ID }],
                             });
                         } catch(e) {
-                            // If can't switch, reload
                             location.reload();
                             return;
                         }
@@ -3497,15 +3549,9 @@
                     // Re-init after chain switch
                     if (userAccount) {
                         try {
-                            web3 = new Web3(window.ethereum);
-                            chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS);
-                            tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
-                            refreshReadContract();
+                            initWalletContracts();
                             fetchLiveTaxRates();
-                            updateGameInfo(true);
-                            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
-                            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
-                            setTimeout(() => updateVaultAndBurnt(), 6000);
+                            reloadAllData();
                         } catch(e) {
                             console.error('Error handling chain change:', e);
                             location.reload();
@@ -3516,6 +3562,9 @@
                 console.log('No wallet detected - showing install message');
                 connectWalletBtn.textContent = 'Install Wallet';
             }
+
+            // Load nicknames from GitHub first (so they're available when leaderboard renders)
+            loadNicknamesFromGithub();
 
             // Load data on page load (priority: Timer first, Coop second, Vault/Burnt last)
             updateGameInfo(true); // Timer + seed/pool/lotto FIRST
@@ -3567,22 +3616,23 @@
         }
 
         async function connectWallet() {
+            // Prevent duplicate calls (e.g. if auto-connect and manual click overlap)
+            if (_walletConnecting) return;
+            _walletConnecting = true;
+
             console.log('Connect wallet clicked!');
-                await checkAndSwitchNetwork();
             try {
-                web3 = new Web3(window.ethereum);
+                await checkAndSwitchNetwork();
+
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 userAccount = accounts[0];
 
-                chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS); // for .send() only
-                tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
-                refreshReadContract(); // readContract uses public RPC for all .call() reads
+                initWalletContracts();
                 fetchLiveTaxRates();
 
                 // Play connect sound - simple beep (deferred to satisfy autoplay policy)
                 try {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    // Resume context if suspended (required by browser autoplay policy)
                     if (audioContext.state === 'suspended') {
                         await audioContext.resume();
                     }
@@ -3592,7 +3642,7 @@
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
                     
-                    oscillator.frequency.value = 800; // Frequency in hertz
+                    oscillator.frequency.value = 800;
                     oscillator.type = 'sine';
                     
                     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
@@ -3604,34 +3654,13 @@
                     // Audio play failed - not critical, silently ignore
                 }
 
-                // Show connected address
-                document.getElementById('connectedWallet').style.display = 'flex';
-                document.getElementById('connectedAddress').textContent = formatAddress(userAccount);
-
-                // Show owner dashboard if owner
-                if (userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase()) {
-                    document.getElementById('ownerDashboard').style.display = 'block';
-                    fetchOwnerCurrentValues();
-                }
-
-                // Transform button into grab chicken button
-                connectWalletBtn.classList.add('is-grab-button');
-                connectWalletBtn.innerHTML = '<img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E"> GRAB CHICKEN <img src="eshare-fire-logo.webp" class="grab-btn-logo" alt="E">';
-                // Also toggle wrapper class for browsers without :has() support
-                const wrapper = connectWalletBtn.closest('.grab-btn-wrapper');
-                if (wrapper) wrapper.classList.add('grab-mode');
-                connectWalletBtn.removeEventListener('click', connectWallet);
-                connectWalletBtn.addEventListener('click', handleGrabChicken);
-
-                // Stagger startup calls — PRIORITY: Timer first, Coop second, Vault/Burnt last
-                updateGameInfo(true); // Timer + seed/pool/lotto FIRST (skip vault/burnt to save RPC calls)
-                setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500); // Coop SECOND
-                setTimeout(() => loadBalance(), 3000);
-                setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
-                setTimeout(() => updateVaultAndBurnt(), 6000); // Vault + Burnt LAST
+                showWalletConnectedUI();
+                reloadAllData();
             } catch (error) {
                 console.error('Error connecting wallet:', error);
                 showAlert('Failed to connect wallet');
+            } finally {
+                _walletConnecting = false;
             }
         }
 
@@ -5225,19 +5254,84 @@
         }
 
         // ===== NICKNAME SYSTEM =====
-        // Uses localStorage so each user can set a name for their own wallet address.
-        // Names are visible to anyone on the same device/browser.
-        // For cross-device visibility, a smart contract or backend would be needed.
+        // Nicknames are stored in nicknames.json on GitHub so all devices see the same names.
+        // localStorage is used as a read cache and offline fallback.
+        // Writing requires a GitHub Personal Access Token (see config below).
+
+        // ---- GITHUB CONFIG ----
+        // To enable cross-device nicknames:
+        // 1. Create a fine-grained Personal Access Token on GitHub with "Contents: Read and write" permission for this repo only.
+        // 2. Fill in the values below.
+        const GITHUB_NICKNAME_CONFIG = {
+            owner: 'coolsheet69',           // e.g. 'myusername'
+            repo: 'hotchicken',            // e.g. 'chickencoop'
+            branch: 'main',     // usually 'main' or 'master'
+            filePath: 'nicknames.json',
+            token: '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'            // GitHub PAT with contents:write for this repo
+        };
+        // ---- END GITHUB CONFIG ----
+
         const NICKNAME_STORAGE_KEY = 'hotchicken_nicknames';
         const MAX_NICKNAME_LENGTH = 10;
 
-        function getNicknames() {
-            try {
-                return JSON.parse(localStorage.getItem(NICKNAME_STORAGE_KEY) || '{}');
-            } catch(e) { return {}; }
+        // In-memory cache of nicknames (loaded from GitHub, backed by localStorage)
+        let _nicknameCache = null;
+
+        // Check if GitHub config is set up
+        function isGithubConfigured() {
+            return GITHUB_NICKNAME_CONFIG.owner && GITHUB_NICKNAME_CONFIG.repo && GITHUB_NICKNAME_CONFIG.token;
         }
 
-        function saveNicknames(map) {
+        // Get the URL to fetch nicknames.json from (read is public, no auth needed)
+        function getNicknamesReadURL() {
+            if (isGithubConfigured()) {
+                return `https://raw.githubusercontent.com/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/${GITHUB_NICKNAME_CONFIG.branch}/${GITHUB_NICKNAME_CONFIG.filePath}`;
+            }
+            // Fallback: try relative path (works if same domain)
+            return GITHUB_NICKNAME_CONFIG.filePath;
+        }
+
+        // Load nicknames from GitHub (or localStorage cache), merge into memory
+        async function loadNicknamesFromGithub() {
+            try {
+                const url = getNicknamesReadURL();
+                const response = await fetch(url + '?t=' + Date.now()); // cache-bust
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && typeof data === 'object') {
+                        _nicknameCache = data;
+                        // Update localStorage cache
+                        try { localStorage.setItem(NICKNAME_STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+                        console.log('Loaded nicknames from GitHub:', Object.keys(data).length, 'names');
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.warn('Failed to load nicknames from GitHub, using cache:', e.message);
+            }
+            // Fallback to localStorage cache
+            try {
+                _nicknameCache = JSON.parse(localStorage.getItem(NICKNAME_STORAGE_KEY) || '{}');
+            } catch(e) {
+                _nicknameCache = {};
+            }
+        }
+
+        // Get the in-memory nickname map (sync, fast)
+        function getNicknames() {
+            if (!_nicknameCache) {
+                try {
+                    _nicknameCache = JSON.parse(localStorage.getItem(NICKNAME_STORAGE_KEY) || '{}');
+                } catch(e) {
+                    _nicknameCache = {};
+                }
+            }
+            return _nicknameCache;
+        }
+
+        // Save nicknames to localStorage cache (called on every change)
+        function saveNicknamesLocal(map) {
+            _nicknameCache = map;
             try {
                 localStorage.setItem(NICKNAME_STORAGE_KEY, JSON.stringify(map));
             } catch(e) {}
@@ -5249,6 +5343,98 @@
             return map[address.toLowerCase()] || '';
         }
 
+        // Push updated nicknames.json to GitHub via Contents API
+        async function pushNicknamesToGithub(map) {
+            if (!isGithubConfigured()) {
+                console.log('GitHub not configured — nickname saved locally only');
+                return false;
+            }
+
+            try {
+                const apiBase = `https://api.github.com/repos/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/contents/${GITHUB_NICKNAME_CONFIG.filePath}`;
+
+                // Step 1: Get the current file SHA (required for update)
+                const getResp = await fetch(apiBase, {
+                    headers: { 'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (!getResp.ok) {
+                    console.warn('Failed to get nicknames.json SHA:', getResp.status);
+                    return false;
+                }
+                const fileData = await getResp.json();
+                const sha = fileData.sha;
+
+                // Step 2: Push the updated file
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(map, null, 2))));
+                const putResp = await fetch(apiBase, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update nickname for wallet`,
+                        content: content,
+                        sha: sha,
+                        branch: GITHUB_NICKNAME_CONFIG.branch
+                    })
+                });
+
+                if (putResp.ok) {
+                    console.log('Nickname pushed to GitHub successfully');
+                    return true;
+                } else {
+                    const errData = await putResp.json().catch(() => ({}));
+                    console.warn('Failed to push nickname to GitHub:', putResp.status, errData.message);
+                    // If conflict (SHA mismatch), retry once after reloading
+                    if (putResp.status === 409) {
+                        console.log('SHA conflict — retrying...');
+                        // Re-fetch and retry
+                        const retryGetResp = await fetch(apiBase, {
+                            headers: { 'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json' }
+                        });
+                        if (retryGetResp.ok) {
+                            const retryData = await retryGetResp.json();
+                            const retrySha = retryData.sha;
+                            // Merge: re-read from GitHub first, apply our change on top
+                            try {
+                                const githubMap = JSON.parse(atob(retryData.content.replace(/\n/g, '')));
+                                const addr = Object.keys(map).find(k => map[k] !== (githubMap[k] || ''));
+                                if (addr) githubMap[addr] = map[addr];
+                                const retryContent = btoa(unescape(encodeURIComponent(JSON.stringify(githubMap, null, 2))));
+                                const retryPutResp = await fetch(apiBase, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`,
+                                        'Accept': 'application/vnd.github.v3+json',
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        message: `Update nickname (retry)`,
+                                        content: retryContent,
+                                        sha: retrySha,
+                                        branch: GITHUB_NICKNAME_CONFIG.branch
+                                    })
+                                });
+                                if (retryPutResp.ok) {
+                                    console.log('Nickname push retry succeeded');
+                                    return true;
+                                }
+                            } catch(retryErr) {
+                                console.warn('Retry also failed:', retryErr.message);
+                            }
+                        }
+                    }
+                    return false;
+                }
+            } catch(e) {
+                console.warn('Error pushing nickname to GitHub:', e.message);
+                return false;
+            }
+        }
+
+        // Set a nickname — saves locally immediately, then pushes to GitHub in background
         function setNickname(address, name) {
             if (!address) return;
             const map = getNicknames();
@@ -5258,7 +5444,10 @@
             } else {
                 delete map[address.toLowerCase()];
             }
-            saveNicknames(map);
+            // Save to localStorage cache immediately (instant feedback)
+            saveNicknamesLocal(map);
+            // Push to GitHub in the background (non-blocking)
+            pushNicknamesToGithub(map);
         }
 
         // Build the nickname HTML for a given address.
@@ -5271,8 +5460,7 @@
             if (isOwn) {
                 // Show clickable static tag for own wallet — click to edit
                 const display = saved || '✏️';
-                const cls = saved ? 'holder-nickname own-name' : 'holder-nickname own-name';
-                return `<span class="${cls}" data-addr="${address.toLowerCase()}" data-role="own-nickname" title="Click to edit your plucker name">${display}</span> `;
+                return `<span class="holder-nickname own-name" data-addr="${address.toLowerCase()}" data-role="own-nickname" title="Click to edit your plucker name">${display}</span> `;
             } else if (saved) {
                 return `<span class="holder-nickname">${saved}</span> `;
             }
@@ -5311,8 +5499,6 @@
                         newSpan.title = 'Click to edit your plucker name';
                         newSpan.textContent = display;
                         this.replaceWith(newSpan);
-                        // Re-attach click listener on the new span
-                        newSpan.addEventListener('click', arguments.callee); // won't work, use helper
                         attachOwnNicknameClick(newSpan);
                     });
                     input.addEventListener('keydown', function(e) {
