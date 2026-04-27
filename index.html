@@ -2709,7 +2709,7 @@
 
         <!-- Leaderboard -->
         <div class="leaderboard-container">
-            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔<span class="gh-token-gear no-token" id="ghTokenGear" title="Set GitHub token for cross-device nicknames">⚙️</span></div>
+            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔<span class="gh-token-gear no-token" id="ghTokenGear" style="display:none;" title="Set GitHub token for cross-device nicknames">⚙️</span></div>
             
             <div class="leaderboard-column-headers">
                 <span class="header-rank"></span>
@@ -3577,6 +3577,9 @@
             } else {
                 document.getElementById('ownerDashboard').style.display = 'none';
             }
+
+            // Update gear icon visibility (admin-only)
+            if (typeof updateGearState === 'function') updateGearState();
 
             // Transform button into grab chicken button (only if not already done)
             if (!connectWalletBtn.classList.contains('is-grab-button')) {
@@ -5813,10 +5816,14 @@
 
         // ===== GITHUB TOKEN GEAR UI =====
 
-        // Update the gear icon visual state (green if token set, red pulse if not)
+        // Update the gear icon visual state — only visible for admin wallet
         function updateGearState() {
             const gear = document.getElementById('ghTokenGear');
             if (!gear) return;
+            // Only show gear to the admin wallet
+            const isAdmin = userAccount && userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase();
+            gear.style.display = isAdmin ? '' : 'none';
+            if (!isAdmin) return;
             const hasToken = !!getGithubToken();
             gear.className = 'gh-token-gear ' + (hasToken ? 'has-token' : 'no-token');
             gear.title = hasToken ? 'GitHub token set (click to change)' : 'No GitHub token (click to set up cross-device nicknames)';
