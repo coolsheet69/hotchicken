@@ -3279,6 +3279,9 @@
             'https://base-rpc.publicnode.com',
             'https://base.drpc.org',
             'https://base.meowrpc.com',
+            'https://base.llamarpc.com',
+            'https://1rpc.io/base',
+            'https://rpc.base.org',
             'https://mainnet.base.org',
         ];
         let _readRpcIndex = 0;
@@ -4505,6 +4508,7 @@
         let lastBlockFetchTime = 0;
         let lastRoundEndBlock = 0;
         let isHotzoneFromServer = false;
+        let lastKnownRoundNum = 0;        // Track round changes for timer reset detection
         const FETCH_INTERVAL_MS = 10000; // Fetch from blockchain every 10 seconds
         setInterval(fetchEsharePrice, 120000); // Refresh ESHARE price every 2 minutes
         const BLOCK_TIME_SEC = 2; // Base blocks are ~2 seconds
@@ -4713,9 +4717,41 @@
                             } catch(e) {}
                         }).catch(() => {});
 
-                        readContract.methods.getTimeLeft().call().then(timeLeft => {
+                        readContract.methods.getTimeLeft().call().then(async timeLeft => {
                             const secs = parseInt(timeLeft.secs);
                             const isHZ = timeLeft.isHZ;
+                            
+                            // Basic validation - reject NaN or negative
+                            if (isNaN(secs) || secs < 0) {
+                                fetchInProgress = false;
+                                return;
+                            }
+                            
+                            // SANITY CHECK: If timer jumps UP by a lot, verify it's not stale RPC data.
+                            // A legitimate grab only adds ~1hr. If it jumps up by more than 2hr, verify the round.
+                            const currentExpected = calculateCurrentSeconds();
+                            const jumpUp = secs - currentExpected;
+                            
+                            if (jumpUp > 7200 && currentExpected > 0) {
+                                // Jumped up by more than 2 hours — verify the round number to make sure it's real
+                                try {
+                                    const cr = await readContract.methods.currentRound().call();
+                                    const rn = parseInt(cr);
+                                    if (rn < _lastLeaderboardRound) {
+                                        // RPC returned old round data — this timer value is stale
+                                        console.warn('Timer sanity: STALE RPC - round', rn, '< current', _lastLeaderboardRound, '- rejecting jump from', currentExpected, 'to', secs);
+                                        fetchInProgress = false;
+                                        return;
+                                    }
+                                    // Round is current or newer — the jump is real (new grab with lots of time added)
+                                    console.log('Timer jumped', Math.round(jumpUp/3600), 'hours - round confirmed at', rn, '(real grab)');
+                                } catch(e) {
+                                    // Can't verify round — reject the jump to be safe
+                                    console.warn('Timer sanity: cannot verify round, rejecting jump from', currentExpected, 'to', secs);
+                                    fetchInProgress = false;
+                                    return;
+                                }
+                            }
                             
                             // Store the server time and when we fetched it
                             serverSecondsAtFetch = secs;
@@ -4785,9 +4821,13 @@
                     // Only show hotzone if we have valid time AND it's <= 300 seconds (5 minutes)
                     const shouldBeHotzone = displayedSeconds !== null && displayedSeconds > 0 && displayedSeconds <= 300;
                     
-                    // Debug logging
-                    if (displayedSeconds !== null && displayedSeconds <= 350 && displayedSeconds > 280) {
-                        console.log('Near hotzone threshold - displayedSeconds:', displayedSeconds, 'shouldBeHotzone:', shouldBeHotzone);
+                    // Only log hotzone threshold once
+                    if (displayedSeconds !== null && displayedSeconds <= 300 && displayedSeconds > 295 && !window._hotzoneThresholdLogged) {
+                        window._hotzoneThresholdLogged = true;
+                        console.log('Approaching hotzone - displayedSeconds:', displayedSeconds);
+                    }
+                    if (displayedSeconds === null || displayedSeconds > 300) {
+                        window._hotzoneThresholdLogged = false;
                     }
                     
                     if (shouldBeHotzone) {
@@ -4892,13 +4932,31 @@
             }
         }
 
+        let _leaderboardLoading = false; // Concurrency guard
+        let _lastLeaderboardRound = 0;   // Track which round we last rendered
+
         async function loadLeaderboard() {
+            // CONCURRENCY GUARD: Don't start a new fetch if one is already running
+            if (_leaderboardLoading) {
+                console.log('Leaderboard fetch already in progress — skipping');
+                return;
+            }
+            _leaderboardLoading = true;
+
             try {
                 // Get current round info
                 if (chickenContract) {
                     const roundInfo = await readContract.methods.getCurrentRound().call();
-                    const currentRoundNum = roundInfo.round;
+                    const currentRoundNum = parseInt(roundInfo.round);
                     const holder = roundInfo.holder;
+                    
+                    // STALE DATA CHECK: If the round number went backwards, this is bad RPC data
+                    if (currentRoundNum < _lastLeaderboardRound) {
+                        console.warn('Stale RPC data: round', currentRoundNum, '< last rendered', _lastLeaderboardRound, '— skipping');
+                        _leaderboardLoading = false;
+                        return;
+                    }
+                    _lastLeaderboardRound = currentRoundNum;
                     
                     // Get accurate pot from playerDeps
                     let actualPot = roundInfo.pot;
@@ -4906,9 +4964,6 @@
                         const detailedInfo = await readContract.methods.getRoundInfo(currentRoundNum).call();
                         actualPot = detailedInfo.playerDeps; // Use playerDeps as the actual pot
                     }
-                    
-                    console.log('Round info:', roundInfo);
-                    console.log('Actual pot (playerDeps):', actualPot);
                     
                     // Get lotto eligible addresses
                     let lottoHolder = null;
@@ -4920,9 +4975,7 @@
                         const zeroAddr = '0x0000000000000000000000000000000000000000';
                         if (lottoHolder === zeroAddr) lottoHolder = null;
                         if (lottoPrevious === zeroAddr) lottoPrevious = null;
-                        console.log('Lotto eligible - holder:', lottoHolder, 'previous:', lottoPrevious);
                     } catch (e) {
-                        console.log('getLottoEligible not available, using fallback:', e.message);
                         // Fallback: current holder is always lotto eligible
                         if (holder && holder !== '0x0000000000000000000000000000000000000000') {
                             lottoHolder = holder.toLowerCase();
@@ -4958,17 +5011,11 @@
                             try {
                                 const roundDetails = await readContract.methods.getRoundInfo(currentRoundNum).call();
                                 const seedAmount = parseFloat(web3.utils.fromWei(roundDetails.seed, 'ether'));
-                                
-                                // Seed is TAX FREE - loser gets full amount as consolation
-                                console.log('Lead plucker seed winnings (TAX FREE):', seedAmount);
-                                
                                 document.getElementById('currentWinnings').innerHTML = seedAmount.toFixed(4) + ' <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             } catch (e) {
-                                console.log('Error calculating holder winnings:', e);
                                 document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             }
                         } catch (e) {
-                            console.log('Error getting holder deposit:', e);
                             document.getElementById('currentAmount').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                             document.getElementById('currentWinnings').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                         }
@@ -4984,7 +5031,7 @@
                             // Use getParticipants to get all participants
                             const participants = await readContract.methods.getParticipants(currentRoundNum).call();
                             
-                            console.log('Participants:', participants);
+                            // Participants fetched
                             
                             // Check if we have participants
                             if (!participants || participants.length === 0) {
@@ -5006,7 +5053,7 @@
                                     await new Promise(r => setTimeout(r, 300));
                                 }
                                 
-                                console.log('Participants with deposits:', participantsWithDeposits);
+                                // Deposits fetched for
                                 
                                 // Lead Plucker = current holder (#1, shown separately above)
                                 // Previous holder = always #2 (lotto eligible, immune to DC)
@@ -5029,7 +5076,7 @@
                                 // #2 = previous holder (if exists), then rest by deposit
                                 const pastPluckers = prevHolderEntry ? [prevHolderEntry, ...rest] : rest;
 
-                                console.log('Past pluckers (prev holder #2, rest by deposit):', pastPluckers.map(p => ({addr: p.address, deposit: p.deposit})));
+                                // Past pluckers sorted
                                 
                                 // Calculate total deposits of past pluckers for pot distribution
                                 const potEshare = parseFloat(web3.utils.fromWei(actualPot, 'ether'));
@@ -5085,7 +5132,7 @@
                                     totalWinnerDeposits += BigInt(p.deposit);
                                 }
                                 
-                                console.log(`DC simulation - ${simDeadCount} DCs, totalDcDeposit: ${totalDcDeposit}, chickenContrib: ${chickenContribution}, totalWinnerDeps: ${totalWinnerDeposits.toString()}`);
+                                // DC simulation complete
                                 
                                 if (pastPluckers.length > 0) {
                                     previousHoldersEl.innerHTML = pastPluckers.map((plucker, index) => {
@@ -5156,6 +5203,8 @@
                 console.error('Error loading leaderboard:', error);
                 currentHolderEl.textContent = 'Error loading';
                 previousHoldersEl.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">Error loading data</div>';
+            } finally {
+                _leaderboardLoading = false;
             }
         }
 
