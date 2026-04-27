@@ -137,6 +137,40 @@
             z-index: 50;
         }
 
+        /* ===== CHICKEN PROMO IMAGE (floating, glowing) ===== */
+        .chicken-promo {
+            position: absolute;
+            width: 146px;
+            height: auto;
+            top: 18%;
+            left: calc(50% + 135px);
+            z-index: 100000;
+            cursor: pointer;
+            animation: promo-float 4s ease-in-out infinite, promo-glow 3s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+        .chicken-promo:hover {
+            transform: scale(1.06);
+        }
+        @keyframes promo-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(0.5deg); }
+            50% { transform: translateY(-4px) rotate(-0.3deg); }
+            75% { transform: translateY(-10px) rotate(0.2deg); }
+        }
+        @keyframes promo-glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 4px rgba(255, 106, 0, 0.3))
+                        drop-shadow(0 0 10px rgba(255, 106, 0, 0.12))
+                        drop-shadow(0 0 20px rgba(255, 80, 0, 0.06));
+            }
+            50% {
+                filter: drop-shadow(0 0 8px rgba(255, 106, 0, 0.6))
+                        drop-shadow(0 0 18px rgba(255, 106, 0, 0.3))
+                        drop-shadow(0 0 35px rgba(255, 80, 0, 0.15));
+            }
+        }
+
         .game-info-row {
             display: flex;
             justify-content: space-between;
@@ -1380,17 +1414,17 @@
         .lotto-tag {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            padding: 2px 6px;
-            border-radius: 4px;
+            gap: 0px;
+            padding: 1px 4px;
+            border-radius: 3px;
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 200, 100, 0.1));
             border: 1px solid rgba(0, 255, 136, 0.25);
             font-family: var(--font-display);
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: var(--neon-green);
-            margin-left: 4px;
+            margin-left: 3px;
             vertical-align: middle;
             white-space: nowrap;
         }
@@ -1431,7 +1465,7 @@
 
         .leaderboard-column-headers {
             display: grid;
-            grid-template-columns: 55px 1fr 95px 95px;
+            grid-template-columns: 35px 1fr 95px 95px;
             gap: 6px; padding: 6px 10px; margin-bottom: 4px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
@@ -1456,25 +1490,73 @@
             padding: 7px 10px; border-radius: 10px; margin-bottom: 6px;
             border: 1px solid rgba(255, 215, 0, 0.25);
             box-shadow: var(--glow-gold);
-            display: grid;
-            grid-template-columns: 55px 1fr 95px 95px;
-            align-items: center; gap: 6px;
             transition: box-shadow 0.3s;
         }
 
-        .current-holder-label {
+        .current-holder-title {
             font-family: var(--font-display);
             font-size: 10px; color: var(--neon-gold);
-            text-transform: uppercase; letter-spacing: 1px;
-            grid-column: 1; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 700;
             text-align: center; line-height: 1.3;
+            margin-bottom: 4px;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .current-holder-row {
+            display: grid;
+            grid-template-columns: 35px 1fr 95px 95px;
+            align-items: center; gap: 6px;
+        }
+
+        .current-holder-rank {
+            color: var(--neon-gold); font-size: 15px; font-weight: 700; text-align: left; font-family: var(--font-display);
         }
 
         .current-holder-address {
             font-size: 15px; font-weight: 700; color: white;
             font-family: var(--text-mono);
-            text-align: left; grid-column: 2;
-            padding-left: 0.5em;
+            text-align: left;
+            padding-left: 0.2em;
+        }
+
+        .holder-nickname {
+            color: var(--neon-blue);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-display);
+            margin-right: 4px;
+            letter-spacing: 0.5px;
+            cursor: default;
+            white-space: nowrap;
+        }
+        .holder-nickname.own-name {
+            cursor: pointer;
+            text-decoration: underline dotted rgba(0, 212, 255, 0.5);
+            text-underline-offset: 2px;
+        }
+
+        .holder-nickname-input {
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 4px;
+            color: var(--neon-blue);
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-display);
+            width: 70px;
+            padding: 1px 4px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .holder-nickname-input:focus {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+        }
+        .holder-nickname-input::placeholder {
+            color: rgba(0, 212, 255, 0.3);
         }
 
         .current-holder-amount {
@@ -1498,7 +1580,7 @@
             background: rgba(255, 255, 255, 0.03);
             padding: 7px 10px; border-radius: 8px; margin-bottom: 3px;
             display: grid;
-            grid-template-columns: 55px 1fr 95px 95px;
+            grid-template-columns: 35px 1fr 95px 95px;
             align-items: center;
             transition: background 0.2s ease, border-color 0.2s;
             gap: 6px;
@@ -1514,7 +1596,7 @@
         .holder-item.user-connected .holder-address { color: var(--neon-blue); font-weight: 700; }
 
         .holder-rank { color: var(--text-secondary); font-size: 15px; font-weight: 700; text-align: left; font-family: var(--font-display); }
-        .holder-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 15px; text-align: left; padding-left: 0.5em; }
+        .holder-address { font-family: var(--text-mono); color: rgba(255,255,255,0.85); font-size: 15px; text-align: left; padding-left: 0.2em; }
         .holder-amount {
             color: var(--neon-gold); font-size: 16px; font-weight: 700;
             white-space: nowrap; display: flex; align-items: center;
@@ -1979,6 +2061,7 @@
             .chicken-area { min-height: 200px; padding-top: 0; }
             .chicken-area::before { width: 200px; height: 200px; }
             .chicken { width: 135px; height: 135px; }
+            .chicken-promo { width: 85px; left: calc(50% + 80px); top: 15%; }
 
             .hotzone-message { top: 45%; }
             .hotzone-text { font-size: 14px; letter-spacing: 1px; }
@@ -1990,23 +2073,28 @@
 
             .leaderboard-container { max-width: 100%; overflow-x: hidden; padding: 10px; }
             .leaderboard-title { font-size: 14px; letter-spacing: 2px; }
-            .lotto-tag { font-size: 6px; padding: 1px 4px; }
-            .leaderboard-column-headers { grid-template-columns: 50px 1fr 80px 80px; gap: 4px; padding: 5px 8px; }
+            .lotto-tag { font-size: 5px; padding: 0px 2px; letter-spacing: 0.3px; margin-left: 2px; }
+            .leaderboard-column-headers { grid-template-columns: 35px 1fr 80px 80px; gap: 4px; padding: 5px 8px; }
             .leaderboard-column-headers span { font-size: 9px; }
 
-            .current-holder { padding: 8px; gap: 4px; grid-template-columns: 50px 1fr 80px 80px; }
-            .current-holder-label { font-size: 9px; }
-            .current-holder-address { font-size: 12px; }
+            .current-holder { padding: 8px; gap: 4px; }
+            .current-holder-row { grid-template-columns: 35px 1fr 80px 80px; }
+            .current-holder-title { font-size: 9px; }
+            .current-holder-address { font-size: 13px; padding-left: 0.1em; }
             .current-holder-amount { font-size: 13px; }
             .current-holder-amount .eshare-symbol { width: 16px; height: 16px; }
             .current-holder-winnings { font-size: 13px; }
             .current-holder-winnings .eshare-symbol { width: 16px; height: 16px; }
 
-            .holder-item { padding: 6px 8px; gap: 4px; grid-template-columns: 50px 1fr 80px 80px; }
+            .holder-item { padding: 6px 8px; gap: 4px; grid-template-columns: 35px 1fr 80px 80px; }
             .holder-rank { font-size: 13px; }
-            .holder-address { font-size: 13px; }
+            .holder-address { font-size: 13px; padding-left: 0.1em; }
             .holder-amount, .holder-winnings { font-size: 13px; }
             .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 16px; height: 16px; }
+
+            .holder-nickname { font-size: 9px; margin-right: 2px; letter-spacing: 0.3px; }
+            .holder-nickname.own-name { cursor: pointer; text-decoration: underline dotted rgba(0, 212, 255, 0.5); text-underline-offset: 2px; }
+            .holder-nickname-input { font-size: 9px; width: 55px; padding: 0 2px; }
 
             .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 8px; }
             .previous-winners-title { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 6px; }
@@ -2035,6 +2123,7 @@
             .title-logo { width: 30px; height: 30px; margin: 0 3px -4px; }
             .chicken { width: 117px; height: 117px; }
             .chicken-area { min-height: 170px; }
+            .chicken-promo { width: 73px; left: calc(50% + 70px); top: 12%; }
             .chicken-area::before { width: 160px; height: 160px; }
             .grab-button-container { margin-top: -25px; }
             .game-info-container { margin: 0 auto 4px auto; }
@@ -2043,19 +2132,24 @@
             .game-info-label { font-size: 9px; }
             .game-info-value { font-size: 12px; }
 
-            .current-holder { padding: 6px; gap: 3px; grid-template-columns: 45px 1fr 65px 65px; }
-            .current-holder-label { font-size: 8px; }
-            .current-holder-address { font-size: 11px; }
+            .current-holder { padding: 6px; gap: 3px; }
+            .current-holder-row { grid-template-columns: 30px 1fr 65px 65px; }
+            .current-holder-title { font-size: 8px; }
+            .current-holder-address { font-size: 10px; padding-left: 0.1em; }
             .current-holder-amount, .current-holder-winnings { font-size: 11px; }
             .current-holder-amount .eshare-symbol, .current-holder-winnings .eshare-symbol { width: 14px; height: 14px; }
 
-            .holder-item { padding: 5px 6px; gap: 3px; grid-template-columns: 45px 1fr 65px 65px; }
+            .holder-item { padding: 5px 6px; gap: 3px; grid-template-columns: 30px 1fr 65px 65px; }
             .holder-rank { font-size: 11px; }
-            .holder-address { font-size: 10px; }
+            .holder-address { font-size: 10px; padding-left: 0.1em; }
             .holder-amount, .holder-winnings { font-size: 11px; }
             .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 14px; height: 14px; }
 
-            .leaderboard-column-headers { grid-template-columns: 45px 1fr 65px 65px; }
+            .holder-nickname { font-size: 8px; margin-right: 1px; letter-spacing: 0.2px; }
+            .holder-nickname.own-name { cursor: pointer; text-decoration: underline dotted rgba(0, 212, 255, 0.5); text-underline-offset: 2px; }
+            .holder-nickname-input { font-size: 8px; width: 48px; padding: 0 2px; }
+
+            .leaderboard-column-headers { grid-template-columns: 30px 1fr 65px 65px; }
             .leaderboard-column-headers span { font-size: 8px; }
 
             .game-over-message { font-size: 12px; padding: 12px 18px; max-width: 260px; letter-spacing: 1px; }
@@ -2425,6 +2519,11 @@
                     <div class="smoke-particle"></div>
                 </div>
             </div>
+
+            <!-- Promo Image (floating to the right of the chicken) -->
+            <a href="https://youtu.be/QVuRZ0oiSZg" target="_blank" rel="noopener noreferrer" class="chicken-promo">
+                <img src="chicken-promo.webp" alt="Hot Chicken Promo" style="width:100%;height:auto;display:block;">
+            </a>
         </div>
 
         <!-- Grab Button -->
@@ -2474,10 +2573,13 @@
             </div>
             
             <div class="current-holder">
-                <div class="current-holder-label">Lead Plucker:</div>
-                <div class="current-holder-address" id="currentHolder">0x0000...0000</div>
-                <div class="current-holder-amount" id="currentAmount">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
-                <div class="current-holder-winnings" id="currentWinnings">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></div>
+                <div class="current-holder-title">🐔 LEAD PLUCKER 🐔</div>
+                <div class="current-holder-row">
+                    <span class="current-holder-rank">#1</span>
+                    <span class="current-holder-address" id="currentHolder">0x0000...0000</span>
+                    <span class="current-holder-amount" id="currentAmount">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                    <span class="current-holder-winnings" id="currentWinnings">0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
+                </div>
             </div>
 
             <div class="previous-holders-label">Past Pluckers</div>
@@ -3132,6 +3234,7 @@
         // Minimum cost required to grab chicken (starts at 0.10, then +10% each time)
         let minimumCost = 0.10; // Default for first player
         let lastGrabAmount = 0; // Track last grab amount
+        let _contractMinReady = false; // true once updateMinimumCost has fetched from contract (declared here to avoid TDZ error)
 
         // Calculate minimum cost from contract
         // Helper function to round UP to 4 decimal places (for UI display)
@@ -3308,8 +3411,8 @@
         document.getElementById('eshareAmountFirst').addEventListener('input', function() { handleBidInput(this); updateBidUsdDisplay(); });
         document.getElementById('eshareAmountEsc').addEventListener('input', function() { handleBidInput(this); updateBidUsdDisplay(); });
 
-        // Initialize with minimum cost
-        updateMinimumCost();
+        // Initialize with minimum cost (delayed slightly to let readWeb3 initialize)
+        setTimeout(() => updateMinimumCost(), 2000);
 
         // Initialize
         window.addEventListener('load', async () => {
@@ -3332,28 +3435,92 @@
                     console.warn('Auto-connect check failed:', e.message);
                 }
 
-                // Listen for account changes
+                // Listen for account changes — auto-reconnect without full page reload
                 window.ethereum.on('accountsChanged', async (accounts) => {
                     console.log('Account changed:', accounts);
                     if (accounts.length > 0) {
-                        await connectWallet();
+                        // Silently update account without re-prompting eth_requestAccounts
+                        try {
+                            userAccount = accounts[0];
+                            // Re-init Web3 contracts with new account context
+                            web3 = new Web3(window.ethereum);
+                            chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS);
+                            tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
+                            refreshReadContract();
+                            fetchLiveTaxRates();
+
+                            // Update UI
+                            document.getElementById('connectedAddress').textContent = formatAddress(userAccount);
+
+                            // Show owner dashboard if new account is owner
+                            if (userAccount.toLowerCase() === OWNER_ADDRESS.toLowerCase()) {
+                                document.getElementById('ownerDashboard').style.display = 'block';
+                                fetchOwnerCurrentValues();
+                            } else {
+                                document.getElementById('ownerDashboard').style.display = 'none';
+                            }
+
+                            // Reload data with priority ordering
+                            updateGameInfo(true);
+                            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
+                            setTimeout(() => loadBalance(), 3000);
+                            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
+                            setTimeout(() => updateVaultAndBurnt(), 6000);
+
+                            console.log('Wallet switched to:', userAccount);
+                        } catch(e) {
+                            console.error('Error handling account change:', e);
+                            // Fallback: full page reload
+                            location.reload();
+                        }
                     } else {
+                        // Wallet disconnected
                         location.reload();
                     }
                 });
-                
-                // Listen for chain changes
-                window.ethereum.on('chainChanged', () => {
-                    location.reload();
+
+                // Listen for chain changes — silent reconnect instead of hard reload
+                window.ethereum.on('chainChanged', async (chainId) => {
+                    console.log('Chain changed:', chainId);
+                    if (chainId !== BASE_CHAIN_ID) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: BASE_CHAIN_ID }],
+                            });
+                        } catch(e) {
+                            // If can't switch, reload
+                            location.reload();
+                            return;
+                        }
+                    }
+                    // Re-init after chain switch
+                    if (userAccount) {
+                        try {
+                            web3 = new Web3(window.ethereum);
+                            chickenContract = new web3.eth.Contract(CHICKEN_ABI, CHICKEN_CONTRACT_ADDRESS);
+                            tokenContract = new web3.eth.Contract(TOKEN_ABI, TOKEN_CONTRACT_ADDRESS);
+                            refreshReadContract();
+                            fetchLiveTaxRates();
+                            updateGameInfo(true);
+                            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
+                            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
+                            setTimeout(() => updateVaultAndBurnt(), 6000);
+                        } catch(e) {
+                            console.error('Error handling chain change:', e);
+                            location.reload();
+                        }
+                    }
                 });
             } else {
                 console.log('No wallet detected - showing install message');
                 connectWalletBtn.textContent = 'Install Wallet';
             }
 
-            // Load leaderboard data always (not just when contracts are set)
-            loadLeaderboard();
-            loadPreviousWinners();
+            // Load data on page load (priority: Timer first, Coop second, Vault/Burnt last)
+            updateGameInfo(true); // Timer + seed/pool/lotto FIRST
+            setTimeout(() => { loadLeaderboard(); updateMinimumCost(); }, 1000); // Coop SECOND
+            setTimeout(() => { loadPreviousWinners(); updateVaultAndBurnt(); }, 4000); // Vault/Burnt LAST
         });
 
         // Network checking function
@@ -3412,9 +3579,13 @@
                 refreshReadContract(); // readContract uses public RPC for all .call() reads
                 fetchLiveTaxRates();
 
-                // Play connect sound - simple beep
+                // Play connect sound - simple beep (deferred to satisfy autoplay policy)
                 try {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    // Resume context if suspended (required by browser autoplay policy)
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
                     
@@ -3430,7 +3601,7 @@
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.2);
                 } catch (e) {
-                    console.log('Audio play failed:', e);
+                    // Audio play failed - not critical, silently ignore
                 }
 
                 // Show connected address
@@ -3452,13 +3623,12 @@
                 connectWalletBtn.removeEventListener('click', connectWallet);
                 connectWalletBtn.addEventListener('click', handleGrabChicken);
 
-                // Stagger startup calls to avoid rate-limiting the RPC
-                loadBalance();
-                fetchEsharePrice();
-                setTimeout(() => updateMinimumCost(), 500);
-                setTimeout(() => updateGameInfo(), 1000);
-                setTimeout(() => loadLeaderboard(), 1500);
-                setTimeout(() => loadPreviousWinners(), 3000);
+                // Stagger startup calls — PRIORITY: Timer first, Coop second, Vault/Burnt last
+                updateGameInfo(true); // Timer + seed/pool/lotto FIRST (skip vault/burnt to save RPC calls)
+                setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500); // Coop SECOND
+                setTimeout(() => loadBalance(), 3000);
+                setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
+                setTimeout(() => updateVaultAndBurnt(), 6000); // Vault + Burnt LAST
             } catch (error) {
                 console.error('Error connecting wallet:', error);
                 showAlert('Failed to connect wallet');
@@ -3668,7 +3838,6 @@
 
         // ===== ESHARE USD PRICE =====
         let _esharePriceUsd = null;
-        let _contractMinReady = false; // true once updateMinimumCost has fetched from contract
 
         // Uniswap V3 factory on Base — pool looked up dynamically
         const UNISWAP_V3_FACTORY = '0x33128a8fC17869897dcE68Ed026d694621f6FDfD';
@@ -3679,11 +3848,16 @@
 
         async function fetchEsharePrice() {
             try {
+                // Validate addresses before calling contract
+                if (!readWeb3 || !readWeb3.utils.isAddress(ESHARE_ADDRESS) || !readWeb3.utils.isAddress(WETH_ADDRESS)) {
+                    throw new Error('Invalid token address for ESHARE price lookup');
+                }
+
                 // Look up the best pool from factory (try 1%, 0.3%, 0.05% fee tiers)
                 const factoryAbi = [{
                     name: 'getPool', type: 'function', stateMutability: 'view',
-                    inputs: [{ type: 'address' }, { type: 'address' }, { type: 'uint24' }],
-                    outputs: [{ type: 'address' }]
+                    inputs: [{ name: 'tokenA', type: 'address' }, { name: 'tokenB', type: 'address' }, { name: 'fee', type: 'uint24' }],
+                    outputs: [{ name: 'pool', type: 'address' }]
                 }];
                 const factory = new readWeb3.eth.Contract(factoryAbi, UNISWAP_V3_FACTORY);
                 const zeroAddr = '0x0000000000000000000000000000000000000000';
@@ -4024,17 +4198,19 @@
                         window._timerPausedUntilSync = false;
                         document.getElementById('timer').classList.remove('timer-updating');
                         
+                        // PRIORITY: Timer first, then Coop, then Vault/Burnt
+                        updateGameInfo(true);
                         loadLeaderboard();
+                        updateMinimumCost();
                         loadBalance();
                         loadPreviousWinners();
-                        updateMinimumCost();
-                        updateGameInfo();
+                        setTimeout(() => updateVaultAndBurnt(), 3000);
                     }, 15000);
                     
-                    // Background refreshes during transition
-                    setTimeout(() => { loadPreviousWinners(); updateMinimumCost(); }, 3000);
-                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(); }, 7000);
-                    setTimeout(() => { loadLeaderboard(); updateMinimumCost(); updateGameInfo(); }, 12000);
+                    // Background refreshes during transition (priority ordered)
+                    setTimeout(() => { updateGameInfo(true); updateMinimumCost(); loadLeaderboard(); }, 3000);
+                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(true); }, 8000);
+                    setTimeout(() => { loadLeaderboard(); updateMinimumCost(); updateVaultAndBurnt(); }, 13000);
                     
                 } else {
                     // === NORMAL GRAB (mid-round) ===
@@ -4076,49 +4252,43 @@
                     lastBlockFetchTime = 0;
                     fetchInProgress = false;
                 
-                    // Small initial delay to let blockchain update
+                    // Small initial delay to let blockchain update (PRIORITY: Timer first)
                     setTimeout(() => {
-                        loadLeaderboard();
+                        updateGameInfo(true); // Timer + seed/pool FIRST
+                        updateMinimumCost(); loadLeaderboard(); // Coop SECOND
                         loadBalance();
                         loadPreviousWinners();
-                        updateMinimumCost();
-                        updateGameInfo();
-                    }, 500);
+                        setTimeout(() => updateVaultAndBurnt(), 2000); // Vault/Burnt deferred
+                    }, 1500);
                     
-                    // Continue aggressive refreshing for blockchain sync
+                    // Continue refreshing for blockchain sync (priority ordered)
                     setTimeout(() => {
-                        loadLeaderboard();
+                        updateGameInfo(true); updateMinimumCost(); loadLeaderboard();
                         loadPreviousWinners();
-                        updateMinimumCost();
-                        updateGameInfo();
-                    }, 2000);
-                    
-                    setTimeout(() => {
-                        loadLeaderboard();
-                        loadPreviousWinners();
-                        updateMinimumCost();
-                        updateGameInfo();
                     }, 4000);
                     
                     setTimeout(() => {
-                        loadLeaderboard();
-                        loadPreviousWinners();
-                        updateGameInfo();
-                    }, 6000);
+                        loadLeaderboard(); loadPreviousWinners();
+                        updateMinimumCost(); updateGameInfo(true);
+                    }, 7000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard(); loadPreviousWinners();
+                        updateGameInfo(true);
+                    }, 10000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard(); loadPreviousWinners();
+                    }, 13000);
                     
                     setTimeout(() => {
                         loadLeaderboard();
-                        loadPreviousWinners();
+                    }, 18000);
+                    
+                    setTimeout(() => {
+                        loadLeaderboard(); updateGameInfo(true);
+                        updateVaultAndBurnt();
                     }, 8000);
-                    
-                    setTimeout(() => {
-                        loadLeaderboard();
-                    }, 15000);
-                    
-                    setTimeout(() => {
-                        loadLeaderboard();
-                        updateGameInfo();
-                    }, 5000);
                 } // end else (normal grab)
 
             } catch (error) {
@@ -4335,7 +4505,7 @@
                                 // Round changed - reset and update minimum
                                 await updateMinimumCost();
                                 loadPreviousWinners();
-                                updateGameInfo();
+                                updateGameInfo(true); // Skip vault/burnt for faster round-change response
                             }
                             lastKnownRound = roundNum;
                         } catch (e) {
@@ -4470,7 +4640,7 @@
             }, 1000);
         }
 
-        async function updateGameInfo() {
+        async function updateGameInfo(skipVaultAndBurnt = false) {
             try {
                 if (chickenContract) {
                     const roundInfo = await readContract.methods.getCurrentRound().call();
@@ -4505,35 +4675,42 @@
                         document.getElementById('lottoEstimate').innerHTML = '0.0000 <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E">';
                     }
                     
-                    // Update seed vault info in actions box
-                    try {
-                        const vaultInfo = await readContract.methods.getSeedVaultInfo().call();
-                        const vaultBalance = parseFloat(web3.utils.fromWei(vaultInfo.vaultBalance, 'ether'));
-                        document.getElementById('vaultBalance').textContent = vaultBalance.toFixed(2);
-                    } catch (e) {
-                        console.log('Error getting vault info:', e);
-                        document.getElementById('vaultBalance').textContent = '0.00';
-                    }
-                    
-                    // Update total burnt
-                    try {
-                        const totalBurnt = await readContract.methods.totalBurned().call();
-                        const burntEshare = parseFloat(web3.utils.fromWei(totalBurnt, 'ether'));
-                        const HISTORICAL_BURNT = 0.4801785; // Burnt from prior contract deployments (v4.1 + v4.2)
-                        document.getElementById('totalBurnt').textContent = (burntEshare + HISTORICAL_BURNT).toFixed(3);
-                    } catch (e) {
-                        console.log('Error getting total burnt:', e);
-                        document.getElementById('totalBurnt').textContent = '0.000';
-                    }
-                    
-                    // Start the ticker if not already running
+                    // Start the ticker if not already running (PRIORITY: Timer first!)
                     if (!tickerInterval) {
                         startTicker();
+                    }
+
+                    // Low-priority: vault & burnt (defer to avoid RPC burst)
+                    if (!skipVaultAndBurnt) {
+                        updateVaultAndBurnt();
                     }
                 }
             } catch (error) {
                 onRpcError(error);
                 console.log('Error updating game info:', error);
+            }
+        }
+
+        // Low-priority update: seed vault balance + total burnt (can be deferred)
+        async function updateVaultAndBurnt() {
+            if (!chickenContract) return;
+            try {
+                const vaultInfo = await readContract.methods.getSeedVaultInfo().call();
+                const vaultBalance = parseFloat(web3.utils.fromWei(vaultInfo.vaultBalance, 'ether'));
+                document.getElementById('vaultBalance').textContent = vaultBalance.toFixed(2);
+            } catch (e) {
+                console.log('Error getting vault info:', e);
+                document.getElementById('vaultBalance').textContent = '0.00';
+            }
+            
+            try {
+                const totalBurnt = await readContract.methods.totalBurned().call();
+                const burntEshare = parseFloat(web3.utils.fromWei(totalBurnt, 'ether'));
+                const HISTORICAL_BURNT = 0.4801785; // Burnt from prior contract deployments (v4.1 + v4.2)
+                document.getElementById('totalBurnt').textContent = (burntEshare + HISTORICAL_BURNT).toFixed(3);
+            } catch (e) {
+                console.log('Error getting total burnt:', e);
+                document.getElementById('totalBurnt').textContent = '0.000';
             }
         }
 
@@ -4583,7 +4760,7 @@
 
                     // Update current holder and their deposit
                     const isHolderLottoEligible = lottoHolder && holder && holder.toLowerCase() === lottoHolder;
-                    const lottoTagHTML = '<span class="lotto-tag">🎰 LOTTO ENTRY</span>';
+                    const lottoTagHTML = '<span class="lotto-tag">LOTTO</span>';
                     
                     if (holder && holder !== '0x0000000000000000000000000000000000000000') {
                         let holderHZTag = '';
@@ -4591,7 +4768,7 @@
                             const holderHZ = await readContract.methods.hotZoneDeposits(currentRoundNum, holder).call();
                             if (BigInt(holderHZ) > BigInt(0)) holderHZTag = ' <span class="hz-tag">HOT</span>';
                         } catch(e) {}
-                        currentHolderEl.innerHTML = formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '') + holderHZTag;
+                        currentHolderEl.innerHTML = buildNicknameHTML(holder) + formatAddress(holder) + (isHolderLottoEligible ? ' ' + lottoTagHTML : '') + holderHZTag;
                         
                         // Get the holder's individual deposit using deposits mapping
                         try {
@@ -4635,7 +4812,7 @@
                             if (!participants || participants.length === 0) {
                                 previousHoldersEl.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">No participants yet</div>';
                             } else {
-                                // Fetch deposits sequentially with small delay to avoid RPC burst
+                                // Fetch deposits sequentially with delay to avoid RPC burst
                                 const participantsWithDeposits = [];
                                 for (const addr of participants) {
                                     try {
@@ -4648,7 +4825,7 @@
                                     } catch(e) {
                                         console.warn('Failed to fetch deposit for', addr, e);
                                     }
-                                    await new Promise(r => setTimeout(r, 50));
+                                    await new Promise(r => setTimeout(r, 300));
                                 }
                                 
                                 console.log('Participants with deposits:', participantsWithDeposits);
@@ -4758,7 +4935,7 @@
                                         }
                                         
                                         const isPreviousLottoEligible = lottoPrevious && plucker.address.toLowerCase() === lottoPrevious;
-                                        const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">🎰 LOTTO ENTRY</span>' : '';
+                                        const pluckerLottoTag = isPreviousLottoEligible ? ' <span class="lotto-tag">LOTTO</span>' : '';
                                         const isHZBidder = BigInt(plucker.hzDeposit) > BigInt(0);
                                         const hzTag = isHZBidder ? ' <span class="hz-tag">HOT</span>' : '';
                                         // Show knife on all players eligible for dead chicken (not lotto-immune previous holder)
@@ -4768,7 +4945,7 @@
                                         return `
                                         <div class="holder-item${userClass}">
                                             <span class="holder-rank">#${index + 2}</span>
-                                            <span class="holder-address">${formatAddress(plucker.address)}${pluckerLottoTag}${knifeTag}${hzTag}</span>
+                                            <span class="holder-address">${buildNicknameHTML(plucker.address)}${formatAddress(plucker.address)}${pluckerLottoTag}${knifeTag}${hzTag}</span>
                                             <span class="holder-amount">${depositEshare.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                             <span class="holder-winnings">${potentialWinnings.toFixed(4)} <img src="eshare-fire-logo.webp" class="eshare-symbol" alt="E"></span>
                                         </div>
@@ -4793,6 +4970,8 @@
 
                 // Check if scroll indicator should be shown (with slight delay for DOM update)
                 setTimeout(checkScrollIndicator, 100);
+                // Attach nickname input listeners after DOM update
+                setTimeout(attachNicknameListeners, 150);
 
             } catch (error) {
                 onRpcError(error);
@@ -4996,7 +5175,7 @@
                     let html = `
                         <div class="winner-item${lottoClass}">
                             <div class="winner-info">
-                                <span class="winner-address">${formatAddress(p.address)}</span>
+                                <span class="winner-address">${getNickname(p.address) ? '<span class="holder-nickname">' + getNickname(p.address) + '</span> ' : ''}${formatAddress(p.address)}</span>
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
                                 ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀☠️ Dead Chicken</span>' : ''}
                                 ${p.isLeadPlucker ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(200,80,0,0.12)); border-color: rgba(255,140,0,0.45); color: #ff8c00;">🐔 Lead Plucker</span>' : ''}
@@ -5042,8 +5221,149 @@
             if (!address || address === '0x0000000000000000000000000000000000000000') {
                 return '0x0000...0000';
             }
-            return `${address.slice(0, 6)}...${address.slice(-4)}`;
+            return `${address.slice(0, 3)}...${address.slice(-4)}`;
         }
+
+        // ===== NICKNAME SYSTEM =====
+        // Uses localStorage so each user can set a name for their own wallet address.
+        // Names are visible to anyone on the same device/browser.
+        // For cross-device visibility, a smart contract or backend would be needed.
+        const NICKNAME_STORAGE_KEY = 'hotchicken_nicknames';
+        const MAX_NICKNAME_LENGTH = 10;
+
+        function getNicknames() {
+            try {
+                return JSON.parse(localStorage.getItem(NICKNAME_STORAGE_KEY) || '{}');
+            } catch(e) { return {}; }
+        }
+
+        function saveNicknames(map) {
+            try {
+                localStorage.setItem(NICKNAME_STORAGE_KEY, JSON.stringify(map));
+            } catch(e) {}
+        }
+
+        function getNickname(address) {
+            if (!address) return '';
+            const map = getNicknames();
+            return map[address.toLowerCase()] || '';
+        }
+
+        function setNickname(address, name) {
+            if (!address) return;
+            const map = getNicknames();
+            const trimmed = (name || '').trim().slice(0, MAX_NICKNAME_LENGTH);
+            if (trimmed) {
+                map[address.toLowerCase()] = trimmed;
+            } else {
+                delete map[address.toLowerCase()];
+            }
+            saveNicknames(map);
+        }
+
+        // Build the nickname HTML for a given address.
+        // If the address belongs to the connected wallet, show a clickable nickname tag
+        // (or a placeholder if no name set). Clicking it opens an inline edit input.
+        // Other users see their saved nickname as a static tag.
+        function buildNicknameHTML(address) {
+            const saved = getNickname(address);
+            const isOwn = userAccount && address.toLowerCase() === userAccount.toLowerCase();
+            if (isOwn) {
+                // Show clickable static tag for own wallet — click to edit
+                const display = saved || '✏️';
+                const cls = saved ? 'holder-nickname own-name' : 'holder-nickname own-name';
+                return `<span class="${cls}" data-addr="${address.toLowerCase()}" data-role="own-nickname" title="Click to edit your plucker name">${display}</span> `;
+            } else if (saved) {
+                return `<span class="holder-nickname">${saved}</span> `;
+            }
+            return '';
+        }
+
+        // Attach click-to-edit listeners on own-nickname spans and blur/enter on inputs
+        function attachNicknameListeners() {
+            // Click-to-edit: clicking own nickname span opens an inline input
+            document.querySelectorAll('[data-role="own-nickname"]').forEach(span => {
+                span.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const addr = this.dataset.addr;
+                    const current = getNickname(addr);
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'holder-nickname-input';
+                    input.dataset.addr = addr;
+                    input.placeholder = 'name';
+                    input.maxLength = MAX_NICKNAME_LENGTH;
+                    if (current) input.value = current;
+                    input.title = 'Set your plucker name!';
+                    // Replace span with input
+                    this.replaceWith(input);
+                    input.focus();
+                    if (current) input.select();
+                    // Save on blur and revert to static span
+                    input.addEventListener('blur', function() {
+                        setNickname(this.dataset.addr, this.value);
+                        const saved = getNickname(this.dataset.addr);
+                        const newSpan = document.createElement('span');
+                        const display = saved || '✏️';
+                        newSpan.className = 'holder-nickname own-name';
+                        newSpan.dataset.addr = this.dataset.addr;
+                        newSpan.dataset.role = 'own-nickname';
+                        newSpan.title = 'Click to edit your plucker name';
+                        newSpan.textContent = display;
+                        this.replaceWith(newSpan);
+                        // Re-attach click listener on the new span
+                        newSpan.addEventListener('click', arguments.callee); // won't work, use helper
+                        attachOwnNicknameClick(newSpan);
+                    });
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Helper to attach click-to-edit on a single own-nickname span
+        function attachOwnNicknameClick(span) {
+            span.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const addr = this.dataset.addr;
+                const current = getNickname(addr);
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'holder-nickname-input';
+                input.dataset.addr = addr;
+                input.placeholder = 'name';
+                input.maxLength = MAX_NICKNAME_LENGTH;
+                if (current) input.value = current;
+                input.title = 'Set your plucker name!';
+                this.replaceWith(input);
+                input.focus();
+                if (current) input.select();
+                input.addEventListener('blur', function() {
+                    setNickname(this.dataset.addr, this.value);
+                    const saved = getNickname(this.dataset.addr);
+                    const newSpan = document.createElement('span');
+                    const display = saved || '✏️';
+                    newSpan.className = 'holder-nickname own-name';
+                    newSpan.dataset.addr = this.dataset.addr;
+                    newSpan.dataset.role = 'own-nickname';
+                    newSpan.title = 'Click to edit your plucker name';
+                    newSpan.textContent = display;
+                    this.replaceWith(newSpan);
+                    attachOwnNicknameClick(newSpan);
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            });
+        }
+        // ===== END NICKNAME SYSTEM =====
     </script>
 
     <!-- Web3.js CDN -->
