@@ -1408,6 +1408,152 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            position: relative;
+        }
+
+        /* GitHub token gear icon */
+        .gh-token-gear {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.35;
+            transition: opacity 0.3s, transform 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .gh-token-gear:hover {
+            opacity: 0.9;
+            transform: translateY(-50%) rotate(45deg);
+        }
+        .gh-token-gear.has-token {
+            opacity: 0.2;
+            color: var(--neon-green);
+        }
+        .gh-token-gear.no-token {
+            opacity: 0.5;
+            color: var(--neon-red);
+            animation: gear-pulse 2s ease-in-out infinite;
+        }
+        @keyframes gear-pulse {
+            0%, 100% { opacity: 0.35; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Token input modal */
+        .gh-token-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gh-token-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        .gh-token-modal h3 {
+            font-family: var(--font-display);
+            color: var(--neon-blue);
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        .gh-token-modal p {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .gh-token-modal input {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: white;
+            font-family: var(--text-mono);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .gh-token-modal input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+        }
+        .gh-token-modal .modal-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .gh-token-modal .modal-btn {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .gh-token-modal .modal-btn.cancel {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .gh-token-modal .modal-btn.cancel:hover {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.7);
+        }
+        .gh-token-modal .modal-btn.save {
+            background: linear-gradient(135deg, #0099dd, #0066aa);
+            color: white;
+        }
+        .gh-token-modal .modal-btn.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        .gh-token-modal .modal-btn.test {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--neon-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        .gh-token-modal .modal-btn.test:hover {
+            background: rgba(0, 255, 136, 0.25);
+        }
+        .gh-token-modal .test-result {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--text-mono);
+            max-height: 120px;
+            overflow-y: auto;
+            display: none;
+        }
+        .gh-token-modal .test-result.success {
+            display: block;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            color: var(--neon-green);
+        }
+        .gh-token-modal .test-result.error {
+            display: block;
+            background: rgba(255, 45, 45, 0.1);
+            border: 1px solid rgba(255, 45, 45, 0.2);
+            color: var(--neon-red);
         }
 
         /* Lotto eligible tag on rows */
@@ -2563,7 +2709,7 @@
 
         <!-- Leaderboard -->
         <div class="leaderboard-container">
-            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔</div>
+            <div class="leaderboard-title">🐔 THE CHICKEN COOP 🐔<span class="gh-token-gear no-token" id="ghTokenGear" title="Set GitHub token for cross-device nicknames">⚙️</span></div>
             
             <div class="leaderboard-column-headers">
                 <span class="header-rank"></span>
@@ -5259,16 +5405,16 @@
         // Writing requires a GitHub Personal Access Token (see config below).
 
         // ---- GITHUB CONFIG ----
-        // To enable cross-device nicknames:
-        // 1. Create a fine-grained Personal Access Token on GitHub with "Contents: Read and write" permission for this repo only.
-        // 2. Fill in the values below.
+        // Token is stored securely in localStorage (NOT in this source code).
+        // To set it up: click the ⚙️ gear icon that appears in the leaderboard area,
+        // or call setGithubToken('your_token_here') from the browser console.
         const GITHUB_NICKNAME_CONFIG = {
-            owner: 'coolsheet69',           // e.g. 'myusername'
-            repo: 'hotchicken',            // e.g. 'chickencoop'
-            branch: 'main',     // usually 'main' or 'master'
-            filePath: 'nicknames.json',
-            token: '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'            // GitHub PAT with contents:write for this repo
+            owner: 'coolsheet69',
+            repo: 'hotchicken',
+            branch: 'main',
+            filePath: 'nicknames.json'
         };
+        const GITHUB_TOKEN_KEY = 'hotchicken_github_token';
         // ---- END GITHUB CONFIG ----
 
         const NICKNAME_STORAGE_KEY = 'hotchicken_nicknames';
@@ -5277,17 +5423,27 @@
         // In-memory cache of nicknames (loaded from GitHub, backed by localStorage)
         let _nicknameCache = null;
 
-        // Check if GitHub config is set up
+        // Get the stored GitHub token (from localStorage, never from source code)
+        function getGithubToken() {
+            try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ''; } catch(e) { return ''; }
+        }
+
+        // Set the GitHub token (called from UI or console)
+        function setGithubToken(token) {
+            try { localStorage.setItem(GITHUB_TOKEN_KEY, token || ''); } catch(e) {}
+            console.log('GitHub token saved. Type:', token && token.startsWith('github_pat_') ? 'fine-grained' : token && token.startsWith('ghp_') ? 'classic' : 'unknown');
+        }
+
+        // Check if GitHub is configured (owner + repo + token)
         function isGithubConfigured() {
-            return GITHUB_NICKNAME_CONFIG.owner && GITHUB_NICKNAME_CONFIG.repo && GITHUB_NICKNAME_CONFIG.token;
+            return GITHUB_NICKNAME_CONFIG.owner && GITHUB_NICKNAME_CONFIG.repo && getGithubToken();
         }
 
         // Get the URL to fetch nicknames.json from (read is public, no auth needed)
         function getNicknamesReadURL() {
-            if (isGithubConfigured()) {
+            if (GITHUB_NICKNAME_CONFIG.owner && GITHUB_NICKNAME_CONFIG.repo) {
                 return `https://raw.githubusercontent.com/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/${GITHUB_NICKNAME_CONFIG.branch}/${GITHUB_NICKNAME_CONFIG.filePath}`;
             }
-            // Fallback: try relative path (works if same domain)
             return GITHUB_NICKNAME_CONFIG.filePath;
         }
 
@@ -5343,23 +5499,115 @@
             return map[address.toLowerCase()] || '';
         }
 
+        // Build the Authorization header for GitHub API
+        function buildGithubAuthHeader() {
+            const token = getGithubToken();
+            if (!token) return null;
+            // Fine-grained PATs start with "github_pat_" and need Bearer auth
+            // Classic PATs start with "ghp_" and use token auth
+            const authValue = token.startsWith('github_pat_')
+                ? `Bearer ${token}`
+                : `token ${token}`;
+            return {
+                'Authorization': authValue,
+                'Accept': 'application/vnd.github.v3+json'
+            };
+        }
+
+        // Diagnostic: test the GitHub token by hitting /repos/{owner}/{repo}
+        // Call from console: testGithubToken()
+        async function testGithubToken(customToken) {
+            const token = customToken || getGithubToken();
+            if (!token) {
+                console.error('No GitHub token found. Set one with: setGithubToken("your_token")');
+                return;
+            }
+            const cfg = GITHUB_NICKNAME_CONFIG;
+            const authValue = token.startsWith('github_pat_')
+                ? `Bearer ${token}`
+                : `token ${token}`;
+            const headers = { 'Authorization': authValue, 'Accept': 'application/vnd.github.v3+json' };
+
+            console.log('--- GitHub Token Diagnostic ---');
+            console.log('Repo:', cfg.owner + '/' + cfg.repo);
+            console.log('Token prefix:', token.slice(0, 12) + '...');
+            console.log('Token type:', token.startsWith('github_pat_') ? 'fine-grained' : token.startsWith('ghp_') ? 'classic' : 'unknown');
+
+            // Test 1: Check if token is valid at all
+            try {
+                const userResp = await fetch('https://api.github.com/user', { headers });
+                if (userResp.ok) {
+                    const userData = await userResp.json();
+                    console.log('Token is VALID — authenticated as:', userData.login);
+                } else {
+                    const errData = await userResp.json().catch(() => ({}));
+                    console.error('Token is INVALID:', userResp.status, errData.message);
+                    if (userResp.status === 401) {
+                        console.error('The token itself is bad. Possible causes:');
+                        console.error('  - Token was copied incorrectly (extra spaces, missing chars)');
+                        console.error('  - Token has expired');
+                        console.error('  - Token was revoked');
+                    }
+                    return;
+                }
+            } catch(e) {
+                console.error('Network error:', e.message);
+                return;
+            }
+
+            // Test 2: Check if token can access the repo
+            try {
+                const repoResp = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`, { headers });
+                if (repoResp.ok) {
+                    console.log('Repo access: OK');
+                } else if (repoResp.status === 404) {
+                    console.error('Repo NOT FOUND (404). Check owner/repo spelling:', cfg.owner + '/' + cfg.repo);
+                    return;
+                } else {
+                    const errData = await repoResp.json().catch(() => ({}));
+                    console.error('Repo access FAILED:', repoResp.status, errData.message);
+                    return;
+                }
+            } catch(e) {
+                console.error('Network error:', e.message);
+                return;
+            }
+
+            // Test 3: Check if token has Contents permission
+            try {
+                const contentsResp = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.filePath}`, { headers });
+                if (contentsResp.ok) {
+                    const fileData = await contentsResp.json();
+                    console.log('File access: OK —', cfg.filePath, 'found (SHA:', fileData.sha.slice(0, 8) + '...)');
+                    console.log('ALL CHECKS PASSED — token should work for reading and writing nicknames');
+                } else if (contentsResp.status === 404) {
+                    console.warn('File NOT FOUND (404):', cfg.filePath, '— You need to create this file in the repo root');
+                    console.warn('Create it with content: {}');
+                } else {
+                    const errData = await contentsResp.json().catch(() => ({}));
+                    console.error('File access FAILED:', contentsResp.status, errData.message);
+                    if (contentsResp.status === 403) {
+                        console.error('Token does NOT have Contents permission. Go to GitHub > Settings > Developer settings > Fine-grained tokens > your token > Permissions > Repository permissions > Contents: Read and write');
+                    }
+                }
+            } catch(e) {
+                console.error('Network error:', e.message);
+            }
+            console.log('--- End Diagnostic ---');
+        }
+
         // Push updated nicknames.json to GitHub via Contents API
         async function pushNicknamesToGithub(map) {
             if (!isGithubConfigured()) {
-                console.log('GitHub not configured — nickname saved locally only');
+                console.log('GitHub not configured — nickname saved locally only. Use setGithubToken("your_token") to enable.');
                 return false;
             }
 
-            // Fine-grained PATs start with "github_pat_" and need Bearer auth
-            // Classic PATs start with "ghp_" and use token auth
-            const authHeader = GITHUB_NICKNAME_CONFIG.token.startsWith('github_pat_')
-                ? `Bearer ${GITHUB_NICKNAME_CONFIG.token}`
-                : `token ${GITHUB_NICKNAME_CONFIG.token}`;
-
-            const ghHeaders = {
-                'Authorization': authHeader,
-                'Accept': 'application/vnd.github.v3+json'
-            };
+            const ghHeaders = buildGithubAuthHeader();
+            if (!ghHeaders) {
+                console.warn('No GitHub token — nickname saved locally only');
+                return false;
+            }
 
             try {
                 const apiBase = `https://api.github.com/repos/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/contents/${GITHUB_NICKNAME_CONFIG.filePath}`;
@@ -5370,16 +5618,18 @@
                     const errBody = await getResp.json().catch(() => ({}));
                     console.error('GitHub API GET failed:', getResp.status, errBody.message || '');
                     if (getResp.status === 401) {
-                        console.error('TOKEN AUTH FAILED (401) — Common causes:');
-                        console.error('  1. Token is expired or invalid');
+                        const token = getGithubToken();
+                        console.error('TOKEN AUTH FAILED (401) — your token was rejected.');
+                        console.error('Run testGithubToken() in the console for a detailed diagnosis.');
+                        console.error('Token prefix:', token.slice(0, 12) + '...');
+                        console.error('Quick fixes:');
+                        console.error('  1. Re-copy the token (check for extra spaces/missing chars)');
                         console.error('  2. Fine-grained token: must have "Contents: Read and write" permission');
-                        console.error('  3. Fine-grained token: must have this repo selected under "Repository access"');
-                        console.error('  4. Check owner/repo spelling:', GITHUB_NICKNAME_CONFIG.owner + '/' + GITHUB_NICKNAME_CONFIG.repo);
-                        console.error('  5. Token type:', GITHUB_NICKNAME_CONFIG.token.startsWith('github_pat_') ? 'fine-grained' : GITHUB_NICKNAME_CONFIG.token.startsWith('ghp_') ? 'classic' : 'unknown');
+                        console.error('  3. Fine-grained token: must select THIS repo under "Repository access"');
+                        console.error('  4. Set a new token with: setGithubToken("your_new_token")');
                     }
                     if (getResp.status === 404) {
                         console.error('FILE NOT FOUND (404) — Make sure nicknames.json exists in the repo root');
-                        console.error('  Expected at: ' + GITHUB_NICKNAME_CONFIG.owner + '/' + GITHUB_NICKNAME_CONFIG.repo + '/' + GITHUB_NICKNAME_CONFIG.filePath);
                     }
                     return false;
                 }
@@ -5400,7 +5650,7 @@
                 });
 
                 if (putResp.ok) {
-                    console.log('✅ Nickname pushed to GitHub successfully');
+                    console.log('Nickname pushed to GitHub successfully');
                     return true;
                 } else {
                     const errData = await putResp.json().catch(() => ({}));
@@ -5429,7 +5679,7 @@
                                     })
                                 });
                                 if (retryPutResp.ok) {
-                                    console.log('✅ Nickname push retry succeeded');
+                                    console.log('Nickname push retry succeeded');
                                     return true;
                                 }
                             } catch(retryErr) {
@@ -5560,6 +5810,156 @@
                 });
             });
         }
+
+        // ===== GITHUB TOKEN GEAR UI =====
+
+        // Update the gear icon visual state (green if token set, red pulse if not)
+        function updateGearState() {
+            const gear = document.getElementById('ghTokenGear');
+            if (!gear) return;
+            const hasToken = !!getGithubToken();
+            gear.className = 'gh-token-gear ' + (hasToken ? 'has-token' : 'no-token');
+            gear.title = hasToken ? 'GitHub token set (click to change)' : 'No GitHub token (click to set up cross-device nicknames)';
+        }
+
+        // Show the token input modal
+        function showTokenModal() {
+            // Remove any existing modal
+            const existing = document.getElementById('ghTokenModalOverlay');
+            if (existing) existing.remove();
+
+            const currentToken = getGithubToken();
+            const overlay = document.createElement('div');
+            overlay.id = 'ghTokenModalOverlay';
+            overlay.className = 'gh-token-modal-overlay';
+            overlay.innerHTML = `
+                <div class="gh-token-modal">
+                    <h3>GitHub Token Setup</h3>
+                    <p>This token lets your nickname sync across devices. It's stored in your browser only — <b>never</b> in the page source code.</p>
+                    <p style="color: rgba(255,140,0,0.7);">Create a <b>fine-grained</b> token at GitHub &gt; Settings &gt; Developer settings &gt; Personal access tokens &gt; Fine-grained tokens. Give it <b>Contents: Read and write</b> permission and select the <b>hotchicken</b> repo.</p>
+                    <input type="password" id="ghTokenInput" placeholder="github_pat_XXXXXXXXXXXX" value="${currentToken}" autocomplete="off" spellcheck="false">
+                    <div id="ghTestResult" class="test-result"></div>
+                    <div class="modal-btns">
+                        <button class="modal-btn test" id="ghTestBtn">Test</button>
+                        <button class="modal-btn cancel" id="ghCancelBtn">Cancel</button>
+                        <button class="modal-btn save" id="ghSaveBtn">Save</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const input = document.getElementById('ghTokenInput');
+            const testResult = document.getElementById('ghTestResult');
+
+            // Close on overlay click
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.remove();
+            });
+
+            // Cancel
+            document.getElementById('ghCancelBtn').addEventListener('click', () => overlay.remove());
+
+            // Save
+            document.getElementById('ghSaveBtn').addEventListener('click', () => {
+                const token = input.value.trim();
+                setGithubToken(token);
+                updateGearState();
+                overlay.remove();
+                // If token was just set, try to push any pending nicknames
+                if (token && userAccount) {
+                    const map = getNicknames();
+                    if (Object.keys(map).length > 0) {
+                        pushNicknamesToGithub(map);
+                    }
+                }
+            });
+
+            // Test
+            document.getElementById('ghTestBtn').addEventListener('click', async () => {
+                const token = input.value.trim();
+                if (!token) {
+                    testResult.className = 'test-result error';
+                    testResult.textContent = 'No token entered';
+                    return;
+                }
+                testResult.className = 'test-result';
+                testResult.style.display = 'block';
+                testResult.style.background = 'rgba(0,0,0,0.3)';
+                testResult.style.color = 'rgba(255,255,255,0.5)';
+                testResult.textContent = 'Testing token...';
+
+                const cfg = GITHUB_NICKNAME_CONFIG;
+                const authValue = token.startsWith('github_pat_') ? `Bearer ${token}` : `token ${token}`;
+                const headers = { 'Authorization': authValue, 'Accept': 'application/vnd.github.v3+json' };
+
+                try {
+                    // Test 1: Check token validity
+                    const userResp = await fetch('https://api.github.com/user', { headers });
+                    if (!userResp.ok) {
+                        const errData = await userResp.json().catch(() => ({}));
+                        testResult.className = 'test-result error';
+                        testResult.textContent = `FAILED: Token invalid (${userResp.status}) — ${errData.message || 'Bad credentials'}. Check token is copied correctly.`;
+                        return;
+                    }
+                    const userData = await userResp.json();
+
+                    // Test 2: Check repo access
+                    const repoResp = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`, { headers });
+                    if (!repoResp.ok) {
+                        if (repoResp.status === 404) {
+                            testResult.className = 'test-result error';
+                            testResult.textContent = `FAILED: Repo ${cfg.owner}/${cfg.repo} not found or token has no access. Check: 1) Repository access includes this repo, 2) Owner/repo spelling.`;
+                        } else {
+                            const errData = await repoResp.json().catch(() => ({}));
+                            testResult.className = 'test-result error';
+                            testResult.textContent = `FAILED: Repo access error (${repoResp.status}) — ${errData.message}`;
+                        }
+                        return;
+                    }
+
+                    // Test 3: Check contents permission
+                    const contentsResp = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.filePath}`, { headers });
+                    if (contentsResp.status === 403) {
+                        testResult.className = 'test-result error';
+                        testResult.textContent = `FAILED: Token lacks Contents permission. Go to your token settings > Permissions > Repository permissions > Contents: Read and write.`;
+                        return;
+                    }
+                    if (contentsResp.status === 404) {
+                        testResult.className = 'test-result error';
+                        testResult.textContent = `Token works but nicknames.json not found in repo. Create the file with content: {}`;
+                        return;
+                    }
+                    if (!contentsResp.ok) {
+                        testResult.className = 'test-result error';
+                        testResult.textContent = `Contents access error (${contentsResp.status})`;
+                        return;
+                    }
+
+                    const fileData = await contentsResp.json();
+                    testResult.className = 'test-result success';
+                    testResult.textContent = `ALL GOOD! Authenticated as ${userData.login}. Token has read+write access to ${cfg.filePath}.`;
+                } catch(e) {
+                    testResult.className = 'test-result error';
+                    testResult.textContent = `Network error: ${e.message}`;
+                }
+            });
+
+            // Focus the input
+            input.focus();
+        }
+
+        // Initialize gear icon
+        document.addEventListener('DOMContentLoaded', function() {
+            updateGearState();
+            const gear = document.getElementById('ghTokenGear');
+            if (gear) {
+                gear.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showTokenModal();
+                });
+            }
+        });
+
         // ===== END NICKNAME SYSTEM =====
     </script>
 
