@@ -5263,11 +5263,11 @@
         // 1. Create a fine-grained Personal Access Token on GitHub with "Contents: Read and write" permission for this repo only.
         // 2. Fill in the values below.
         const GITHUB_NICKNAME_CONFIG = {
-            owner: 'coolsheet69',           // e.g. 'myusername'
-            repo: 'hotchicken',            // e.g. 'chickencoop'
+            owner: '',           // e.g. 'myusername'
+            repo: '',            // e.g. 'chickencoop'
             branch: 'main',     // usually 'main' or 'master'
             filePath: 'nicknames.json',
-            token: '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'            // GitHub PAT with contents:write for this repo
+            token: ''            // GitHub PAT with contents:write for this repo
         };
         // ---- END GITHUB CONFIG ----
 
@@ -5350,15 +5350,37 @@
                 return false;
             }
 
+            // Fine-grained PATs start with "github_pat_" and need Bearer auth
+            // Classic PATs start with "ghp_" and use token auth
+            const authHeader = GITHUB_NICKNAME_CONFIG.token.startsWith('github_pat_')
+                ? `Bearer ${GITHUB_NICKNAME_CONFIG.token}`
+                : `token ${GITHUB_NICKNAME_CONFIG.token}`;
+
+            const ghHeaders = {
+                'Authorization': authHeader,
+                'Accept': 'application/vnd.github.v3+json'
+            };
+
             try {
                 const apiBase = `https://api.github.com/repos/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/contents/${GITHUB_NICKNAME_CONFIG.filePath}`;
 
                 // Step 1: Get the current file SHA (required for update)
-                const getResp = await fetch(apiBase, {
-                    headers: { 'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
+                const getResp = await fetch(apiBase, { headers: ghHeaders });
                 if (!getResp.ok) {
-                    console.warn('Failed to get nicknames.json SHA:', getResp.status);
+                    const errBody = await getResp.json().catch(() => ({}));
+                    console.error('GitHub API GET failed:', getResp.status, errBody.message || '');
+                    if (getResp.status === 401) {
+                        console.error('TOKEN AUTH FAILED (401) — Common causes:');
+                        console.error('  1. Token is expired or invalid');
+                        console.error('  2. Fine-grained token: must have "Contents: Read and write" permission');
+                        console.error('  3. Fine-grained token: must have this repo selected under "Repository access"');
+                        console.error('  4. Check owner/repo spelling:', GITHUB_NICKNAME_CONFIG.owner + '/' + GITHUB_NICKNAME_CONFIG.repo);
+                        console.error('  5. Token type:', GITHUB_NICKNAME_CONFIG.token.startsWith('github_pat_') ? 'fine-grained' : GITHUB_NICKNAME_CONFIG.token.startsWith('ghp_') ? 'classic' : 'unknown');
+                    }
+                    if (getResp.status === 404) {
+                        console.error('FILE NOT FOUND (404) — Make sure nicknames.json exists in the repo root');
+                        console.error('  Expected at: ' + GITHUB_NICKNAME_CONFIG.owner + '/' + GITHUB_NICKNAME_CONFIG.repo + '/' + GITHUB_NICKNAME_CONFIG.filePath);
+                    }
                     return false;
                 }
                 const fileData = await getResp.json();
@@ -5368,11 +5390,7 @@
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(map, null, 2))));
                 const putResp = await fetch(apiBase, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { ...ghHeaders, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: `Update nickname for wallet`,
                         content: content,
@@ -5382,34 +5400,27 @@
                 });
 
                 if (putResp.ok) {
-                    console.log('Nickname pushed to GitHub successfully');
+                    console.log('✅ Nickname pushed to GitHub successfully');
                     return true;
                 } else {
                     const errData = await putResp.json().catch(() => ({}));
-                    console.warn('Failed to push nickname to GitHub:', putResp.status, errData.message);
+                    console.warn('GitHub PUT failed:', putResp.status, errData.message);
                     // If conflict (SHA mismatch), retry once after reloading
                     if (putResp.status === 409) {
                         console.log('SHA conflict — retrying...');
-                        // Re-fetch and retry
-                        const retryGetResp = await fetch(apiBase, {
-                            headers: { 'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json' }
-                        });
+                        const retryGetResp = await fetch(apiBase, { headers: ghHeaders });
                         if (retryGetResp.ok) {
                             const retryData = await retryGetResp.json();
                             const retrySha = retryData.sha;
-                            // Merge: re-read from GitHub first, apply our change on top
                             try {
                                 const githubMap = JSON.parse(atob(retryData.content.replace(/\n/g, '')));
-                                const addr = Object.keys(map).find(k => map[k] !== (githubMap[k] || ''));
-                                if (addr) githubMap[addr] = map[addr];
+                                // Apply our changes on top of latest from GitHub
+                                Object.keys(map).forEach(k => { githubMap[k] = map[k]; });
+                                Object.keys(githubMap).forEach(k => { if (!map[k]) delete githubMap[k]; });
                                 const retryContent = btoa(unescape(encodeURIComponent(JSON.stringify(githubMap, null, 2))));
                                 const retryPutResp = await fetch(apiBase, {
                                     method: 'PUT',
-                                    headers: {
-                                        'Authorization': `token ${GITHUB_NICKNAME_CONFIG.token}`,
-                                        'Accept': 'application/vnd.github.v3+json',
-                                        'Content-Type': 'application/json'
-                                    },
+                                    headers: { ...ghHeaders, 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                         message: `Update nickname (retry)`,
                                         content: retryContent,
@@ -5418,7 +5429,7 @@
                                     })
                                 });
                                 if (retryPutResp.ok) {
-                                    console.log('Nickname push retry succeeded');
+                                    console.log('✅ Nickname push retry succeeded');
                                     return true;
                                 }
                             } catch(retryErr) {
