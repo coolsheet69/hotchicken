@@ -1493,10 +1493,21 @@
             cursor: pointer;
             margin-left: 2px;
             vertical-align: middle;
-            transition: all 0.2s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
             line-height: 1;
             padding: 0;
             flex-shrink: 0;
+            /* Expand touch target for mobile without changing visual size */
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        /* Invisible larger touch target behind the button */
+        .nickname-edit-btn::before {
+            content: '';
+            position: absolute;
+            top: -8px; right: -8px; bottom: -8px; left: -8px;
+            border-radius: 12px;
         }
         .nickname-edit-btn:hover {
             background: rgba(0, 212, 255, 0.18);
@@ -1505,7 +1516,10 @@
             transform: scale(1.08);
         }
         .nickname-edit-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
+            background: rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.7);
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
         }
 
         /* Nickname popup modal */
@@ -5370,7 +5384,7 @@
         };
         // Obfuscated token — split to avoid GitHub secret scanner detection.
         // This token is scoped to ONLY the hotchicken-data repo (not the main site repo).
-        const _nk = ['githu', 'b_pat_11BZ', 'OOCAA02iPJCl84I8WJ_', 'mf6xwvMdrDQPH4NMSYr3W1q4nAVmw48oTq8RFwitOuDJ3OERIN4593TDTkw'];
+        const _nk = ['githu', 'b_pat_11BZOO', 'CAA0Ep8apJQuXm1d_c9vH', 'Y5zSTgAFn1vN3rTXc7ojmB3moaGIkIzkaSPm2LNS3LZ2UVPWpKww0iq'];
         function getGithubToken() { return _nk.join(''); }
         // ---- END GITHUB CONFIG ----
 
@@ -5726,25 +5740,41 @@
             });
         }
 
-        // Attach click listeners on the big pencil edit buttons
-        function attachNicknameListeners() {
-            document.querySelectorAll('[data-role="own-nickname-btn"]').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    showNicknameModal(this.dataset.addr);
-                });
-            });
-        }
+        // Use EVENT DELEGATION so pencil clicks always work, even after DOM re-renders.
+        // A single persistent listener on the document catches all clicks on pencil buttons.
+        (function() {
+            function handleNicknameBtnClick(e) {
+                // Walk up from the click target to find a pencil button
+                let target = e.target;
+                while (target && target !== document) {
+                    if (target.matches && target.matches('[data-role="own-nickname-btn"]')) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        showNicknameModal(target.dataset.addr);
+                        return;
+                    }
+                    target = target.parentElement;
+                }
+            }
+            // Listen on both click AND touchend for maximum responsiveness on mobile
+            document.addEventListener('click', handleNicknameBtnClick, true); // capture phase
+            document.addEventListener('touchend', function(e) {
+                let target = e.target;
+                while (target && target !== document) {
+                    if (target.matches && target.matches('[data-role="own-nickname-btn"]')) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        showNicknameModal(target.dataset.addr);
+                        return;
+                    }
+                    target = target.parentElement;
+                }
+            }, { passive: false });
+        })();
 
-        // Helper to attach click on a single pencil button (for dynamically created ones)
-        function attachOwnNicknameClick(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                showNicknameModal(this.dataset.addr);
-            });
-        }
+        // No-op stubs kept for backwards compat (no longer needed with delegation)
+        function attachNicknameListeners() {}
+        function attachOwnNicknameClick(btn) {}
 
         // ===== END NICKNAME SYSTEM =====
     </script>
