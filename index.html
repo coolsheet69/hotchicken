@@ -1618,33 +1618,145 @@
             white-space: nowrap;
         }
         .holder-nickname.own-name {
-            cursor: pointer;
-            text-decoration: underline dotted rgba(0, 212, 255, 0.5);
-            text-underline-offset: 2px;
+            cursor: default;
         }
 
-        .holder-nickname-input {
-            background: rgba(0, 212, 255, 0.08);
+        /* Big pencil edit button next to own nickname */
+        .nickname-edit-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
             border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 4px;
+            background: rgba(0, 212, 255, 0.08);
             color: var(--neon-blue);
-            font-size: 11px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            width: 70px;
-            padding: 1px 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 2px;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            line-height: 1;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .nickname-edit-btn:hover {
+            background: rgba(0, 212, 255, 0.18);
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+            transform: scale(1.08);
+        }
+        .nickname-edit-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Nickname popup modal */
+        .nickname-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nickname-modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
             text-align: center;
-            letter-spacing: 0.5px;
+        }
+        .nickname-modal h3 {
+            font-family: var(--font-display);
+            color: var(--neon-blue);
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+        .nickname-modal .nickname-current {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            font-family: var(--text-mono);
+            margin-bottom: 12px;
+        }
+        .nickname-modal input {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: white;
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .nickname-modal input:focus {
             outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
         }
-        .holder-nickname-input:focus {
-            border-color: rgba(0, 212, 255, 0.6);
-            box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+        .nickname-modal input::placeholder {
+            color: rgba(0, 212, 255, 0.35);
+            font-weight: 400;
         }
-        .holder-nickname-input::placeholder {
-            color: rgba(0, 212, 255, 0.3);
+        .nickname-modal .char-count {
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            font-family: var(--text-mono);
+            margin-bottom: 16px;
         }
+        .nickname-modal .modal-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .nickname-modal .modal-btn {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 10px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .nickname-modal .modal-btn.cancel {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nickname-modal .modal-btn.cancel:hover {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.7);
+        }
+        .nickname-modal .modal-btn.save {
+            background: linear-gradient(135deg, #0099dd, #0066aa);
+            color: white;
+        }
+        .nickname-modal .modal-btn.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        .nickname-modal .save-status {
+            margin-top: 10px;
+            font-size: 10px;
+            font-family: var(--text-mono);
+            min-height: 16px;
+        }
+        .nickname-modal .save-status.success { color: var(--neon-green); }
+        .nickname-modal .save-status.error { color: var(--neon-red); }
+        .nickname-modal .save-status.pending { color: rgba(255,255,255,0.4); }
 
         .current-holder-amount {
             font-size: 16px; font-weight: 700; color: var(--neon-gold);
@@ -2180,8 +2292,7 @@
             .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 16px; height: 16px; }
 
             .holder-nickname { font-size: 9px; margin-right: 2px; letter-spacing: 0.3px; }
-            .holder-nickname.own-name { cursor: pointer; text-decoration: underline dotted rgba(0, 212, 255, 0.5); text-underline-offset: 2px; }
-            .holder-nickname-input { font-size: 9px; width: 55px; padding: 0 2px; }
+            .nickname-edit-btn { width: 22px; height: 22px; font-size: 13px; border-radius: 6px; }
 
             .previous-winners-container { max-width: 100%; overflow-x: hidden; padding: 8px; }
             .previous-winners-title { font-size: 11px; letter-spacing: 1.5px; margin-bottom: 6px; }
@@ -2233,8 +2344,7 @@
             .holder-amount .eshare-symbol, .holder-winnings .eshare-symbol { width: 14px; height: 14px; }
 
             .holder-nickname { font-size: 8px; margin-right: 1px; letter-spacing: 0.2px; }
-            .holder-nickname.own-name { cursor: pointer; text-decoration: underline dotted rgba(0, 212, 255, 0.5); text-underline-offset: 2px; }
-            .holder-nickname-input { font-size: 8px; width: 48px; padding: 0 2px; }
+            .nickname-edit-btn { width: 20px; height: 20px; font-size: 12px; border-radius: 5px; }
 
             .leaderboard-column-headers { grid-template-columns: 30px 1fr 65px 65px; }
             .leaderboard-column-headers span { font-size: 8px; }
@@ -5342,7 +5452,7 @@
                     let html = `
                         <div class="winner-item${lottoClass}">
                             <div class="winner-info">
-                                <span class="winner-address">${getNickname(p.address) ? '<span class="holder-nickname">' + getNickname(p.address) + '</span> ' : ''}${formatAddress(p.address)}</span>
+                                <span class="winner-address">${buildNicknameHTML(p.address)}${formatAddress(p.address)}</span>
                                 ${p.isLottoWinner ? '<span class="lotto-badge">🎰 Lotto Winner</span>' : ''}
                                 ${p.isDeadChicken ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(180,0,255,0.25), rgba(120,0,200,0.15)); border-color: rgba(180,0,255,0.4); color: #c84dff;">💀☠️ Dead Chicken</span>' : ''}
                                 ${p.isLeadPlucker ? '<span class="lotto-badge" style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(200,80,0,0.12)); border-color: rgba(255,140,0,0.45); color: #ff8c00;">🐔 Lead Plucker</span>' : ''}
@@ -5589,6 +5699,8 @@
         }
 
         // Push updated nicknames.json to GitHub via Contents API
+        // IMPORTANT: This first reads the latest from GitHub and MERGES local changes on top,
+        // so we never overwrite nicknames saved by other devices.
         async function pushNicknamesToGithub(map) {
             if (!isGithubConfigured()) {
                 console.log('GitHub not configured — nickname saved locally only. Use setGithubToken("your_token") to enable.');
@@ -5604,7 +5716,7 @@
             try {
                 const apiBase = `https://api.github.com/repos/${GITHUB_NICKNAME_CONFIG.owner}/${GITHUB_NICKNAME_CONFIG.repo}/contents/${GITHUB_NICKNAME_CONFIG.filePath}`;
 
-                // Step 1: Get the current file SHA (required for update)
+                // Step 1: Get the current file from GitHub (latest version)
                 const getResp = await fetch(apiBase, { headers: ghHeaders });
                 if (!getResp.ok) {
                     const errBody = await getResp.json().catch(() => ({}));
@@ -5628,8 +5740,33 @@
                 const fileData = await getResp.json();
                 const sha = fileData.sha;
 
-                // Step 2: Push the updated file
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(map, null, 2))));
+                // Step 2: Parse the current GitHub version and MERGE our changes on top
+                // This is the key fix — we never overwrite the whole file with just our local cache.
+                // Instead, we start with what GitHub has and overlay our local changes.
+                let githubMap = {};
+                try {
+                    githubMap = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+                } catch(e) {
+                    console.warn('Could not parse existing GitHub nicknames.json, starting fresh');
+                }
+
+                // Merge: our local map entries override GitHub entries for the same address.
+                // We do NOT delete entries from GitHub that are missing locally — those belong
+                // to other devices/users and must be preserved.
+                const mergedMap = { ...githubMap };
+                Object.keys(map).forEach(k => {
+                    if (map[k]) {
+                        mergedMap[k] = map[k]; // Add or update our nicknames
+                    } else {
+                        delete mergedMap[k]; // Only delete if explicitly cleared locally
+                    }
+                });
+
+                // Update our local cache with the merged result so we stay in sync
+                saveNicknamesLocal(mergedMap);
+
+                // Step 3: Push the merged file
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(mergedMap, null, 2))));
                 const putResp = await fetch(apiBase, {
                     method: 'PUT',
                     headers: { ...ghHeaders, 'Content-Type': 'application/json' },
@@ -5642,24 +5779,37 @@
                 });
 
                 if (putResp.ok) {
-                    console.log('Nickname pushed to GitHub successfully');
+                    console.log('Nickname pushed to GitHub successfully (merged', Object.keys(mergedMap).length, 'names)');
                     return true;
                 } else {
                     const errData = await putResp.json().catch(() => ({}));
                     console.warn('GitHub PUT failed:', putResp.status, errData.message);
-                    // If conflict (SHA mismatch), retry once after reloading
+                    // If conflict (SHA mismatch — someone else pushed between our GET and PUT),
+                    // retry once with the latest version
                     if (putResp.status === 409) {
-                        console.log('SHA conflict — retrying...');
+                        console.log('SHA conflict — retrying with merge...');
                         const retryGetResp = await fetch(apiBase, { headers: ghHeaders });
                         if (retryGetResp.ok) {
                             const retryData = await retryGetResp.json();
                             const retrySha = retryData.sha;
                             try {
-                                const githubMap = JSON.parse(atob(retryData.content.replace(/\n/g, '')));
-                                // Apply our changes on top of latest from GitHub
-                                Object.keys(map).forEach(k => { githubMap[k] = map[k]; });
-                                Object.keys(githubMap).forEach(k => { if (!map[k]) delete githubMap[k]; });
-                                const retryContent = btoa(unescape(encodeURIComponent(JSON.stringify(githubMap, null, 2))));
+                                let retryGithubMap = {};
+                                try {
+                                    retryGithubMap = JSON.parse(atob(retryData.content.replace(/\n/g, '')));
+                                } catch(e) {}
+
+                                // Re-merge our changes on top of the very latest from GitHub
+                                const retryMerged = { ...retryGithubMap };
+                                Object.keys(map).forEach(k => {
+                                    if (map[k]) {
+                                        retryMerged[k] = map[k];
+                                    } else {
+                                        delete retryMerged[k];
+                                    }
+                                });
+                                saveNicknamesLocal(retryMerged);
+
+                                const retryContent = btoa(unescape(encodeURIComponent(JSON.stringify(retryMerged, null, 2))));
                                 const retryPutResp = await fetch(apiBase, {
                                     method: 'PUT',
                                     headers: { ...ghHeaders, 'Content-Type': 'application/json' },
@@ -5671,7 +5821,7 @@
                                     })
                                 });
                                 if (retryPutResp.ok) {
-                                    console.log('Nickname push retry succeeded');
+                                    console.log('Nickname push retry succeeded (merged', Object.keys(retryMerged).length, 'names)');
                                     return true;
                                 }
                             } catch(retryErr) {
@@ -5704,102 +5854,137 @@
         }
 
         // Build the nickname HTML for a given address.
-        // If the address belongs to the connected wallet, show a clickable nickname tag
-        // (or a placeholder if no name set). Clicking it opens an inline edit input.
+        // If the address belongs to the connected wallet, show the nickname + a big pencil button.
+        // Clicking the pencil opens a popup modal to enter/edit the name.
         // Other users see their saved nickname as a static tag.
         function buildNicknameHTML(address) {
             const saved = getNickname(address);
             const isOwn = userAccount && address.toLowerCase() === userAccount.toLowerCase();
             if (isOwn) {
-                // Show clickable static tag for own wallet — click to edit
-                const display = saved || '✏️';
-                return `<span class="holder-nickname own-name" data-addr="${address.toLowerCase()}" data-role="own-nickname" title="Click to edit your plucker name">${display}</span> `;
+                // Show nickname text + big pencil edit button
+                const display = saved || '';
+                const nameSpan = saved
+                    ? `<span class="holder-nickname own-name">${saved}</span>`
+                    : '';
+                return `${nameSpan}<button class="nickname-edit-btn" data-addr="${address.toLowerCase()}" data-role="own-nickname-btn" title="Edit your plucker name">✏️</button> `;
             } else if (saved) {
                 return `<span class="holder-nickname">${saved}</span> `;
             }
             return '';
         }
 
-        // Attach click-to-edit listeners on own-nickname spans and blur/enter on inputs
+        // Show the nickname editing popup modal
+        function showNicknameModal(address) {
+            // Remove any existing modal
+            const existing = document.getElementById('nicknameModalOverlay');
+            if (existing) existing.remove();
+
+            const addr = address.toLowerCase();
+            const current = getNickname(addr);
+            const overlay = document.createElement('div');
+            overlay.id = 'nicknameModalOverlay';
+            overlay.className = 'nickname-modal-overlay';
+            overlay.innerHTML = `
+                <div class="nickname-modal">
+                    <h3>Set Your Plucker Name</h3>
+                    <div class="nickname-current">Wallet: ${addr.slice(0,6)}...${addr.slice(-4)}</div>
+                    <input type="text" id="nicknameInput" placeholder="Enter name" maxlength="${MAX_NICKNAME_LENGTH}" value="${current || ''}" autocomplete="off" spellcheck="false">
+                    <div class="char-count" id="nicknameCharCount">${(current || '').length}/${MAX_NICKNAME_LENGTH}</div>
+                    <div class="modal-btns">
+                        <button class="modal-btn cancel" id="nicknameCancelBtn">Cancel</button>
+                        <button class="modal-btn save" id="nicknameSaveBtn">Save</button>
+                    </div>
+                    <div class="save-status" id="nicknameSaveStatus"></div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const input = document.getElementById('nicknameInput');
+            const charCount = document.getElementById('nicknameCharCount');
+            const saveStatus = document.getElementById('nicknameSaveStatus');
+
+            // Update character count on input
+            input.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length}/${MAX_NICKNAME_LENGTH}`;
+            });
+
+            // Focus the input
+            input.focus();
+            if (current) input.select();
+
+            // Close on overlay click
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.remove();
+            });
+
+            // Cancel
+            document.getElementById('nicknameCancelBtn').addEventListener('click', () => overlay.remove());
+
+            // Save
+            document.getElementById('nicknameSaveBtn').addEventListener('click', async () => {
+                const newName = input.value.trim();
+                setNickname(addr, newName);
+                const saved = getNickname(addr);
+
+                // Show save status
+                saveStatus.className = 'save-status pending';
+                saveStatus.textContent = 'Syncing to GitHub...';
+
+                // Wait a beat then check if GitHub push succeeded
+                if (isGithubConfigured()) {
+                    // pushNicknamesToGithub already fires in setNickname,
+                    // but we can give feedback
+                    setTimeout(() => {
+                        // Re-read from GitHub to verify
+                        loadNicknamesFromGithub().then(() => {
+                            const verified = getNickname(addr);
+                            if (verified === saved) {
+                                saveStatus.className = 'save-status success';
+                                saveStatus.textContent = 'Saved & synced!';
+                            } else {
+                                saveStatus.className = 'save-status success';
+                                saveStatus.textContent = 'Saved locally (sync pending)';
+                            }
+                            // Auto-close after brief delay
+                            setTimeout(() => overlay.remove(), 800);
+                        });
+                    }, 500);
+                } else {
+                    saveStatus.className = 'save-status success';
+                    saveStatus.textContent = 'Saved locally (no GitHub token)';
+                    setTimeout(() => overlay.remove(), 800);
+                }
+
+                // Refresh the leaderboard to show updated name
+                // (The next render cycle will pick it up from the cache)
+            });
+
+            // Enter key = Save
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('nicknameSaveBtn').click();
+                }
+            });
+        }
+
+        // Attach click listeners on the big pencil edit buttons
         function attachNicknameListeners() {
-            // Click-to-edit: clicking own nickname span opens an inline input
-            document.querySelectorAll('[data-role="own-nickname"]').forEach(span => {
-                span.addEventListener('click', function(e) {
+            document.querySelectorAll('[data-role="own-nickname-btn"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const addr = this.dataset.addr;
-                    const current = getNickname(addr);
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'holder-nickname-input';
-                    input.dataset.addr = addr;
-                    input.placeholder = 'name';
-                    input.maxLength = MAX_NICKNAME_LENGTH;
-                    if (current) input.value = current;
-                    input.title = 'Set your plucker name!';
-                    // Replace span with input
-                    this.replaceWith(input);
-                    input.focus();
-                    if (current) input.select();
-                    // Save on blur and revert to static span
-                    input.addEventListener('blur', function() {
-                        setNickname(this.dataset.addr, this.value);
-                        const saved = getNickname(this.dataset.addr);
-                        const newSpan = document.createElement('span');
-                        const display = saved || '✏️';
-                        newSpan.className = 'holder-nickname own-name';
-                        newSpan.dataset.addr = this.dataset.addr;
-                        newSpan.dataset.role = 'own-nickname';
-                        newSpan.title = 'Click to edit your plucker name';
-                        newSpan.textContent = display;
-                        this.replaceWith(newSpan);
-                        attachOwnNicknameClick(newSpan);
-                    });
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            this.blur();
-                        }
-                    });
+                    e.preventDefault();
+                    showNicknameModal(this.dataset.addr);
                 });
             });
         }
 
-        // Helper to attach click-to-edit on a single own-nickname span
-        function attachOwnNicknameClick(span) {
-            span.addEventListener('click', function(e) {
+        // Helper to attach click on a single pencil button (for dynamically created ones)
+        function attachOwnNicknameClick(btn) {
+            btn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                const addr = this.dataset.addr;
-                const current = getNickname(addr);
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'holder-nickname-input';
-                input.dataset.addr = addr;
-                input.placeholder = 'name';
-                input.maxLength = MAX_NICKNAME_LENGTH;
-                if (current) input.value = current;
-                input.title = 'Set your plucker name!';
-                this.replaceWith(input);
-                input.focus();
-                if (current) input.select();
-                input.addEventListener('blur', function() {
-                    setNickname(this.dataset.addr, this.value);
-                    const saved = getNickname(this.dataset.addr);
-                    const newSpan = document.createElement('span');
-                    const display = saved || '✏️';
-                    newSpan.className = 'holder-nickname own-name';
-                    newSpan.dataset.addr = this.dataset.addr;
-                    newSpan.dataset.role = 'own-nickname';
-                    newSpan.title = 'Click to edit your plucker name';
-                    newSpan.textContent = display;
-                    this.replaceWith(newSpan);
-                    attachOwnNicknameClick(newSpan);
-                });
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        this.blur();
-                    }
-                });
+                e.preventDefault();
+                showNicknameModal(this.dataset.addr);
             });
         }
 
