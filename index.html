@@ -3522,7 +3522,7 @@
 
         // Reload all on-chain data with priority staggering
         function reloadAllData() {
-            loadNicknamesFromGithub(); // Refresh nicknames from GitHub
+            loadNicknamesFromGithub().then(() => loadLeaderboard()); // Refresh nicknames then re-render
             updateGameInfo(true);
             setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
             setTimeout(() => loadBalance(), 3000);
@@ -3640,8 +3640,11 @@
                 connectWalletBtn.textContent = 'Install Wallet';
             }
 
-            // Load nicknames from GitHub first (so they're available when leaderboard renders)
-            loadNicknamesFromGithub();
+            // Load nicknames from GitHub first (await so they're available when leaderboard renders)
+            loadNicknamesFromGithub().then(() => {
+                // Re-render leaderboard once nicknames are loaded
+                loadLeaderboard();
+            });
 
             // Load data on page load (priority: Timer first, Coop second, Vault/Burnt last)
             updateGameInfo(true); // Timer + seed/pool/lotto FIRST
@@ -4434,6 +4437,8 @@
         let lastKnownRoundNum = 0;        // Track round changes for timer reset detection
         const FETCH_INTERVAL_MS = 10000; // Fetch from blockchain every 10 seconds
         setInterval(fetchEsharePrice, 120000); // Refresh ESHARE price every 2 minutes
+        // Periodically refresh nicknames from GitHub so other users' names appear
+        setInterval(() => { loadNicknamesFromGithub().then(() => loadLeaderboard()); }, 30000); // Every 30s
         const BLOCK_TIME_SEC = 2; // Base blocks are ~2 seconds
 
         function formatTime(seconds) {
@@ -5411,23 +5416,26 @@
         async function loadNicknamesFromGithub() {
             try {
                 const url = getNicknamesReadURL();
-                const response = await fetch(url + '?t=' + Date.now()); // cache-bust
+                const response = await fetch(url + '?t=' + Date.now(), { cache: 'no-store' }); // cache-bust
                 if (response.ok) {
                     const data = await response.json();
                     if (data && typeof data === 'object') {
                         _nicknameCache = data;
                         // Update localStorage cache
                         try { localStorage.setItem(NICKNAME_STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-                        console.log('Loaded nicknames from GitHub:', Object.keys(data).length, 'names');
+                        console.log('[Nicknames] Loaded from GitHub:', Object.keys(data).length, 'names', Object.keys(data).join(', '));
                         return;
                     }
+                } else {
+                    console.warn('[Nicknames] GitHub read failed:', response.status, response.statusText);
                 }
             } catch(e) {
-                console.warn('Failed to load nicknames from GitHub, using cache:', e.message);
+                console.warn('[Nicknames] Failed to load from GitHub, using cache:', e.message);
             }
             // Fallback to localStorage cache
             try {
                 _nicknameCache = JSON.parse(localStorage.getItem(NICKNAME_STORAGE_KEY) || '{}');
+                console.log('[Nicknames] Using localStorage cache:', Object.keys(_nicknameCache).length, 'names');
             } catch(e) {
                 _nicknameCache = {};
             }
@@ -5472,6 +5480,7 @@
         // IMPORTANT: This first reads the latest from GitHub and MERGES local changes on top,
         // so we never overwrite nicknames saved by other devices.
         async function pushNicknamesToGithub(map) {
+            console.log('[Nicknames] Pushing to GitHub:', Object.keys(map).length, 'names');
             const ghHeaders = buildGithubAuthHeader();
 
             try {
@@ -5698,6 +5707,9 @@
                 setNickname(addr, newName);
                 const saved = getNickname(addr);
 
+                // Immediately re-render leaderboard so the new name appears right away
+                loadLeaderboard();
+
                 // Show save status
                 saveStatus.className = 'save-status pending';
                 saveStatus.textContent = 'Syncing to GitHub...';
@@ -5717,6 +5729,8 @@
                                 saveStatus.className = 'save-status success';
                                 saveStatus.textContent = 'Saved locally (sync pending)';
                             }
+                            // Re-render leaderboard with verified data
+                            loadLeaderboard();
                             // Auto-close after brief delay
                             setTimeout(() => overlay.remove(), 800);
                         });
@@ -5726,9 +5740,6 @@
                     saveStatus.textContent = 'Saved locally (no GitHub token)';
                     setTimeout(() => overlay.remove(), 800);
                 }
-
-                // Refresh the leaderboard to show updated name
-                // (The next render cycle will pick it up from the cache)
             });
 
             // Enter key = Save
