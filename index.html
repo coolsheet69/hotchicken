@@ -3308,8 +3308,10 @@
         const currentHolderEl = document.getElementById('currentHolder');
         const previousHoldersEl = document.getElementById('previousHolders');
 
-        // Minimum cost required to grab chicken (starts at 0.10, then +10% each time)
-        let minimumCost = 0.10; // Default for first player
+        // Minimum cost required to grab chicken (starts at 0.11, then +10% each time)
+        // This is just a fallback used before getConfig() resolves; the real value
+        // comes from the contract's minGrabCost (set by admin via setMinGrabCost).
+        let minimumCost = 0.11; // Fallback if contract read fails
         let lastGrabAmount = 0; // Track last grab amount
         let _contractMinReady = false; // true once updateMinimumCost has fetched from contract (declared here to avoid TDZ error)
 
@@ -3344,7 +3346,7 @@
                                 window._firstBidMax = null;
                             }
                         } catch(e) {
-                            minimumCost = 0.005;
+                            minimumCost = 0.11;
                         }
                         window._maxBid = null;
                         window._isFirstBid = true;
@@ -3391,12 +3393,12 @@
                             if (minGrabWei && minGrabWei !== '0') {
                                 minimumCost = roundUp4Decimals(parseFloat(web3.utils.fromWei(minGrabWei, 'ether')));
                             } else {
-                                minimumCost = 0.005;
+                                minimumCost = 0.11;
                             }
                         }
                     }
                 } else {
-                    minimumCost = 0.005;
+                    minimumCost = 0.11;
                 }
                 
                 // Auto-fill both inputs with the minimum required amount
@@ -3409,7 +3411,7 @@
             } catch (error) {
                 onRpcError(error);
                 console.error('Error getting minimum cost:', error);
-                minimumCost = 0.005;
+                minimumCost = 0.11;
                 const val = minimumCost.toFixed(4);
                 [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
                     if (inp) { inp.value = val; }
@@ -4506,7 +4508,7 @@
                 const baseMin = parseFloat(web3.utils.fromWei(config.minGrabCost, 'ether'));
                 minimumCost = Math.ceil(baseMin * 10000) / 10000;
             } catch(e) {
-                minimumCost = 0.005;
+                minimumCost = 0.11;
             }
             const val = minimumCost.toFixed(4);
             [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
@@ -4628,22 +4630,41 @@
                         fetchInProgress = true;
                         lastBlockFetchTime = now;
                         
-                        // Also fetch current minimum grab cost for responsive bid updates
-                        readContract.methods.currentMinGrab().call().then(minGrabWei => {
-                            try {
-                                const newMin = roundUp4Decimals(parseFloat(web3.utils.fromWei(minGrabWei, 'ether')));
-                                if (newMin !== minimumCost) {
-                                    minimumCost = newMin;
-                                    const val = newMin.toFixed(4);
-                                    [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
-                                        if (inp) { inp.value = val; inp.placeholder = val; inp.classList.remove('below-minimum', 'above-maximum'); }
-                                    });
-                                    _contractMinReady = true;
-                                    updateBidUsdDisplay();
-                                    console.log('Min grab updated to:', val);
-                                }
-                            } catch(e) {}
-                        }).catch(() => {});
+                        // Also fetch current minimum grab cost for responsive bid updates.
+                        // IMPORTANT: currentMinGrab() returns the LAST round's escalated min when a round
+                        // has just ended but the next one hasn't started yet — using it here would clobber
+                        // the correct opening-bid value that triggerGameOver()/updateMinimumCost() just wrote.
+                        // So: skip this poll entirely when the round isn't active, and let updateMinimumCost()
+                        // (which checks roundActive and calls getConfig().minGrabCost in the inactive case) own
+                        // the input value during game-over / opening-bid mode.
+                        const chickenEl = document.querySelector('.chicken');
+                        const inGameOver = chickenEl && chickenEl.classList.contains('exploded');
+                        if (!inGameOver && !window._isFirstBid) {
+                            readContract.methods.currentMinGrab().call().then(minGrabWei => {
+                                try {
+                                    const newMin = roundUp4Decimals(parseFloat(web3.utils.fromWei(minGrabWei, 'ether')));
+                                    if (newMin !== minimumCost) {
+                                        const prevMin = minimumCost;
+                                        const prevMinStr = prevMin.toFixed(4);
+                                        minimumCost = newMin;
+                                        const val = newMin.toFixed(4);
+                                        // Only overwrite inputs that still hold the previous min value;
+                                        // don't stomp on a value the user has typed or quick-picked.
+                                        [document.getElementById('eshareAmountFirst'), document.getElementById('eshareAmountEsc')].forEach(inp => {
+                                            if (!inp) return;
+                                            inp.placeholder = val;
+                                            if (inp.value === prevMinStr || inp.value === '' || parseFloat(inp.value) === prevMin) {
+                                                inp.value = val;
+                                                inp.classList.remove('below-minimum', 'above-maximum');
+                                            }
+                                        });
+                                        _contractMinReady = true;
+                                        updateBidUsdDisplay();
+                                        console.log('Min grab updated to:', val);
+                                    }
+                                } catch(e) {}
+                            }).catch(() => {});
+                        }
 
                         readContract.methods.getTimeLeft().call().then(async timeLeft => {
                             const secs = parseInt(timeLeft.secs);
