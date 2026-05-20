@@ -3198,19 +3198,22 @@
                 _winnerReturnRate = 1 - totalWinnerTax;
                 _chickenReturnRate = 1 - totalChickenTax;
                 console.log(`Live tax rates — winner: ${(totalWinnerTax*100).toFixed(1)}% tax, chicken: ${(totalChickenTax*100).toFixed(1)}% tax`);
-            } catch(e) { console.warn('Tax rate fetch failed:', e.message); }
+            } catch(e) { onRpcError(e); console.warn('Tax rate fetch failed:', e.message); }
         }
         let tokenContract;
 
         // ===== READ RPC — always use a reliable public endpoint for reads =====
+        // Ordering matters: more permissive endpoints first. base-rpc.publicnode.com is the
+        // most aggressive about 429s (~30 req/min per IP), so it's last. For production
+        // traffic, replace the top of this list with your own Alchemy/QuickNode/etc. URL.
         const READ_RPCS = [
-            'https://base-rpc.publicnode.com',
-            'https://base.drpc.org',
-            'https://base.meowrpc.com',
+            'https://mainnet.base.org',
             'https://base.llamarpc.com',
+            'https://base.meowrpc.com',
+            'https://base.drpc.org',
             'https://1rpc.io/base',
             'https://rpc.base.org',
-            'https://mainnet.base.org',
+            'https://base-rpc.publicnode.com',
         ];
         let _readRpcIndex = 0;
         let _readRpcErrors = 0;
@@ -3224,14 +3227,29 @@
         }
         function onRpcError(err) {
             const msg = (err && err.message) ? err.message : JSON.stringify(err);
+            // Rate-limit signals — rotate IMMEDIATELY, no point hammering an endpoint
+            // that just told us to back off.
+            const isRateLimit = msg.includes('429') ||
+                                msg.includes('over rate limit') ||
+                                msg.includes('Too Many Requests') ||
+                                msg.includes('rate limit');
+            // Connection/server signals — keep the threshold-of-3 behavior so we don't
+            // thrash on a single transient blip.
             const isConnErr = msg.includes('connection refused') || msg.includes('dial tcp') ||
-                              msg.includes('503') || msg.includes('502') || msg.includes('429') ||
+                              msg.includes('503') || msg.includes('502') ||
                               msg.includes('timeout') || msg.includes('ECONNREFUSED') ||
                               msg.includes('CONNECTION ERROR') || msg.includes("Couldn't connect") ||
-                              msg.includes('Failed to fetch') || msg.includes('Errno') ||
-                              msg.includes('over rate limit') || msg.includes('Too Many Requests') ||
-                              msg.includes('rate limit');
-            if (!isConnErr) return;
+                              msg.includes('Failed to fetch') || msg.includes('Errno');
+            if (!isRateLimit && !isConnErr) return;
+            if (isRateLimit) {
+                // Rotate now, don't wait for the threshold
+                _readRpcErrors = 0;
+                _readRpcIndex = (_readRpcIndex + 1) % READ_RPCS.length;
+                console.warn('Read RPC rate-limited — switching to: ' + READ_RPCS[_readRpcIndex]);
+                buildReadWeb3();
+                refreshReadContract();
+                return;
+            }
             _readRpcErrors++;
             if (_readRpcErrors >= READ_RPC_THRESHOLD) {
                 _readRpcErrors = 0;
@@ -3522,14 +3540,25 @@
             }
         }
 
-        // Reload all on-chain data with priority staggering
+        // Reload all on-chain data with priority staggering.
+        // Spread requests so we don't trip rate limits on the initial burst.
+        // Order: critical UI first (game info, min cost), then leaderboard, then
+        // low-priority stuff (balance, prices, vault). Each tier waits for the
+        // previous to mostly drain before firing.
         function reloadAllData() {
-            loadNicknamesFromGithub().then(() => { loadLeaderboard(); loadPreviousWinners(); }); // Refresh nicknames then re-render
+            // t=0  — what the user MUST see immediately: game state + bid input
             updateGameInfo(true);
-            setTimeout(() => { updateMinimumCost(); loadLeaderboard(); }, 1500);
-            setTimeout(() => loadBalance(), 3000);
-            setTimeout(() => { fetchEsharePrice(); loadPreviousWinners(); }, 4000);
-            setTimeout(() => updateVaultAndBurnt(), 6000);
+            updateMinimumCost();
+            // t=1.5s — leaderboard (single fetch; the previous duplicate at t=4s is dropped)
+            setTimeout(() => {
+                loadNicknamesFromGithub().then(() => { loadLeaderboard(); loadPreviousWinners(); });
+            }, 1500);
+            // t=4s — user balance
+            setTimeout(() => loadBalance(), 4000);
+            // t=6s — ESHARE price (low priority; only updates USD display)
+            setTimeout(() => fetchEsharePrice(), 6000);
+            // t=8s — vault + total burnt (lowest priority; displayed below the fold)
+            setTimeout(() => updateVaultAndBurnt(), 8000);
         }
 
         // Initialize Web3 contracts from window.ethereum (used by both connect and account change)
@@ -3642,17 +3671,9 @@
                 connectWalletBtn.textContent = 'Install Wallet';
             }
 
-            // Load nicknames from GitHub first (await so they're available when leaderboard renders)
-            loadNicknamesFromGithub().then(() => {
-                // Re-render leaderboard AND previous winners once nicknames are loaded
-                loadLeaderboard();
-                loadPreviousWinners();
-            });
-
-            // Load data on page load (priority: Timer first, Coop second, Vault/Burnt last)
-            updateGameInfo(true); // Timer + seed/pool/lotto FIRST
-            setTimeout(() => { loadLeaderboard(); updateMinimumCost(); }, 1000); // Coop SECOND
-            setTimeout(() => { loadPreviousWinners(); updateVaultAndBurnt(); }, 4000); // Vault/Burnt LAST
+            // Load data on page load — use the centralized staggered loader
+            // so we don't have two different burst patterns competing.
+            reloadAllData();
         });
 
         // Network checking function
@@ -4040,6 +4061,7 @@
                 document.querySelectorAll('.bid-usd-value').forEach(el => el.classList.add('loaded'));
 
             } catch(e) {
+                onRpcError(e);
                 console.warn('Could not fetch ESHARE price:', e.message);
                 // Fallback: try GeckoTerminal public API (no key needed)
                 try {
@@ -4309,13 +4331,13 @@
                         window._timerPausedUntilSync = false;
                         document.getElementById('timer').classList.remove('timer-updating');
                         
-                        // PRIORITY: Timer first, then Coop, then Vault/Burnt
+                        // Stagger the post-settlement refresh so we don't fire 5+ calls at once
                         updateGameInfo(true);
-                        loadLeaderboard();
                         updateMinimumCost();
-                        loadBalance();
-                        loadPreviousWinners();
-                        setTimeout(() => updateVaultAndBurnt(), 3000);
+                        setTimeout(() => loadLeaderboard(), 800);
+                        setTimeout(() => loadBalance(), 1600);
+                        setTimeout(() => loadPreviousWinners(), 2400);
+                        setTimeout(() => updateVaultAndBurnt(), 4000);
                     }, 15000);
                     
                     // Background refreshes during transition (priority ordered)
@@ -4362,13 +4384,14 @@
                     lastBlockFetchTime = 0;
                     fetchInProgress = false;
                 
-                    // Small initial delay to let blockchain update (PRIORITY: Timer first)
+                    // Small initial delay to let blockchain update, then stagger refresh
                     setTimeout(() => {
-                        updateGameInfo(true); // Timer + seed/pool FIRST
-                        updateMinimumCost(); loadLeaderboard(); // Coop SECOND
-                        loadBalance();
-                        loadPreviousWinners();
-                        setTimeout(() => updateVaultAndBurnt(), 2000); // Vault/Burnt deferred
+                        updateGameInfo(true);
+                        updateMinimumCost();
+                        setTimeout(() => loadLeaderboard(), 700);
+                        setTimeout(() => loadBalance(), 1400);
+                        setTimeout(() => loadPreviousWinners(), 2100);
+                        setTimeout(() => updateVaultAndBurnt(), 3500);
                     }, 1500);
                     
                     // Continue refreshing for blockchain sync (priority ordered)
@@ -4862,6 +4885,7 @@
                 const vaultBalance = parseFloat(web3.utils.fromWei(vaultInfo.vaultBalance, 'ether'));
                 document.getElementById('vaultBalance').textContent = vaultBalance.toFixed(2);
             } catch (e) {
+                onRpcError(e);
                 console.log('Error getting vault info:', e);
                 document.getElementById('vaultBalance').textContent = '0.00';
             }
@@ -4872,6 +4896,7 @@
                 const HISTORICAL_BURNT = 0.4801785; // Burnt from prior contract deployments (v4.1 + v4.2)
                 document.getElementById('totalBurnt').textContent = (burntEshare + HISTORICAL_BURNT).toFixed(3);
             } catch (e) {
+                onRpcError(e);
                 console.log('Error getting total burnt:', e);
                 document.getElementById('totalBurnt').textContent = '0.000';
             }
