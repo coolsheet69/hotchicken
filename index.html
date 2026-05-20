@@ -3203,17 +3203,20 @@
         let tokenContract;
 
         // ===== READ RPC — always use a reliable public endpoint for reads =====
-        // Ordering matters: more permissive endpoints first. base-rpc.publicnode.com is the
-        // most aggressive about 429s (~30 req/min per IP), so it's last. For production
-        // traffic, replace the top of this list with your own Alchemy/QuickNode/etc. URL.
+        // Browser-friendly Base RPCs are limited. Tested results:
+        //   ✓ base-rpc.publicnode.com — works, ~30 req/min limit
+        //   ✓ base.drpc.org           — works
+        //   ✓ 1rpc.io/base            — works
+        //   ✓ rpc.base.org            — works
+        //   ✗ mainnet.base.org        — aggressively rate-limited from browsers (instant 429)
+        //   ✗ base.meowrpc.com        — does NOT support eth_call (contract reads), useless here
+        //   ✗ base.llamarpc.com       — no CORS headers, browser-blocked
+        // For production, replace the top with your own Alchemy/QuickNode URL.
         const READ_RPCS = [
-            'https://mainnet.base.org',
-            'https://base.llamarpc.com',
-            'https://base.meowrpc.com',
+            'https://base-rpc.publicnode.com',
             'https://base.drpc.org',
             'https://1rpc.io/base',
             'https://rpc.base.org',
-            'https://base-rpc.publicnode.com',
         ];
         let _readRpcIndex = 0;
         let _readRpcErrors = 0;
@@ -3233,19 +3236,26 @@
                                 msg.includes('over rate limit') ||
                                 msg.includes('Too Many Requests') ||
                                 msg.includes('rate limit');
+            // Endpoint capability failures — rotate IMMEDIATELY, this endpoint will
+            // never serve our requests (e.g. some RPCs don't support eth_call, or
+            // return broken empty responses for contract reads).
+            const isUnsupported = msg.includes('not supported') ||
+                                  msg.includes('Invalid JSON RPC response');
             // Connection/server signals — keep the threshold-of-3 behavior so we don't
             // thrash on a single transient blip.
             const isConnErr = msg.includes('connection refused') || msg.includes('dial tcp') ||
                               msg.includes('503') || msg.includes('502') ||
                               msg.includes('timeout') || msg.includes('ECONNREFUSED') ||
                               msg.includes('CONNECTION ERROR') || msg.includes("Couldn't connect") ||
-                              msg.includes('Failed to fetch') || msg.includes('Errno');
-            if (!isRateLimit && !isConnErr) return;
-            if (isRateLimit) {
+                              msg.includes('Failed to fetch') || msg.includes('Errno') ||
+                              msg.includes('CORS');
+            if (!isRateLimit && !isConnErr && !isUnsupported) return;
+            if (isRateLimit || isUnsupported) {
                 // Rotate now, don't wait for the threshold
                 _readRpcErrors = 0;
                 _readRpcIndex = (_readRpcIndex + 1) % READ_RPCS.length;
-                console.warn('Read RPC rate-limited — switching to: ' + READ_RPCS[_readRpcIndex]);
+                const reason = isRateLimit ? 'rate-limited' : 'unsupported method';
+                console.warn(`Read RPC ${reason} — switching to: ` + READ_RPCS[_readRpcIndex]);
                 buildReadWeb3();
                 refreshReadContract();
                 return;
@@ -3541,24 +3551,26 @@
         }
 
         // Reload all on-chain data with priority staggering.
-        // Spread requests so we don't trip rate limits on the initial burst.
-        // Order: critical UI first (game info, min cost), then leaderboard, then
-        // low-priority stuff (balance, prices, vault). Each tier waits for the
-        // previous to mostly drain before firing.
+        // Public RPCs allow ~30 req/min. Each function below fires multiple sub-requests,
+        // so we spread them out generously. The user sees the critical UI (game info +
+        // bid input) immediately; everything else fills in over the next ~15s.
         function reloadAllData() {
-            // t=0  — what the user MUST see immediately: game state + bid input
+            // t=0 — critical UI: game state + bid input
             updateGameInfo(true);
-            updateMinimumCost();
-            // t=1.5s — leaderboard (single fetch; the previous duplicate at t=4s is dropped)
+            // t=2s — minimum cost (uses getConfig/getBidRange/getCurrentRound)
+            setTimeout(() => updateMinimumCost(), 2000);
+            // t=5s — leaderboard + previous winners (heavy: getParticipants + deposits per player)
             setTimeout(() => {
-                loadNicknamesFromGithub().then(() => { loadLeaderboard(); loadPreviousWinners(); });
-            }, 1500);
-            // t=4s — user balance
-            setTimeout(() => loadBalance(), 4000);
-            // t=6s — ESHARE price (low priority; only updates USD display)
-            setTimeout(() => fetchEsharePrice(), 6000);
-            // t=8s — vault + total burnt (lowest priority; displayed below the fold)
-            setTimeout(() => updateVaultAndBurnt(), 8000);
+                loadNicknamesFromGithub().then(() => { loadLeaderboard(); });
+            }, 5000);
+            // t=9s — previous winners (separate call to getRoundInfo for past N rounds)
+            setTimeout(() => loadPreviousWinners(), 9000);
+            // t=12s — user balance (single balanceOf call on token contract)
+            setTimeout(() => loadBalance(), 12000);
+            // t=14s — ESHARE price
+            setTimeout(() => fetchEsharePrice(), 14000);
+            // t=16s — vault + total burnt (lowest priority; below the fold)
+            setTimeout(() => updateVaultAndBurnt(), 16000);
         }
 
         // Initialize Web3 contracts from window.ethereum (used by both connect and account change)
@@ -4331,19 +4343,21 @@
                         window._timerPausedUntilSync = false;
                         document.getElementById('timer').classList.remove('timer-updating');
                         
-                        // Stagger the post-settlement refresh so we don't fire 5+ calls at once
+                        // Stagger the post-settlement refresh more generously to respect rate limits
                         updateGameInfo(true);
-                        updateMinimumCost();
-                        setTimeout(() => loadLeaderboard(), 800);
-                        setTimeout(() => loadBalance(), 1600);
-                        setTimeout(() => loadPreviousWinners(), 2400);
-                        setTimeout(() => updateVaultAndBurnt(), 4000);
+                        setTimeout(() => updateMinimumCost(), 1500);
+                        setTimeout(() => loadLeaderboard(), 3500);
+                        setTimeout(() => loadBalance(), 5500);
+                        setTimeout(() => loadPreviousWinners(), 7500);
+                        setTimeout(() => updateVaultAndBurnt(), 10000);
                     }, 15000);
                     
-                    // Background refreshes during transition (priority ordered)
-                    setTimeout(() => { updateGameInfo(true); updateMinimumCost(); loadLeaderboard(); }, 3000);
-                    setTimeout(() => { loadLeaderboard(); loadPreviousWinners(); updateGameInfo(true); }, 8000);
-                    setTimeout(() => { loadLeaderboard(); updateMinimumCost(); updateVaultAndBurnt(); }, 13000);
+                    // Background refreshes during transition (single staggered sequence,
+                    // not three overlapping batches that fire 9+ calls in tight bursts)
+                    setTimeout(() => updateGameInfo(true), 3000);
+                    setTimeout(() => loadLeaderboard(), 6000);
+                    setTimeout(() => updateMinimumCost(), 9000);
+                    setTimeout(() => loadPreviousWinners(), 12000);
                     
                 } else {
                     // === NORMAL GRAB (mid-round) ===
@@ -4387,28 +4401,17 @@
                     // Small initial delay to let blockchain update, then stagger refresh
                     setTimeout(() => {
                         updateGameInfo(true);
-                        updateMinimumCost();
-                        setTimeout(() => loadLeaderboard(), 700);
-                        setTimeout(() => loadBalance(), 1400);
-                        setTimeout(() => loadPreviousWinners(), 2100);
-                        setTimeout(() => updateVaultAndBurnt(), 3500);
+                        setTimeout(() => updateMinimumCost(), 1500);
+                        setTimeout(() => loadLeaderboard(), 3500);
+                        setTimeout(() => loadBalance(), 5500);
+                        setTimeout(() => loadPreviousWinners(), 7500);
+                        setTimeout(() => updateVaultAndBurnt(), 10000);
                     }, 1500);
                     
-                    // Continue refreshing for blockchain sync (priority ordered)
-                    setTimeout(() => {
-                        updateGameInfo(true); updateMinimumCost(); loadLeaderboard();
-                        loadPreviousWinners();
-                    }, 4000);
-                    
-                    setTimeout(() => {
-                        loadLeaderboard(); loadPreviousWinners();
-                        updateMinimumCost(); updateGameInfo(true);
-                    }, 7000);
-                    
-                    setTimeout(() => {
-                        loadLeaderboard(); loadPreviousWinners();
-                        updateGameInfo(true);
-                    }, 10000);
+                    // (Removed the three overlapping refresh batches at t+4s, t+7s, t+10s —
+                    // the staggered sequence above already covers blockchain-sync timing
+                    // and the old version fired 12 extra redundant calls into a tight window
+                    // that was tripping public RPC rate limits.)
                     
                     setTimeout(() => {
                         loadLeaderboard(); loadPreviousWinners();
